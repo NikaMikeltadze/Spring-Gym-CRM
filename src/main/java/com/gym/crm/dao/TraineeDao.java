@@ -3,15 +3,15 @@ package com.gym.crm.dao;
 import com.gym.crm.model.Trainee;
 
 public interface TraineeDao {
-    public void save(Trainee trainee);
+    void save(Trainee trainee);
 
-    public Trainee findById(Long id);
+    Trainee findById(Long id);
 
-    public Trainee findByUsername(String username);
+    Trainee findByUsername(String username);
 
-    public void delete(String username);
+    void delete(String username);
 
-    public void update(Trainee trainee);
+    void update(Trainee trainee);
 
     boolean exists(String username);
 }

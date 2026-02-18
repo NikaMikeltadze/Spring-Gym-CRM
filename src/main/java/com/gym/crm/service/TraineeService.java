@@ -53,7 +53,7 @@ public class TraineeService {
         String username = usernamePasswordGenerator.generateUsername(
                 trainee.getFirstName(),
                 trainee.getLastName(),
-                user -> traineeDao.exists(user) || traineeDao.exists(user)
+                user -> traineeDao.exists(user) || trainerDao.exists(user)
         );
         String password = usernamePasswordGenerator.generatePassword();
 
