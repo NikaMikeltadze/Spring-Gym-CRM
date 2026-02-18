@@ -51,10 +51,8 @@ class StorageInitializerTest {
 
     @Test
     void initData_LoadsBaseUserFields() {
-        // When
         storageInitializer.initData();
 
-        // Then
         assertFalse(trainerStorage.isEmpty(), "Trainer storage should not be empty");
         Trainer johnSmith = trainerStorage.values().stream()
                 .filter(t -> "John.Smith".equals(t.getUsername()))

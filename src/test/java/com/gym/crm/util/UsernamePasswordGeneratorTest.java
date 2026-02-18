@@ -20,36 +20,28 @@ class UsernamePasswordGeneratorTest {
 
     @Test
     void generateUsername_Successful_NoSerial() {
-        // Given
         String firstName = "John";
         String lastName = "Smith";
         Function<String, Boolean> existsChecker = s -> false;
 
-        // When
         String result = generator.generateUsername(firstName, lastName, existsChecker);
 
-        // Then
         assertEquals("John.Smith", result);
     }
 
     @Test
     void generateUsername_Successful_WithSerial() {
-        // Given
         String firstName = "John";
         String lastName = "Smith";
-        // Simulate John.Smith already exists
         Function<String, Boolean> existsChecker = s -> s.equals("John.Smith");
 
-        // When
         String result = generator.generateUsername(firstName, lastName, existsChecker);
 
-        // Then
         assertEquals("John.Smith1", result);
     }
 
     @Test
     void generateUsername_Successful_WithMultipleSerials() {
-        // Given
         String firstName = "John";
         String lastName = "Smith";
         Set<String> existingUsernames = new HashSet<>();
@@ -59,66 +51,61 @@ class UsernamePasswordGeneratorTest {
 
         Function<String, Boolean> existsChecker = existingUsernames::contains;
 
-        // When
         String result = generator.generateUsername(firstName, lastName, existsChecker);
 
-        // Then
         assertEquals("John.Smith3", result);
     }
 
     @Test
     void generateUsername_TrimsNames() {
-        // Given
         String firstName = "  John  ";
         String lastName = "  Smith  ";
         Function<String, Boolean> existsChecker = s -> false;
 
-        // When
         String result = generator.generateUsername(firstName, lastName, existsChecker);
 
-        // Then
         assertEquals("John.Smith", result);
     }
 
     @Test
     void generateUsername_NullFirstName_ThrowsException() {
-        assertThrows(IllegalArgumentException.class, () -> 
-            generator.generateUsername(null, "Smith", s -> false)
+        assertThrows(IllegalArgumentException.class, () ->
+                generator.generateUsername(null, "Smith", s -> false)
         );
     }
 
     @Test
     void generateUsername_EmptyFirstName_ThrowsException() {
-        assertThrows(IllegalArgumentException.class, () -> 
-            generator.generateUsername("", "Smith", s -> false)
+        assertThrows(IllegalArgumentException.class, () ->
+                generator.generateUsername("", "Smith", s -> false)
         );
     }
 
     @Test
     void generateUsername_BlankFirstName_ThrowsException() {
-        assertThrows(IllegalArgumentException.class, () -> 
-            generator.generateUsername("   ", "Smith", s -> false)
+        assertThrows(IllegalArgumentException.class, () ->
+                generator.generateUsername("   ", "Smith", s -> false)
         );
     }
 
     @Test
     void generateUsername_NullLastName_ThrowsException() {
-        assertThrows(IllegalArgumentException.class, () -> 
-            generator.generateUsername("John", null, s -> false)
+        assertThrows(IllegalArgumentException.class, () ->
+                generator.generateUsername("John", null, s -> false)
         );
     }
 
     @Test
     void generateUsername_EmptyLastName_ThrowsException() {
-        assertThrows(IllegalArgumentException.class, () -> 
-            generator.generateUsername("John", "", s -> false)
+        assertThrows(IllegalArgumentException.class, () ->
+                generator.generateUsername("John", "", s -> false)
         );
     }
 
     @Test
     void generateUsername_BlankLastName_ThrowsException() {
-        assertThrows(IllegalArgumentException.class, () -> 
-            generator.generateUsername("John", "   ", s -> false)
+        assertThrows(IllegalArgumentException.class, () ->
+                generator.generateUsername("John", "   ", s -> false)
         );
     }
 

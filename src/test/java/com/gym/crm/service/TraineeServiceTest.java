@@ -33,7 +33,6 @@ class TraineeServiceTest {
 
     @Test
     void createTrainee_Success() {
-        // Given
         Trainee trainee = new Trainee();
         trainee.setFirstName("John");
         trainee.setLastName("Doe");
