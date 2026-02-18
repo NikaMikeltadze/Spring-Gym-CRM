@@ -42,10 +42,8 @@ class TraineeServiceTest {
                 .thenReturn("John.Doe");
         when(usernamePasswordGenerator.generatePassword()).thenReturn("abcd123456");
 
-        // When
         traineeService.createTrainee(trainee);
 
-        // Then
         verify(traineeDaoImpl).save(trainee);
         assertEquals("John.Doe", trainee.getUsername());
         assertEquals("abcd123456", trainee.getPassword());
@@ -54,7 +52,6 @@ class TraineeServiceTest {
 
     @Test
     void createTrainee_NullTrainee_ThrowsException() {
-        // When & Then
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
                 traineeService.createTrainee(null)
         );
@@ -63,12 +60,10 @@ class TraineeServiceTest {
 
     @Test
     void createTrainee_BlankFirstName_ThrowsException() {
-        // Given
         Trainee trainee = new Trainee();
         trainee.setFirstName("");
         trainee.setLastName("Doe");
 
-        // When & Then
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
                 traineeService.createTrainee(trainee)
         );
@@ -77,12 +72,10 @@ class TraineeServiceTest {
 
     @Test
     void createTrainee_BlankLastName_ThrowsException() {
-        // Given
         Trainee trainee = new Trainee();
         trainee.setFirstName("John");
         trainee.setLastName("");
 
-        // When & Then
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
                 traineeService.createTrainee(trainee)
         );
@@ -91,23 +84,19 @@ class TraineeServiceTest {
 
     @Test
     void updateTrainee_Success() {
-        // Given
         Trainee trainee = new Trainee();
         trainee.setId(1L);
         trainee.setUsername("John.Doe");
         trainee.setFirstName("John");
         trainee.setLastName("Doe");
 
-        // When
         traineeService.updateTrainee(trainee);
 
-        // Then
         verify(traineeDaoImpl).update(trainee);
     }
 
     @Test
     void updateTrainee_NullTrainee_ThrowsException() {
-        // When & Then
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
                 traineeService.updateTrainee(null)
         );
@@ -116,11 +105,9 @@ class TraineeServiceTest {
 
     @Test
     void updateTrainee_NullId_ThrowsException() {
-        // Given
         Trainee trainee = new Trainee();
         trainee.setUsername("John.Doe");
 
-        // When & Then
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
                 traineeService.updateTrainee(trainee)
         );
@@ -129,12 +116,10 @@ class TraineeServiceTest {
 
     @Test
     void updateTrainee_BlankUsername_ThrowsException() {
-        // Given
         Trainee trainee = new Trainee();
         trainee.setId(1L);
         trainee.setUsername("");
 
-        // When & Then
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
                 traineeService.updateTrainee(trainee)
         );
@@ -143,19 +128,15 @@ class TraineeServiceTest {
 
     @Test
     void deleteTrainee_Success() {
-        // Given
         String username = "John.Doe";
 
-        // When
         traineeService.deleteTrainee(username);
 
-        // Then
         verify(traineeDaoImpl).delete(username);
     }
 
     @Test
     void deleteTrainee_BlankUsername_ThrowsException() {
-        // When & Then
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
                 traineeService.deleteTrainee("")
         );
@@ -164,16 +145,13 @@ class TraineeServiceTest {
 
     @Test
     void selectTraineeByUsername_Success() {
-        // Given
         String username = "John.Doe";
         Trainee expectedTrainee = new Trainee();
         expectedTrainee.setUsername(username);
         when(traineeDaoImpl.findByUsername(username)).thenReturn(expectedTrainee);
 
-        // When
         Trainee result = traineeService.selectTraineeByUsername(username);
 
-        // Then
         assertNotNull(result);
         assertEquals(username, result.getUsername());
         verify(traineeDaoImpl).findByUsername(username);
@@ -181,7 +159,6 @@ class TraineeServiceTest {
 
     @Test
     void selectTraineeByUsername_BlankUsername_ThrowsException() {
-        // When & Then
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
                 traineeService.selectTraineeByUsername("")
         );
@@ -190,16 +167,13 @@ class TraineeServiceTest {
 
     @Test
     void selectTraineeById_Success() {
-        // Given
         Long id = 1L;
         Trainee expectedTrainee = new Trainee();
         expectedTrainee.setId(id);
         when(traineeDaoImpl.findById(id)).thenReturn(expectedTrainee);
 
-        // When
         Trainee result = traineeService.selectTraineeById(id);
 
-        // Then
         assertNotNull(result);
         assertEquals(id, result.getId());
         verify(traineeDaoImpl).findById(id);
@@ -207,7 +181,6 @@ class TraineeServiceTest {
 
     @Test
     void selectTraineeById_NullId_ThrowsException() {
-        // When & Then
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
                 traineeService.selectTraineeById(null)
         );

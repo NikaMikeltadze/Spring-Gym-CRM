@@ -33,7 +33,6 @@ class TrainerServiceTest {
 
     @Test
     void createTrainer_Success() {
-        // Given
         Trainer trainer = new Trainer();
         trainer.setFirstName("Jane");
         trainer.setLastName("Smith");
@@ -42,10 +41,8 @@ class TrainerServiceTest {
                 .thenReturn("Jane.Smith");
         when(usernamePasswordGenerator.generatePassword()).thenReturn("xyz9876543");
 
-        // When
         trainerService.createTrainer(trainer);
 
-        // Then
         verify(trainerDaoImpl).save(trainer);
         assertEquals("Jane.Smith", trainer.getUsername());
         assertEquals("xyz9876543", trainer.getPassword());
@@ -54,7 +51,6 @@ class TrainerServiceTest {
 
     @Test
     void createTrainer_NullTrainer_ThrowsException() {
-        // When & Then
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
                 trainerService.createTrainer(null)
         );
@@ -63,12 +59,10 @@ class TrainerServiceTest {
 
     @Test
     void createTrainer_BlankFirstName_ThrowsException() {
-        // Given
         Trainer trainer = new Trainer();
         trainer.setFirstName("");
         trainer.setLastName("Smith");
 
-        // When & Then
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
                 trainerService.createTrainer(trainer)
         );
@@ -77,12 +71,10 @@ class TrainerServiceTest {
 
     @Test
     void createTrainer_BlankLastName_ThrowsException() {
-        // Given
         Trainer trainer = new Trainer();
         trainer.setFirstName("Jane");
         trainer.setLastName("");
 
-        // When & Then
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
                 trainerService.createTrainer(trainer)
         );
@@ -91,23 +83,19 @@ class TrainerServiceTest {
 
     @Test
     void updateTrainer_Success() {
-        // Given
         Trainer trainer = new Trainer();
         trainer.setId(1L);
         trainer.setUsername("Jane.Smith");
         trainer.setFirstName("Jane");
         trainer.setLastName("Smith");
 
-        // When
         trainerService.updateTrainer(trainer);
 
-        // Then
         verify(trainerDaoImpl).update(trainer);
     }
 
     @Test
     void updateTrainer_NullTrainer_ThrowsException() {
-        // When & Then
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
                 trainerService.updateTrainer(null)
         );
@@ -116,11 +104,9 @@ class TrainerServiceTest {
 
     @Test
     void updateTrainer_NullId_ThrowsException() {
-        // Given
         Trainer trainer = new Trainer();
         trainer.setUsername("Jane.Smith");
 
-        // When & Then
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
                 trainerService.updateTrainer(trainer)
         );
@@ -129,12 +115,10 @@ class TrainerServiceTest {
 
     @Test
     void updateTrainer_BlankUsername_ThrowsException() {
-        // Given
         Trainer trainer = new Trainer();
         trainer.setId(1L);
         trainer.setUsername("");
 
-        // When & Then
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
                 trainerService.updateTrainer(trainer)
         );
@@ -143,16 +127,13 @@ class TrainerServiceTest {
 
     @Test
     void selectTrainerById_Success() {
-        // Given
         Long id = 1L;
         Trainer expectedTrainer = new Trainer();
         expectedTrainer.setId(id);
         when(trainerDaoImpl.findById(id)).thenReturn(expectedTrainer);
 
-        // When
         Trainer result = trainerService.selectTrainerById(id);
 
-        // Then
         assertNotNull(result);
         assertEquals(id, result.getId());
         verify(trainerDaoImpl).findById(id);
@@ -160,7 +141,6 @@ class TrainerServiceTest {
 
     @Test
     void selectTrainerById_NullId_ThrowsException() {
-        // When & Then
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
                 trainerService.selectTrainerById(null)
         );
@@ -169,16 +149,13 @@ class TrainerServiceTest {
 
     @Test
     void selectTrainerByUsername_Success() {
-        // Given
         String username = "Jane.Smith";
         Trainer expectedTrainer = new Trainer();
         expectedTrainer.setUsername(username);
         when(trainerDaoImpl.findByUsername(username)).thenReturn(expectedTrainer);
 
-        // When
         Trainer result = trainerService.selectTrainerByUsername(username);
 
-        // Then
         assertNotNull(result);
         assertEquals(username, result.getUsername());
         verify(trainerDaoImpl).findByUsername(username);
@@ -186,7 +163,6 @@ class TrainerServiceTest {
 
     @Test
     void selectTrainerByUsername_BlankUsername_ThrowsException() {
-        // When & Then
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
                 trainerService.selectTrainerByUsername("")
         );

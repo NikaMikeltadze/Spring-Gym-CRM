@@ -36,7 +36,6 @@ class TrainingServiceTest {
 
     @Test
     void createTraining_Success() {
-        // Given
         Training training = new Training();
         training.setTrainingName("Fitness Training");
         training.setTrainingType(new TrainingType());
@@ -51,16 +50,13 @@ class TrainingServiceTest {
         when(trainerDaoImpl.findById(1L)).thenReturn(trainer);
         when(traineeDaoImpl.findById(2L)).thenReturn(trainee);
 
-        // When
         trainingService.createTraining(training);
 
-        // Then
         verify(trainingDaoImpl).save(training);
     }
 
     @Test
     void createTraining_NullTraining_ThrowsException() {
-        // When & Then
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
                 trainingService.createTraining(null)
         );
@@ -69,11 +65,9 @@ class TrainingServiceTest {
 
     @Test
     void createTraining_BlankName_ThrowsException() {
-        // Given
         Training training = new Training();
         training.setTrainingName("");
 
-        // When & Then
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
                 trainingService.createTraining(training)
         );
@@ -82,12 +76,10 @@ class TrainingServiceTest {
 
     @Test
     void createTraining_NullType_ThrowsException() {
-        // Given
         Training training = new Training();
         training.setTrainingName("Fitness Training");
         training.setTrainingType(null);
 
-        // When & Then
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
                 trainingService.createTraining(training)
         );
@@ -96,13 +88,11 @@ class TrainingServiceTest {
 
     @Test
     void createTraining_NullTrainerId_ThrowsException() {
-        // Given
         Training training = new Training();
         training.setTrainingName("Fitness Training");
         training.setTrainingType(new TrainingType());
         training.setTrainerId(null);
 
-        // When & Then
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
                 trainingService.createTraining(training)
         );
@@ -111,14 +101,12 @@ class TrainingServiceTest {
 
     @Test
     void createTraining_NullTraineeId_ThrowsException() {
-        // Given
         Training training = new Training();
         training.setTrainingName("Fitness Training");
         training.setTrainingType(new TrainingType());
         training.setTrainerId(1L);
         training.setTraineeId(null);
 
-        // When & Then
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
                 trainingService.createTraining(training)
         );
@@ -127,7 +115,6 @@ class TrainingServiceTest {
 
     @Test
     void createTraining_TrainerNotFound_ThrowsException() {
-        // Given
         Training training = new Training();
         training.setTrainingName("Fitness Training");
         training.setTrainingType(new TrainingType());
@@ -136,7 +123,6 @@ class TrainingServiceTest {
 
         when(trainerDaoImpl.findById(1L)).thenReturn(null);
 
-        // When & Then
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
                 trainingService.createTraining(training)
         );
@@ -145,7 +131,6 @@ class TrainingServiceTest {
 
     @Test
     void createTraining_TraineeNotFound_ThrowsException() {
-        // Given
         Training training = new Training();
         training.setTrainingName("Fitness Training");
         training.setTrainingType(new TrainingType());
@@ -158,7 +143,6 @@ class TrainingServiceTest {
         when(trainerDaoImpl.findById(1L)).thenReturn(trainer);
         when(traineeDaoImpl.findById(2L)).thenReturn(null);
 
-        // When & Then
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
                 trainingService.createTraining(training)
         );
@@ -167,16 +151,13 @@ class TrainingServiceTest {
 
     @Test
     void selectTraining_Success() {
-        // Given
         Long id = 1L;
         Training expectedTraining = new Training();
         expectedTraining.setId(id);
         when(trainingDaoImpl.findById(id)).thenReturn(expectedTraining);
 
-        // When
         Training result = trainingService.selectTraining(id);
 
-        // Then
         assertNotNull(result);
         assertEquals(id, result.getId());
         verify(trainingDaoImpl).findById(id);
@@ -184,7 +165,6 @@ class TrainingServiceTest {
 
     @Test
     void getAllTrainings_Success() {
-        // Given
         Training training1 = new Training();
         training1.setId(1L);
         Training training2 = new Training();
@@ -193,10 +173,8 @@ class TrainingServiceTest {
 
         when(trainingDaoImpl.findAll()).thenReturn(expectedTrainings);
 
-        // When
         List<Training> result = trainingService.getAllTrainings();
 
-        // Then
         assertNotNull(result);
         assertEquals(2, result.size());
         verify(trainingDaoImpl).findAll();
