@@ -187,3 +187,4 @@ class TraineeServiceTest {
         assertEquals("Id must not be null", exception.getMessage());
     }
 }
+

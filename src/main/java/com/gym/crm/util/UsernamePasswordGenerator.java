@@ -55,3 +55,4 @@ public class UsernamePasswordGenerator {
         return password.toString();
     }
 }
+

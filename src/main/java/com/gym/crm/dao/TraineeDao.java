@@ -15,3 +15,4 @@ public interface TraineeDao {
 
     boolean exists(String username);
 }
+

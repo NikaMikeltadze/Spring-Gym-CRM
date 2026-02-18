@@ -50,3 +50,4 @@ public class Trainer extends User {
         return result;
     }
 }
+

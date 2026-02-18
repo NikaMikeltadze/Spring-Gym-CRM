@@ -77,3 +77,4 @@ public class TrainingService {
         return trainings;
     }
 }
+

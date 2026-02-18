@@ -11,3 +11,4 @@ public interface TrainingDao {
 
     List<Training> findAll();
 }
+

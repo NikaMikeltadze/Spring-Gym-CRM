@@ -127,3 +127,4 @@ public class TraineeService {
         return s == null || s.trim().isEmpty();
     }
 }
+

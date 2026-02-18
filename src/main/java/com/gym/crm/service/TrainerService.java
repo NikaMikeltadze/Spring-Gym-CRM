@@ -110,3 +110,4 @@ public class TrainerService {
         return s == null || s.trim().isEmpty();
     }
 }
+

@@ -169,3 +169,4 @@ class TrainerServiceTest {
         assertEquals("Username must not be blank", exception.getMessage());
     }
 }
+

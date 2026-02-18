@@ -32,3 +32,4 @@ public class TrainingTypeDaoImpl implements TrainingTypeDao {
         return trainingTypeStorage.values().stream().toList();
     }
 }
+

@@ -11,3 +11,4 @@ public interface TrainingTypeDao {
 
     List<TrainingType> findAll();
 }
+

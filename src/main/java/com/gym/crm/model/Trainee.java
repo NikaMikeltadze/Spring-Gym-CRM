@@ -61,3 +61,4 @@ public class Trainee extends User {
         return result;
     }
 }
+

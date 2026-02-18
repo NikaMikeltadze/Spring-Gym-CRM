@@ -180,3 +180,4 @@ class TrainingServiceTest {
         verify(trainingDaoImpl).findAll();
     }
 }
+

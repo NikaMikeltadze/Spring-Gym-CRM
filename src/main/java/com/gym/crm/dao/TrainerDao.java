@@ -13,3 +13,4 @@ public interface TrainerDao {
 
     boolean exists(String username);
 }
+

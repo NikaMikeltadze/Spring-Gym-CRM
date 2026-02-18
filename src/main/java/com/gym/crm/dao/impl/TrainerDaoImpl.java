@@ -59,3 +59,4 @@ public class TrainerDaoImpl implements TrainerDao {
         return exists;
     }
 }
+

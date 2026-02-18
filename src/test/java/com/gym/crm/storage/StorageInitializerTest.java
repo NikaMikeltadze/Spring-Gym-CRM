@@ -80,3 +80,4 @@ class StorageInitializerTest {
         assertTrue(sarahWilliams.isActive(), "Active status should be true");
     }
 }
+

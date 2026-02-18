@@ -40,3 +40,4 @@ public class TrainingDaoImpl implements TrainingDao {
         return trainings;
     }
 }
+

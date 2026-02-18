@@ -66,3 +66,4 @@ public class TraineeDaoImpl implements TraineeDao {
         return exists;
     }
 }
+
