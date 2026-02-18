@@ -24,6 +24,11 @@ import java.util.Objects;
 @Component
 public class StorageInitializer {
 
+    public static final String TRAINING_TYPE = "TRAINING_TYPE";
+    public static final String USER = "USER";
+    public static final String TRAINER = "TRAINER";
+    public static final String TRAINEE = "TRAINEE";
+    public static final String TRAINING = "TRAINING";
     @Value("${storage.data.file}")
     private String fileName;
 
@@ -76,25 +81,25 @@ public class StorageInitializer {
                 if (line.isEmpty() || line.startsWith("#")) continue;
 
                 switch (line) {
-                    case "TRAINING_TYPE":
-                    case "USER":
-                    case "TRAINER":
-                    case "TRAINEE":
-                    case "TRAINING":
+                    case TRAINING_TYPE:
+                    case USER:
+                    case TRAINER:
+                    case TRAINEE:
+                    case TRAINING:
                         currentSection = line;
                         continue;
                 }
 
                 String[] parts = line.split(",");
                 switch (Objects.requireNonNull(currentSection)) {
-                    case "TRAINING_TYPE":
+                    case TRAINING_TYPE:
                         // parts[0] = TrainingTypeName
                         TrainingType trainingType = new TrainingType();
                         trainingType.setId(trainingTypeStorage.size() + 1L);
                         trainingType.setName(parts[0].trim());
                         trainingTypeStorage.put(trainingType.getId(), trainingType);
                         break;
-                    case "USER": {
+                    case USER: {
                         // parts[0]=FirstName, [1]=LastName, [2]=Username,
                         // [3]=Password, [4]=IsActive
                         User user = new User();
@@ -106,7 +111,7 @@ public class StorageInitializer {
                         userMap.put(user.getUsername(), user);
                         break;
                     }
-                    case "TRAINER": {
+                    case TRAINER: {
                         // parts[0]=Username, [1]=Specialization
                         String username = parts[0].trim();
                         Trainer trainer = new Trainer();
@@ -125,7 +130,7 @@ public class StorageInitializer {
                         trainerStorage.put(trainer.getId(), trainer);
                         break;
                     }
-                    case "TRAINEE": {
+                    case TRAINEE: {
                         // parts[0]=Username, [1]=DateOfBirth, [2]=Address
                         String username = parts[0].trim();
                         Trainee trainee = new Trainee();
@@ -145,7 +150,7 @@ public class StorageInitializer {
                         traineeStorage.put(trainee.getId(), trainee);
                         break;
                     }
-                    case "TRAINING": {
+                    case TRAINING: {
                         // parts[0]=TraineeUsername, [1]=TrainerUsername,
                         // [2]=TrainingName, [3]=TrainingType,
                         // [4]=TrainingDate, [5]=DurationMinutes
@@ -187,3 +192,4 @@ public class StorageInitializer {
         this.trainingDaoImpl = trainingDaoImpl;
     }
 }
+

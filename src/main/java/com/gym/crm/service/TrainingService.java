@@ -4,15 +4,14 @@ import com.gym.crm.dao.impl.TraineeDaoImpl;
 import com.gym.crm.dao.impl.TrainerDaoImpl;
 import com.gym.crm.dao.impl.TrainingDaoImpl;
 import com.gym.crm.model.Training;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Slf4j
 @Service
 public class TrainingService {
-    private static final Logger logger = LoggerFactory.getLogger(TrainingService.class);
 
     private final TrainingDaoImpl trainingDaoImpl;
     private final TraineeDaoImpl traineeDaoImpl;
@@ -25,55 +24,55 @@ public class TrainingService {
     }
 
     public void createTraining(Training training) {
-        logger.debug("Creating training with name={}", training != null ? training.getTrainingName() : null);
+        log.debug("Creating training with name={}", training != null ? training.getTrainingName() : null);
 
         if (training == null) {
-            logger.error("Attempted to create null training");
+            log.error("Attempted to create null training");
             throw new IllegalArgumentException("Training must not be null");
         }
         if (training.getTrainingName() == null || training.getTrainingName().trim().isEmpty()) {
-            logger.error("Attempted to create training with blank name");
+            log.error("Attempted to create training with blank name");
             throw new IllegalArgumentException("Training name must not be blank");
         }
         if (training.getTrainingType() == null) {
-            logger.error("Attempted to create training with null type");
+            log.error("Attempted to create training with null type");
             throw new IllegalArgumentException("Training type must not be null");
         }
         if (training.getTrainerId() == null) {
-            logger.error("Attempted to create training with null trainerId");
+            log.error("Attempted to create training with null trainerId");
             throw new IllegalArgumentException("TrainerId must not be null");
         }
         if (training.getTraineeId() == null) {
-            logger.error("Attempted to create training with null traineeId");
+            log.error("Attempted to create training with null traineeId");
             throw new IllegalArgumentException("TraineeId must not be null");
         }
 
         if (trainerDaoImpl.findById(training.getTrainerId()) == null) {
-            logger.error("Trainer with id={} does not exist", training.getTrainerId());
+            log.error("Trainer with id={} does not exist", training.getTrainerId());
             throw new IllegalArgumentException("Trainer with id=" + training.getTrainerId() + " does not exist");
         }
         if (traineeDaoImpl.findById(training.getTraineeId()) == null) {
-            logger.error("Trainee with id={} does not exist", training.getTraineeId());
+            log.error("Trainee with id={} does not exist", training.getTraineeId());
             throw new IllegalArgumentException("Trainee with id=" + training.getTraineeId() + " does not exist");
         }
 
         trainingDaoImpl.save(training);
-        logger.info("Successfully created training with name={}", training.getTrainingName());
+        log.info("Successfully created training with name={}", training.getTrainingName());
     }
 
     public Training selectTraining(Long id) {
-        logger.debug("Selecting training by id={}", id);
+        log.debug("Selecting training by id={}", id);
 
         Training training = trainingDaoImpl.findById(id);
-        logger.debug("Found training: {}", training != null);
+        log.debug("Found training: {}", training != null);
         return training;
     }
 
     public List<Training> getAllTrainings() {
-        logger.debug("Retrieving all trainings");
+        log.debug("Retrieving all trainings");
 
         List<Training> trainings = trainingDaoImpl.findAll();
-        logger.debug("Found {} trainings", trainings.size());
+        log.debug("Found {} trainings", trainings.size());
         return trainings;
     }
 }
