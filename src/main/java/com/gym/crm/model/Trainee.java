@@ -1,17 +1,27 @@
 package com.gym.crm.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import jakarta.persistence.*;
+import lombok.*;
 
-@EqualsAndHashCode(callSuper = true)
-@Data
+import java.time.LocalDate;
+
+@Getter
+@Setter
+@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 @AllArgsConstructor
 @NoArgsConstructor
+
+@Entity
 public class Trainee extends User {
-    String dateOfBirth;
+    @Column(name = "Date of Birth")
+    LocalDate dateOfBirth;
+
+    @Column(name = "Address")
     String address;
-    Long userId;
+
+    @OneToOne
+    @JoinColumn(name = "UserId", nullable = false, unique = true)
+    User user;
+
 }
 
