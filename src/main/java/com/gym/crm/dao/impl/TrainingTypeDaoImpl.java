@@ -2,34 +2,39 @@ package com.gym.crm.dao.impl;
 
 import com.gym.crm.dao.TrainingTypeDao;
 import com.gym.crm.model.TrainingType;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Map;
 
 @Repository
+@Slf4j
 public class TrainingTypeDaoImpl implements TrainingTypeDao {
 
-    private final Map<Long, TrainingType> trainingTypeStorage;
+    private EntityManager entityManager;
 
-    public TrainingTypeDaoImpl(Map<Long, TrainingType> trainingTypeStorage) {
-        this.trainingTypeStorage = trainingTypeStorage;
+    @PersistenceContext
+    public void setEntityManager(EntityManager entityManager) {
+        this.entityManager = entityManager;
     }
 
     @Override
     public void save(TrainingType trainingType) {
-        if (trainingType.getId() == null) trainingType.setId(trainingTypeStorage.size() + 1L);
-        trainingTypeStorage.put(trainingType.getId(), trainingType);
+        entityManager.persist(trainingType);
+        log.info("Saved TrainingType with id={}, name={}", trainingType.getId(), trainingType.getName());
     }
 
     @Override
     public TrainingType findById(Long id) {
-        return trainingTypeStorage.get(id);
+        return entityManager.find(TrainingType.class, id);
     }
 
     @Override
     public List<TrainingType> findAll() {
-        return trainingTypeStorage.values().stream().toList();
+        return entityManager.createQuery("SELECT t FROM TrainingType t", TrainingType.class).getResultList();
     }
 }
 
