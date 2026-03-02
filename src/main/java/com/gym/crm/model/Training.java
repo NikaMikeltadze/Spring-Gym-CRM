@@ -1,6 +1,8 @@
 package com.gym.crm.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -19,23 +21,29 @@ public class Training {
 
     @ManyToOne
     @JoinColumn(name = "Trainee Id")
+    @NotNull(message = "Trainee must not be null")
     Trainee trainee;
 
     @ManyToOne
     @JoinColumn(name = "Trainer Id")
+    @NotNull(message = "Trainer must not be null")
     Trainer trainer;
 
     @Column(name = "Training Name", nullable = false)
+    @NotBlank(message = "Training Name must not be blank")
     String trainingName;
 
     @ManyToOne
     @JoinColumn(name = "Training Type Id")
+    @NotNull(message = "Training Type must not be null")
     TrainingType trainingType;
 
     @Column(name = "Training Date", nullable = false)
+    @NotNull(message = "Training Date must not be null")
     LocalDate trainingDate;
 
     @Column(name = "Training Duration", nullable = false)
+    @NotNull(message = "Training Duration must not be null")
     Double trainingDuration;
 
 }
