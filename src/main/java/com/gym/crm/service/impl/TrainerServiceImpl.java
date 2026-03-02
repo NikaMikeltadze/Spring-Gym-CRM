@@ -80,7 +80,7 @@ public class TrainerServiceImpl implements TrainerService {
     public void changePassword(String username, String oldPassword, String newPassword) {
         log.debug("Attempting to change password for trainer username={}", username);
         
-        Trainer trainer = (Trainer) Optional.ofNullable(trainerDao.findByUsername(username))
+        Trainer trainer = Optional.ofNullable(trainerDao.findByUsername(username))
                 .orElseThrow(() -> {
                     log.error("Trainer not found with username={}", username);
                     return new IllegalArgumentException("Trainer not found with username: " + username);
@@ -106,7 +106,7 @@ public class TrainerServiceImpl implements TrainerService {
     public void activateTrainer(String username) {
         log.debug("Attempting to activate trainer username={}", username);
         
-        Trainer trainer = (Trainer) Optional.ofNullable(trainerDao.findByUsername(username))
+        Trainer trainer = Optional.ofNullable(trainerDao.findByUsername(username))
                 .orElseThrow(() -> {
                     log.error("Trainer not found with username={}", username);
                     return new IllegalArgumentException("Trainer not found with username: " + username);
@@ -127,7 +127,7 @@ public class TrainerServiceImpl implements TrainerService {
     public void deactivateTrainer(String username) {
         log.debug("Attempting to deactivate trainer username={}", username);
         
-        Trainer trainer = (Trainer) Optional.ofNullable(trainerDao.findByUsername(username))
+        Trainer trainer = Optional.ofNullable(trainerDao.findByUsername(username))
                 .orElseThrow(() -> {
                     log.error("Trainer not found with username={}", username);
                     return new IllegalArgumentException("Trainer not found with username: " + username);

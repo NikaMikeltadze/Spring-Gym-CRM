@@ -317,7 +317,7 @@ class GymFacadeImplTest {
 
     @Test
     void getAllTrainings_Empty() {
-        when(trainingService.getAllTrainings()).thenReturn(Arrays.asList());
+        when(trainingService.getAllTrainings()).thenReturn(List.of());
 
         List<TrainingDTO> result = gymFacade.getAllTrainings();
 

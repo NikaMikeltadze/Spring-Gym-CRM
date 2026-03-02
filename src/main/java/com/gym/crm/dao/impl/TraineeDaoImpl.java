@@ -66,7 +66,7 @@ public class TraineeDaoImpl implements TraineeDao {
 
     @Override
     public boolean exists(String username) {
-        boolean exists = findByUsername(username) != null;
+        boolean exists = findByUsername(username).isPresent();
         log.debug("Checking if trainee exists with username={}, exists: {}", username, exists);
         return exists;
     }
