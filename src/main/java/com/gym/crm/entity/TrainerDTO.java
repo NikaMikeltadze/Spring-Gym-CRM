@@ -1,4 +1,4 @@
-package com.gym.crm.model;
+package com.gym.crm.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -7,16 +7,13 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @EqualsAndHashCode(callSuper = true)
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 
 @Entity
-public class Trainer extends User {
+public class TrainerDTO extends User {
     @ManyToOne
     @JoinColumn(name = "Specialization")
     @NotNull

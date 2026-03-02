@@ -1,4 +1,4 @@
-package com.gym.crm.model;
+package com.gym.crm.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
@@ -14,7 +14,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 
 @Entity
-public class Trainee extends User {
+public class TraineeDTO extends User {
     @Column(name = "Date of Birth")
     LocalDate dateOfBirth;
 

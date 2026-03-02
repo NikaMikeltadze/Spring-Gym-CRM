@@ -48,7 +48,7 @@ public class AppConfig {
     public LocalContainerEntityManagerFactoryBean entityManagerFactory(DataSource dataSource) {
         LocalContainerEntityManagerFactoryBean factory = new LocalContainerEntityManagerFactoryBean();
         factory.setDataSource(dataSource);
-        factory.setPackagesToScan("com.gym.crm.model");
+        factory.setPackagesToScan("com.gym.crm.entity");
 
         HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
         factory.setJpaVendorAdapter(vendorAdapter);

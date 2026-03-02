@@ -1,4 +1,4 @@
-package com.gym.crm.model;
+package com.gym.crm.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
@@ -14,7 +14,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 
 @Entity
-public class Training {
+public class TrainingDTO {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
@@ -22,12 +22,12 @@ public class Training {
     @ManyToOne
     @JoinColumn(name = "Trainee Id")
     @NotNull(message = "Trainee must not be null")
-    Trainee trainee;
+    TraineeDTO trainee;
 
     @ManyToOne
     @JoinColumn(name = "Trainer Id")
     @NotNull(message = "Trainer must not be null")
-    Trainer trainer;
+    TrainerDTO trainer;
 
     @Column(name = "Training Name", nullable = false)
     @NotBlank(message = "Training Name must not be blank")
