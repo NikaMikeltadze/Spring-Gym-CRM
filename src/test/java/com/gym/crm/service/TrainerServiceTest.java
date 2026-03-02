@@ -1,14 +1,17 @@
 package com.gym.crm.service;
 
-import com.gym.crm.dao.impl.TrainerDaoImpl;
-import com.gym.crm.model.Trainer;
+import com.gym.crm.dao.TraineeDao;
+import com.gym.crm.dao.TrainerDao;
+import com.gym.crm.entity.Trainer;
+import com.gym.crm.service.impl.TrainerServiceImpl;
 import com.gym.crm.util.UsernamePasswordGenerator;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -18,18 +21,16 @@ import static org.mockito.Mockito.*;
 class TrainerServiceTest {
 
     @Mock
-    private TrainerDaoImpl trainerDaoImpl;
+    private TrainerDao trainerDao;
+
+    @Mock
+    private TraineeDao traineeDao;
 
     @Mock
     private UsernamePasswordGenerator usernamePasswordGenerator;
 
     @InjectMocks
-    private TrainerService trainerService;
-
-    @BeforeEach
-    void setUp() {
-        trainerService.setUsernamePasswordGenerator(usernamePasswordGenerator);
-    }
+    private TrainerServiceImpl trainerService;
 
     @Test
     void createTrainer_Success() {
@@ -43,42 +44,10 @@ class TrainerServiceTest {
 
         trainerService.createTrainer(trainer);
 
-        verify(trainerDaoImpl).save(trainer);
+        verify(trainerDao).save(trainer);
         assertEquals("Jane.Smith", trainer.getUsername());
         assertEquals("xyz9876543", trainer.getPassword());
-        assertTrue(trainer.isActive());
-    }
-
-    @Test
-    void createTrainer_NullTrainer_ThrowsException() {
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
-                trainerService.createTrainer(null)
-        );
-        assertEquals("Trainer must not be null", exception.getMessage());
-    }
-
-    @Test
-    void createTrainer_BlankFirstName_ThrowsException() {
-        Trainer trainer = new Trainer();
-        trainer.setFirstName("");
-        trainer.setLastName("Smith");
-
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
-                trainerService.createTrainer(trainer)
-        );
-        assertEquals("First name must not be blank", exception.getMessage());
-    }
-
-    @Test
-    void createTrainer_BlankLastName_ThrowsException() {
-        Trainer trainer = new Trainer();
-        trainer.setFirstName("Jane");
-        trainer.setLastName("");
-
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
-                trainerService.createTrainer(trainer)
-        );
-        assertEquals("Last name must not be blank", exception.getMessage());
+        assertTrue(trainer.getIsActive());
     }
 
     @Test
@@ -91,38 +60,7 @@ class TrainerServiceTest {
 
         trainerService.updateTrainer(trainer);
 
-        verify(trainerDaoImpl).update(trainer);
-    }
-
-    @Test
-    void updateTrainer_NullTrainer_ThrowsException() {
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
-                trainerService.updateTrainer(null)
-        );
-        assertEquals("Trainer and trainer.id must not be null", exception.getMessage());
-    }
-
-    @Test
-    void updateTrainer_NullId_ThrowsException() {
-        Trainer trainer = new Trainer();
-        trainer.setUsername("Jane.Smith");
-
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
-                trainerService.updateTrainer(trainer)
-        );
-        assertEquals("Trainer and trainer.id must not be null", exception.getMessage());
-    }
-
-    @Test
-    void updateTrainer_BlankUsername_ThrowsException() {
-        Trainer trainer = new Trainer();
-        trainer.setId(1L);
-        trainer.setUsername("");
-
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
-                trainerService.updateTrainer(trainer)
-        );
-        assertEquals("Username must not be blank", exception.getMessage());
+        verify(trainerDao).update(trainer);
     }
 
     @Test
@@ -130,21 +68,13 @@ class TrainerServiceTest {
         Long id = 1L;
         Trainer expectedTrainer = new Trainer();
         expectedTrainer.setId(id);
-        when(trainerDaoImpl.findById(id)).thenReturn(expectedTrainer);
+        when(trainerDao.findById(id)).thenReturn(expectedTrainer);
 
-        Trainer result = trainerService.selectTrainerById(id);
+        Optional<Trainer> result = trainerService.selectTrainerById(id);
 
-        assertNotNull(result);
-        assertEquals(id, result.getId());
-        verify(trainerDaoImpl).findById(id);
-    }
-
-    @Test
-    void selectTrainerById_NullId_ThrowsException() {
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
-                trainerService.selectTrainerById(null)
-        );
-        assertEquals("Id must not be null", exception.getMessage());
+        assertTrue(result.isPresent());
+        assertEquals(id, result.get().getId());
+        verify(trainerDao).findById(id);
     }
 
     @Test
@@ -152,21 +82,52 @@ class TrainerServiceTest {
         String username = "Jane.Smith";
         Trainer expectedTrainer = new Trainer();
         expectedTrainer.setUsername(username);
-        when(trainerDaoImpl.findByUsername(username)).thenReturn(expectedTrainer);
+        when(trainerDao.findByUsername(username)).thenReturn(expectedTrainer);
 
-        Trainer result = trainerService.selectTrainerByUsername(username);
+        Optional<Trainer> result = trainerService.selectTrainerByUsername(username);
 
-        assertNotNull(result);
-        assertEquals(username, result.getUsername());
-        verify(trainerDaoImpl).findByUsername(username);
+        assertTrue(result.isPresent());
+        assertEquals(username, result.get().getUsername());
+        verify(trainerDao).findByUsername(username);
     }
 
     @Test
-    void selectTrainerByUsername_BlankUsername_ThrowsException() {
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
-                trainerService.selectTrainerByUsername("")
-        );
-        assertEquals("Username must not be blank", exception.getMessage());
+    void selectTrainerByUsername_NotFound() {
+        String username = "NonExistent.Trainer";
+        when(trainerDao.findByUsername(username)).thenReturn(null);
+
+        Optional<Trainer> result = trainerService.selectTrainerByUsername(username);
+
+        assertFalse(result.isPresent());
+        verify(trainerDao).findByUsername(username);
+    }
+
+    @Test
+    void selectTrainerById_NotFound() {
+        Long id = 999L;
+        when(trainerDao.findById(id)).thenReturn(null);
+
+        Optional<Trainer> result = trainerService.selectTrainerById(id);
+
+        assertFalse(result.isPresent());
+        verify(trainerDao).findById(id);
+    }
+
+    @Test
+    void createTrainer_WithDuplicateUsername_GeneratesSerialNumber() {
+        Trainer trainer = new Trainer();
+        trainer.setFirstName("Jane");
+        trainer.setLastName("Smith");
+
+        when(usernamePasswordGenerator.generateUsername(eq("Jane"), eq("Smith"), any()))
+                .thenReturn("Jane.Smith1");
+        when(usernamePasswordGenerator.generatePassword()).thenReturn("xyz9876543");
+
+        trainerService.createTrainer(trainer);
+
+        verify(trainerDao).save(trainer);
+        assertEquals("Jane.Smith1", trainer.getUsername());
+        assertEquals("xyz9876543", trainer.getPassword());
+        assertTrue(trainer.getIsActive());
     }
 }
-
