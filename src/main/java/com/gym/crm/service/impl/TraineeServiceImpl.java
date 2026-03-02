@@ -2,7 +2,7 @@ package com.gym.crm.service.impl;
 
 import com.gym.crm.dao.TraineeDao;
 import com.gym.crm.dao.TrainerDao;
-import com.gym.crm.model.Trainee;
+import com.gym.crm.entity.Trainee;
 import com.gym.crm.service.TraineeService;
 import com.gym.crm.util.UsernamePasswordGenerator;
 import lombok.RequiredArgsConstructor;
@@ -62,14 +62,14 @@ public class TraineeServiceImpl implements TraineeService {
 
     public Optional<Trainee> selectTraineeByUsername(String username) {
         log.debug("Selecting trainee by username={}", username);
-        Trainee trainee = traineeDao.findByUsername(username);
+        Trainee trainee = traineeDao.findByUsername(username).orElse(null);
         log.debug("Found trainee {}", trainee != null);
         return Optional.ofNullable(trainee);
     }
 
     public Optional<Trainee> selectTraineeById(Long id) {
         log.debug("Selecting trainee by id={}", id);
-        Trainee trainee = traineeDao.findById(id);
+        Trainee trainee = traineeDao.findById(id).orElse(null);
         log.debug("Found trainee {}", trainee != null);
         return Optional.ofNullable(trainee);
     }

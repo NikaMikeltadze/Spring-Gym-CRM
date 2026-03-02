@@ -1,14 +1,13 @@
 package com.gym.crm.dao.impl;
 
 import com.gym.crm.dao.TrainingTypeDao;
-import com.gym.crm.model.TrainingType;
+import com.gym.crm.entity.TrainingType;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Map;
 
 @Repository
 @Slf4j

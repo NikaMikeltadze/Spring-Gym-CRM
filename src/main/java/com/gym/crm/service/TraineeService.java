@@ -1,6 +1,6 @@
 package com.gym.crm.service;
 
-import com.gym.crm.model.Trainee;
+import com.gym.crm.entity.Trainee;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

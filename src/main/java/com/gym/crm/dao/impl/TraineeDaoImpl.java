@@ -1,12 +1,14 @@
 package com.gym.crm.dao.impl;
 
 import com.gym.crm.dao.TraineeDao;
-import com.gym.crm.model.Trainee;
+import com.gym.crm.entity.Trainee;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
+
+import java.util.Optional;
 
 @Repository
 @Slf4j
@@ -26,20 +28,20 @@ public class TraineeDaoImpl implements TraineeDao {
     }
 
     @Override
-    public Trainee findById(Long id) {
+    public Optional<Trainee> findById(Long id) {
         Trainee trainee = entityManager.find(Trainee.class, id);
         log.info("Finding trainee by id={}, found: {}", id, trainee != null);
-        return trainee;
+        return Optional.ofNullable(trainee);
     }
 
     @Override
-    public Trainee findByUsername(String username) {
+    public Optional<Trainee> findByUsername(String username) {
         try {
             Trainee trainee = entityManager.createQuery("SELECT t FROM Trainee t WHERE t.username = :username"
                     , Trainee.class).setParameter("username", username).getSingleResult();
 
             log.debug("Found trainee by username={}", username);
-            return trainee;
+            return Optional.ofNullable(trainee);
         } catch (NoResultException e) {
             log.debug("Could NOT find trainee by username={}", username);
 
@@ -49,7 +51,7 @@ public class TraineeDaoImpl implements TraineeDao {
 
     @Override
     public void delete(String username) {
-        Trainee trainee = findByUsername(username);
+        Trainee trainee = findByUsername(username).orElse(null);
         if (trainee != null) {
             entityManager.remove(trainee);
             log.info("Deleted trainee with username={}", username);

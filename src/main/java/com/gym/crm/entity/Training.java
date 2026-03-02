@@ -14,7 +14,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 
 @Entity
-public class TrainingDTO {
+public class Training {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
@@ -22,12 +22,12 @@ public class TrainingDTO {
     @ManyToOne
     @JoinColumn(name = "Trainee Id")
     @NotNull(message = "Trainee must not be null")
-    TraineeDTO trainee;
+    Trainee trainee;
 
     @ManyToOne
     @JoinColumn(name = "Trainer Id")
     @NotNull(message = "Trainer must not be null")
-    TrainerDTO trainer;
+    Trainer trainer;
 
     @Column(name = "Training Name", nullable = false)
     @NotBlank(message = "Training Name must not be blank")

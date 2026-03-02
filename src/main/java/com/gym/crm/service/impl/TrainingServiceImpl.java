@@ -1,7 +1,7 @@
 package com.gym.crm.service.impl;
 
 import com.gym.crm.dao.TrainingDao;
-import com.gym.crm.model.Training;
+import com.gym.crm.entity.Training;
 import com.gym.crm.service.TrainingService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

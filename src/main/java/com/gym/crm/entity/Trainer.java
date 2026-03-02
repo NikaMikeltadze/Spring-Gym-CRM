@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 
 @Entity
-public class TrainerDTO extends User {
+public class Trainer extends User {
     @ManyToOne
     @JoinColumn(name = "Specialization")
     @NotNull

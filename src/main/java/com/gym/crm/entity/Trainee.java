@@ -14,7 +14,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 
 @Entity
-public class TraineeDTO extends User {
+public class Trainee extends User {
     @Column(name = "Date of Birth")
     LocalDate dateOfBirth;
 
