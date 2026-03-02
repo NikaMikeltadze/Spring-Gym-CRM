@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -39,6 +40,14 @@ public class TrainingServiceImpl implements TrainingService {
         log.debug("Retrieving all trainings");
         List<Training> trainings = trainingDao.findAll();
         log.debug("Found {} trainings", trainings.size());
+        return trainings;
+    }
+
+    @Override
+    public List<Training> findTrainingsByDateRange(LocalDate fromDate, LocalDate toDate) {
+        log.debug("Finding trainings by date range: from={}, to={}", fromDate, toDate);
+        List<Training> trainings = trainingDao.findByDateRange(fromDate, toDate);
+        log.debug("Found {} trainings in date range", trainings.size());
         return trainings;
     }
 }

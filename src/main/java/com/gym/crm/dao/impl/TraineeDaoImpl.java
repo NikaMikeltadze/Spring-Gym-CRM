@@ -46,7 +46,7 @@ public class TraineeDaoImpl implements TraineeDao {
             log.debug("Could NOT find trainee by username={}", username);
 
         }
-        return null;
+        return Optional.empty();
     }
 
     @Override

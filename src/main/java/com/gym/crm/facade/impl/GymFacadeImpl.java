@@ -15,6 +15,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -83,6 +84,47 @@ public class GymFacadeImpl implements GymFacade {
                 .toList();
     }
 
+    // Password management
+    @Override
+    public void changeTraineePassword(String username, String oldPassword, String newPassword) {
+        traineeService.changePassword(username, oldPassword, newPassword);
+    }
+
+    @Override
+    public void changeTrainerPassword(String username, String oldPassword, String newPassword) {
+        trainerService.changePassword(username, oldPassword, newPassword);
+    }
+
+    // Activation/Deactivation
+    @Override
+    public void activateTrainee(String username) {
+        traineeService.activateTrainee(username);
+    }
+
+    @Override
+    public void deactivateTrainee(String username) {
+        traineeService.deactivateTrainee(username);
+    }
+
+    @Override
+    public void activateTrainer(String username) {
+        trainerService.activateTrainer(username);
+    }
+
+    @Override
+    public void deactivateTrainer(String username) {
+        trainerService.deactivateTrainer(username);
+    }
+
+    @Override
+    public List<TrainingDTO> getTraineeTrainings(String traineeUsername, LocalDate fromDate, LocalDate toDate, String trainerName, String trainingTypeName) {
+        return traineeService.getTrainings(traineeUsername, fromDate, toDate, trainerName, trainingTypeName);
+    }
+
+    @Override
+    public List<TrainingDTO> getTrainerTrainings(String trainerUsername, LocalDate fromDate, LocalDate toDate, String traineeName) {
+        return trainerService.getTrainings(trainerUsername, fromDate, toDate, traineeName);
+    }
 }
 
 

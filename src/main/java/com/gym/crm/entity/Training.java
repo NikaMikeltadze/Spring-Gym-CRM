@@ -19,7 +19,7 @@ public class Training {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.REMOVE)
     @JoinColumn(name = "Trainee Id")
     @NotNull(message = "Trainee must not be null")
     Trainee trainee;
