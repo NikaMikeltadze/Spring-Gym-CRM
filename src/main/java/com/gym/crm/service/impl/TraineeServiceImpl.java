@@ -5,12 +5,10 @@ import com.gym.crm.dao.TrainerDao;
 import com.gym.crm.model.Trainee;
 import com.gym.crm.service.TraineeService;
 import com.gym.crm.util.UsernamePasswordGenerator;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.Optional;
@@ -19,13 +17,15 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 @Validated
+@Transactional(readOnly = true)
 public class TraineeServiceImpl implements TraineeService {
-    //TODO: Transactional
     private final TraineeDao traineeDao;
     private final TrainerDao trainerDao;
     private final UsernamePasswordGenerator usernamePasswordGenerator;
 
-    public void createTrainee(@Valid @NotNull Trainee trainee) {
+    @Override
+    @Transactional
+    public void createTrainee(Trainee trainee) {
         log.debug("Creating trainee with firstName={}, lastName={}", trainee.getFirstName(), trainee.getLastName());
 
         // Generate username and password
@@ -44,26 +44,30 @@ public class TraineeServiceImpl implements TraineeService {
         log.info("Successfully created trainee with username={}", username);
     }
 
-    public void updateTrainee(@Valid @NotNull Trainee trainee) {
+    @Override
+    @Transactional
+    public void updateTrainee(Trainee trainee) {
         log.debug("Updating trainee with id={}", trainee.getId());
         traineeDao.update(trainee);
         log.info("Successfully updated trainee with username={}", trainee.getUsername());
     }
 
-    public void deleteTrainee(@NotBlank String username) {
+    @Override
+    @Transactional
+    public void deleteTrainee(String username) {
         log.debug("Deleting trainee with username={}", username);
         traineeDao.delete(username);
         log.info("Successfully deleted trainee with username={}", username);
     }
 
-    public Optional<Trainee> selectTraineeByUsername(@NotBlank String username) {
+    public Optional<Trainee> selectTraineeByUsername(String username) {
         log.debug("Selecting trainee by username={}", username);
         Trainee trainee = traineeDao.findByUsername(username);
         log.debug("Found trainee {}", trainee != null);
         return Optional.ofNullable(trainee);
     }
 
-    public Optional<Trainee> selectTraineeById(@NotNull Long id) {
+    public Optional<Trainee> selectTraineeById(Long id) {
         log.debug("Selecting trainee by id={}", id);
         Trainee trainee = traineeDao.findById(id);
         log.debug("Found trainee {}", trainee != null);
