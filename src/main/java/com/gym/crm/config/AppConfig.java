@@ -29,6 +29,9 @@ import java.util.Properties;
 @PropertySource("classpath:application.properties")
 @EnableTransactionManagement
 public class AppConfig {
+    public static final String JDBC_URL = "jdbc.url";
+    public static final String JDBC_USERNAME = "jdbc.username";
+    public static final String JDBC_PASSWORD = "jdbc.password";
     private Environment env;
 
     @Autowired
@@ -43,11 +46,11 @@ public class AppConfig {
 
     @Bean
     public DataSource dataSource() {
-        JdbcDataSource ds = new JdbcDataSource();
-        ds.setURL(env.getRequiredProperty("jdbc.url"));
-        ds.setUser(env.getRequiredProperty("jdbc.username"));
-        ds.setPassword(env.getRequiredProperty("jdbc.password"));
-        return ds;
+        JdbcDataSource dataSource = new JdbcDataSource();
+        dataSource.setURL(env.getRequiredProperty(JDBC_URL));
+        dataSource.setUser(env.getRequiredProperty(JDBC_USERNAME));
+        dataSource.setPassword(env.getRequiredProperty(JDBC_PASSWORD));
+        return dataSource;
     }
 
     @Bean
