@@ -23,8 +23,6 @@ class TraineeServiceTest {
     @Mock
     private TraineeDao traineeDao;
 
-    @Mock
-    private TrainerDao trainerDao;
 
     @Mock
     private UsernamePasswordGenerator usernamePasswordGenerator;

@@ -70,14 +70,14 @@ public class TraineeServiceImpl implements TraineeService {
 
     public Optional<Trainee> selectTraineeByUsername(String username) {
         log.debug("Selecting trainee by username={}", username);
-        Trainee trainee = traineeDao.findByUsername(username).orElse(null);
+        Trainee trainee = traineeDao.findByUsername(username).orElseThrow(() -> new IllegalArgumentException("Trainee not found with username: " + username));
         log.debug("Found trainee {}", trainee != null);
         return Optional.ofNullable(trainee);
     }
 
     public Optional<Trainee> selectTraineeById(Long id) {
         log.debug("Selecting trainee by id={}", id);
-        Trainee trainee = traineeDao.findById(id).orElse(null);
+        Trainee trainee = traineeDao.findById(id).orElseThrow(() -> new IllegalArgumentException("Trainee not found with id: " + id));
         log.debug("Found trainee {}", trainee != null);
         return Optional.ofNullable(trainee);
     }
@@ -86,7 +86,7 @@ public class TraineeServiceImpl implements TraineeService {
     @Transactional
     public void changePassword(String username, String oldPassword, String newPassword) {
         log.debug("Attempting to change password for trainee username={}", username);
-        
+
         Trainee trainee = traineeDao.findByUsername(username)
                 .orElseThrow(() -> {
                     log.error("Trainee not found with username={}", username);
@@ -112,7 +112,7 @@ public class TraineeServiceImpl implements TraineeService {
     @Transactional
     public void activateTrainee(String username) {
         log.debug("Attempting to activate trainee username={}", username);
-        
+
         Trainee trainee = traineeDao.findByUsername(username)
                 .orElseThrow(() -> {
                     log.error("Trainee not found with username={}", username);
@@ -133,7 +133,7 @@ public class TraineeServiceImpl implements TraineeService {
     @Transactional
     public void deactivateTrainee(String username) {
         log.debug("Attempting to deactivate trainee username={}", username);
-        
+
         Trainee trainee = traineeDao.findByUsername(username)
                 .orElseThrow(() -> {
                     log.error("Trainee not found with username={}", username);
@@ -154,7 +154,7 @@ public class TraineeServiceImpl implements TraineeService {
     public List<TrainingDTO> getTrainings(String username, LocalDate fromDate, LocalDate toDate, String trainerName, String trainingTypeName) {
         log.debug("Fetching trainings for trainee={} with criteria: from={}, to={}, trainer={}, type={}",
                 username, fromDate, toDate, trainerName, trainingTypeName);
-        
+
         traineeDao.findByUsername(username)
                 .orElseThrow(() -> {
                     log.error("Trainee not found with username={}", username);
@@ -165,7 +165,7 @@ public class TraineeServiceImpl implements TraineeService {
         List<TrainingDTO> result = trainings.stream()
                 .map(training -> modelMapper.map(training, TrainingDTO.class))
                 .toList();
-        
+
         log.info("Successfully fetched {} trainings for trainee={}", result.size(), username);
         return result;
     }

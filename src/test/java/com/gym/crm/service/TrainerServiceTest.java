@@ -1,6 +1,5 @@
 package com.gym.crm.service;
 
-import com.gym.crm.dao.TraineeDao;
 import com.gym.crm.dao.TrainerDao;
 import com.gym.crm.entity.Trainer;
 import com.gym.crm.service.impl.TrainerServiceImpl;
@@ -23,8 +22,7 @@ class TrainerServiceTest {
     @Mock
     private TrainerDao trainerDao;
 
-    @Mock
-    private TraineeDao traineeDao;
+
 
     @Mock
     private UsernamePasswordGenerator usernamePasswordGenerator;
