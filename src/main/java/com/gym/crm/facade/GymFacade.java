@@ -1,75 +1,66 @@
 package com.gym.crm.facade;
 
-import com.gym.crm.model.Trainee;
-import com.gym.crm.model.Trainer;
-import com.gym.crm.model.Training;
-import com.gym.crm.service.TraineeService;
-import com.gym.crm.service.TrainerService;
-import com.gym.crm.service.TrainingService;
+import com.gym.crm.dto.TraineeDTO;
+import com.gym.crm.dto.TrainerDTO;
+import com.gym.crm.dto.TrainingDTO;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Component
-public class GymFacade {
+public interface GymFacade {
+    void createTrainee(@Valid @NotNull TraineeDTO trainee);
 
+    void createTrainer(@Valid @NotNull TrainerDTO trainer);
 
-    private final TraineeService traineeService;
-    private final TrainerService trainerService;
-    private final TrainingService trainingService;
+    void createTraining(@Valid @NotNull TrainingDTO training);
 
-    public GymFacade(TraineeService traineeService, TrainerService trainerService, TrainingService trainingService) {
-        this.traineeService = traineeService;
-        this.trainerService = trainerService;
-        this.trainingService = trainingService;
-    }
+    Optional<TraineeDTO> getTraineeByUsername(@NotBlank String username);
 
-    //Trainee
-    public void createTrainee(Trainee trainee) {
-        traineeService.createTrainee(trainee);
-    }
+    Optional<TraineeDTO> getTraineeById(@NotNull Long id);
 
-    public Trainee getTraineeByUsername(String username) {
-        return traineeService.selectTraineeByUsername(username);
-    }
+    Optional<TrainerDTO> getTrainerByUsername(@NotBlank String username);
 
-    public Trainee getTraineeById(Long id) {
-        return traineeService.selectTraineeById(id);
-    }
+    Optional<TrainingDTO> getTraining(@NotNull Long id);
 
-    public void updateTrainee(Trainee trainee) {
-        traineeService.updateTrainee(trainee);
-    }
+    List<TrainingDTO> getAllTrainings();
 
-    public void deleteTrainee(String username) {
-        traineeService.deleteTrainee(username);
-    }
+    void updateTrainee(@Valid @NotNull TraineeDTO trainee);
 
-    //Trainer
-    public void createTrainer(Trainer trainer) {
-        trainerService.createTrainer(trainer);
-    }
+    void updateTrainer(@Valid @NotNull TrainerDTO trainer);
 
-    public Trainer getTrainerByUsername(String username) {
-        return trainerService.selectTrainerByUsername(username);
-    }
+    void deleteTrainee(@NotBlank String username);
 
-    public void updateTrainer(Trainer trainer) {
-        trainerService.updateTrainer(trainer);
-    }
+    void changeTraineePassword(@NotBlank String username, @NotBlank String oldPassword, @NotBlank String newPassword);
 
-    //training
-    public void createTraining(Training training) {
-        trainingService.createTraining(training);
-    }
+    void changeTrainerPassword(@NotBlank String username, @NotBlank String oldPassword, @NotBlank String newPassword);
 
-    public Training getTraining(Long id) {
-        return trainingService.selectTraining(id);
-    }
+    void activateTrainee(@NotBlank String username);
 
-    public List<Training> getAllTrainings() {
-        return trainingService.getAllTrainings();
-    }
+    void deactivateTrainee(@NotBlank String username);
 
+    void activateTrainer(@NotBlank String username);
+
+    void deactivateTrainer(@NotBlank String username);
+
+    List<TrainingDTO> getTraineeTrainings(
+            @NotBlank String traineeUsername,
+            LocalDate fromDate,
+            LocalDate toDate,
+            String trainerName,
+            String trainingTypeName
+    );
+
+    List<TrainingDTO> getTrainerTrainings(
+            @NotBlank String trainerUsername,
+            LocalDate fromDate,
+            LocalDate toDate,
+            String traineeName
+    );
 }
 

@@ -1,126 +1,37 @@
 package com.gym.crm.service;
 
-import com.gym.crm.dao.TraineeDao;
-import com.gym.crm.dao.TrainerDao;
-import com.gym.crm.model.Trainee;
-import com.gym.crm.util.UsernamePasswordGenerator;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import com.gym.crm.dto.TrainingDTO;
+import com.gym.crm.entity.Trainee;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
-@Slf4j
-@Service
-public class TraineeService {
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
 
-    private TraineeDao traineeDao;
-    private TrainerDao trainerDao;
-    private UsernamePasswordGenerator usernamePasswordGenerator;
+public interface TraineeService {
+    void createTrainee(@Valid @NotNull Trainee trainee);
 
+    void updateTrainee(@Valid @NotNull Trainee trainee);
 
-    @Autowired
-    public void setTraineeDao(TraineeDao traineeDao) {
-        this.traineeDao = traineeDao;
-    }
+    void deleteTrainee(@NotBlank String username);
 
-    @Autowired
-    public void setTrainerDao(TrainerDao trainerDao) {
-        this.trainerDao = trainerDao;
-    }
+    Optional<Trainee> selectTraineeByUsername(@NotBlank String username);
 
-    @Autowired
-    public void setUsernamePasswordGenerator(UsernamePasswordGenerator usernamePasswordGenerator) {
-        this.usernamePasswordGenerator = usernamePasswordGenerator;
-    }
+    Optional<Trainee> selectTraineeById(@NotNull Long id);
 
+    void changePassword(@NotBlank String username, @NotBlank String oldPassword, @NotBlank String newPassword);
 
-    public void createTrainee(Trainee trainee) {
-        log.debug("Creating trainee with firstName={}, lastName={}", trainee != null ? trainee.getFirstName() : null, trainee != null ? trainee.getLastName() : null);
+    void activateTrainee(@NotBlank String username);
 
-        if (trainee == null) {
-            log.error("Attempted to create null trainee");
-            throw new IllegalArgumentException("Trainee must not be null");
-        }
-        if (isBlank(trainee.getFirstName())) {
-            log.error("Attempted to create trainee with blank first name");
-            throw new IllegalArgumentException("First name must not be blank");
-        }
-        if (isBlank(trainee.getLastName())) {
-            log.error("Attempted to create trainee with blank last name");
-            throw new IllegalArgumentException("Last name must not be blank");
-        }
+    void deactivateTrainee(@NotBlank String username);
 
-        // Generate username and password
-        String username = usernamePasswordGenerator.generateUsername(
-                trainee.getFirstName(),
-                trainee.getLastName(),
-                user -> traineeDao.exists(user) || trainerDao.exists(user)
-        );
-        String password = usernamePasswordGenerator.generatePassword();
-
-        trainee.setUsername(username);
-        trainee.setPassword(password);
-        trainee.setActive(true);
-
-        traineeDao.save(trainee);
-        log.info("Successfully created trainee with username={}", username);
-    }
-
-    public void updateTrainee(Trainee trainee) {
-        log.debug("Updating trainee with id={}", trainee != null ? trainee.getId() : null);
-
-        if (trainee == null || trainee.getId() == null) {
-            log.error("Attempted to update trainee with null trainee or id");
-            throw new IllegalArgumentException("Trainee and trainee.id must not be null");
-        }
-        if (isBlank(trainee.getUsername())) {
-            log.error("Attempted to update trainee with blank username");
-            throw new IllegalArgumentException("Username must not be blank");
-        }
-
-        traineeDao.update(trainee);
-        log.info("Successfully updated trainee with username={}", trainee.getUsername());
-    }
-
-    public void deleteTrainee(String username) {
-        log.debug("Deleting trainee with username={}", username);
-
-        if (isBlank(username)) {
-            log.error("Attempted to delete trainee with blank username");
-            throw new IllegalArgumentException("Username must not be blank");
-        }
-
-        traineeDao.delete(username);
-        log.info("Successfully deleted trainee with username={}", username);
-    }
-
-    public Trainee selectTraineeByUsername(String username) {
-        log.debug("Selecting trainee by username={}", username);
-
-        if (isBlank(username)) {
-            log.error("Attempted to select trainee with blank username");
-            throw new IllegalArgumentException("Username must not be blank");
-        }
-
-        Trainee trainee = traineeDao.findByUsername(username);
-        log.debug("Found trainee: {}", trainee != null);
-        return trainee;
-    }
-
-    public Trainee selectTraineeById(Long id) {
-        log.debug("Selecting trainee by id={}", id);
-
-        if (id == null) {
-            log.error("Attempted to select trainee with null id");
-            throw new IllegalArgumentException("Id must not be null");
-        }
-
-        Trainee trainee = traineeDao.findById(id);
-        log.debug("Found trainee: {}", trainee != null);
-        return trainee;
-    }
-
-    private boolean isBlank(String s) {
-        return s == null || s.trim().isEmpty();
-    }
+    List<TrainingDTO> getTrainings(
+            @NotBlank String username,
+            LocalDate fromDate,
+            LocalDate toDate,
+            String trainerName,
+            String trainingTypeName
+    );
 }
-

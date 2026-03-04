@@ -1,7 +1,8 @@
 package com.gym.crm.dao;
 
-import com.gym.crm.model.Training;
+import com.gym.crm.entity.Training;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public interface TrainingDao {
@@ -10,5 +11,28 @@ public interface TrainingDao {
     Training findById(Long id);
 
     List<Training> findAll();
+
+    List<Training> findByTraineeUsername(String traineeUsername);
+
+    List<Training> findByTrainerUsername(String trainerUsername);
+
+    List<Training> findByDateRange(LocalDate fromDate, LocalDate toDate);
+
+    List<Training> findByTraineeId(Long traineeId);
+
+    List<Training> findByTraineeUsernameAndCriteria(
+            String traineeUsername,
+            LocalDate fromDate,
+            LocalDate toDate,
+            String trainerName,
+            String trainingTypeName
+    );
+
+    List<Training> findByTrainerUsernameAndCriteria(
+            String trainerUsername,
+            LocalDate fromDate,
+            LocalDate toDate,
+            String traineeName
+    );
 }
 

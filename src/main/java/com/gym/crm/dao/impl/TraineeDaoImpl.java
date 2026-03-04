@@ -1,68 +1,73 @@
 package com.gym.crm.dao.impl;
 
 import com.gym.crm.dao.TraineeDao;
-import com.gym.crm.model.Trainee;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.gym.crm.entity.Trainee;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.PersistenceContext;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
-import java.util.Map;
+import java.util.Optional;
 
 @Repository
+@Slf4j
 public class TraineeDaoImpl implements TraineeDao {
-    private static final Logger logger = LoggerFactory.getLogger(TraineeDaoImpl.class);
 
-    private final Map<Long, Trainee> traineeStorage;
+    private EntityManager entityManager;
 
-    public TraineeDaoImpl(Map<Long, Trainee> traineeStorage) {
-        this.traineeStorage = traineeStorage;
+    @PersistenceContext
+    public void setEntityManager(EntityManager entityManager) {
+        this.entityManager = entityManager;
     }
 
     @Override
     public void save(Trainee trainee) {
-        if (trainee.getId() == null) trainee.setId(traineeStorage.size() + 1L);
-        traineeStorage.put(trainee.getId(), trainee);
-        logger.debug("Saved trainee with id={}, username={}", trainee.getId(), trainee.getUsername());
+        entityManager.persist(trainee);
+        log.info("Saved trainee with id={}, username={}", trainee.getId(), trainee.getUsername());
     }
 
     @Override
-    public Trainee findById(Long id) {
-        Trainee trainee = traineeStorage.get(id);
-        logger.debug("Finding trainee by id={}, found: {}", id, trainee != null);
-        return trainee;
+    public Optional<Trainee> findById(Long id) {
+        Trainee trainee = entityManager.find(Trainee.class, id);
+        log.info("Finding trainee by id={}, found: {}", id, trainee != null);
+        return Optional.ofNullable(trainee);
     }
 
     @Override
-    public Trainee findByUsername(String username) {
-        Trainee trainee = traineeStorage.values()
-                .stream()
-                .filter(t -> t.getUsername().equals(username))
-                .findFirst().orElse(null);
-        logger.debug("Finding trainee by username={}, found: {}", username, trainee != null);
-        return trainee;
+    public Optional<Trainee> findByUsername(String username) {
+        try {
+            Trainee trainee = entityManager.createQuery("SELECT t FROM Trainee t WHERE t.username = :username"
+                    , Trainee.class).setParameter("username", username).getSingleResult();
+
+            log.debug("Found trainee by username={}", username);
+            return Optional.ofNullable(trainee);
+        } catch (NoResultException e) {
+            log.debug("Could NOT find trainee by username={}", username);
+
+        }
+        return Optional.empty();
     }
 
     @Override
     public void delete(String username) {
-        Trainee trainee = findByUsername(username);
+        Trainee trainee = findByUsername(username).orElse(null);
         if (trainee != null) {
-            traineeStorage.remove(trainee.getId());
-            logger.debug("Deleted trainee with username={}", username);
+            entityManager.remove(trainee);
+            log.info("Deleted trainee with username={}", username);
         }
     }
 
     @Override
     public void update(Trainee trainee) {
-        traineeStorage.put(trainee.getId(), trainee);
-        logger.debug("Updated trainee with id={}, username={}", trainee.getId(), trainee.getUsername());
+        entityManager.merge(trainee);
+        log.debug("Updated trainee with id={}, username={}", trainee.getId(), trainee.getUsername());
     }
 
     @Override
     public boolean exists(String username) {
-        boolean exists = traineeStorage.values()
-                .stream()
-                .anyMatch(t -> t.getUsername() != null && t.getUsername().equals(username));
-        logger.debug("Checking if trainee exists with username={}, exists: {}", username, exists);
+        boolean exists = findByUsername(username).isPresent();
+        log.debug("Checking if trainee exists with username={}, exists: {}", username, exists);
         return exists;
     }
 }
