@@ -8,6 +8,6 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 public class TrainingTypeInfo {
-    private String trainingTypeName;
     private Long trainingTypeId;
+    private String trainingTypeName;
 }

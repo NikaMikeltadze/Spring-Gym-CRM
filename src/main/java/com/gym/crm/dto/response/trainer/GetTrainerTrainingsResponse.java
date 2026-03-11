@@ -9,7 +9,7 @@ import java.time.LocalDate;
 @Getter
 @Setter
 @AllArgsConstructor
-public class GetTrainerTrainingListResponse {
+public class GetTrainerTrainingsResponse {
     private String trainingName;
     private LocalDate trainingDate;
     private String trainingTypeName;

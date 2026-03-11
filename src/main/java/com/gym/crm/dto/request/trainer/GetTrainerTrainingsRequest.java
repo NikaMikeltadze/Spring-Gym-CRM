@@ -6,7 +6,7 @@ import lombok.Data;
 import java.time.LocalDate;
 
 @Data
-public class GetTrainerTrainingListRequest {
+public class GetTrainerTrainingsRequest {
     @NotBlank(message = "Username should not be Blank")
     private String username;
 
