@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 @Slf4j
@@ -27,8 +28,8 @@ public class TrainingTypeDaoImpl implements TrainingTypeDao {
     }
 
     @Override
-    public TrainingType findById(Long id) {
-        return entityManager.find(TrainingType.class, id);
+    public Optional<TrainingType> findById(Long id) {
+        return Optional.ofNullable(entityManager.find(TrainingType.class, id));
     }
 
     @Override

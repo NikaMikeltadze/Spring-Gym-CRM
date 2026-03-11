@@ -8,6 +8,7 @@ import jakarta.persistence.PersistenceContext;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -36,17 +37,12 @@ public class TraineeDaoImpl implements TraineeDao {
 
     @Override
     public Optional<Trainee> findByUsername(String username) {
-        try {
-            Trainee trainee = entityManager.createQuery("SELECT t FROM Trainee t WHERE t.username = :username"
-                    , Trainee.class).setParameter("username", username).getSingleResult();
+        List<Trainee> trainee = entityManager.createQuery("SELECT t FROM Trainee t WHERE t.username = :username"
+                        , Trainee.class).setParameter("username", username)
+                .getResultList();
+        log.debug("Found trainee by username={}:{}", username, !trainee.isEmpty());
 
-            log.debug("Found trainee by username={}", username);
-            return Optional.ofNullable(trainee);
-        } catch (NoResultException e) {
-            log.debug("Could NOT find trainee by username={}", username);
-
-        }
-        return Optional.empty();
+        return trainee.stream().findFirst();
     }
 
     @Override
