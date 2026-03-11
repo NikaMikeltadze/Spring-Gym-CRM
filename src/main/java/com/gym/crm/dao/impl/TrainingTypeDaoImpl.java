@@ -36,5 +36,14 @@ public class TrainingTypeDaoImpl implements TrainingTypeDao {
     public List<TrainingType> findAll() {
         return entityManager.createQuery("SELECT t FROM TrainingType t", TrainingType.class).getResultList();
     }
+
+    @Override
+    public Optional<TrainingType> findByName(String trainingName) {
+        List<TrainingType> trainingTypes = entityManager.createQuery("SELECT t FROM TrainingType t WHERE t.name = :name", TrainingType.class)
+                .setParameter("name", trainingName)
+                .getResultList();
+
+        return trainingTypes.stream().findFirst();
+    }
 }
 

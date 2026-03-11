@@ -11,5 +11,7 @@ public interface TrainingTypeDao {
     Optional<TrainingType> findById(Long id);
 
     List<TrainingType> findAll();
+
+    Optional<TrainingType> findByName(String trainingName);
 }
 
