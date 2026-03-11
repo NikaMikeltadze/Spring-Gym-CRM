@@ -79,11 +79,6 @@ public class AppConfig {
         return transactionManager;
     }
 
-    @Bean
-    public ModelMapper modelMapper() {
-        return new ModelMapper();
-    }
-
     @Bean(initMethod = "start", destroyMethod = "stop")
     public Server h2WebServer() throws SQLException {
         return Server.createWebServer("-web", "-webAllowOthers", "-webPort", "8080");
