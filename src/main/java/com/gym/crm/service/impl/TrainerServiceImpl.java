@@ -3,7 +3,6 @@ package com.gym.crm.service.impl;
 import com.gym.crm.dao.TraineeDao;
 import com.gym.crm.dao.TrainerDao;
 import com.gym.crm.dao.TrainingDao;
-import com.gym.crm.dto.TrainingDTO;
 import com.gym.crm.dto.response.trainer.RegisterTrainerResponse;
 import com.gym.crm.dto.response.training.GetTrainingTypesResponse;
 import com.gym.crm.dto.response.training.TrainingTypeInfo;
