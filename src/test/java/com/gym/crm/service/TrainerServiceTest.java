@@ -1,7 +1,15 @@
 package com.gym.crm.service;
 
+import com.gym.crm.dao.TraineeDao;
 import com.gym.crm.dao.TrainerDao;
+import com.gym.crm.dao.TrainingDao;
+import com.gym.crm.dto.response.trainer.RegisterTrainerResponse;
+import com.gym.crm.dto.response.training.GetTrainingTypesResponse;
+import com.gym.crm.dto.response.training.TrainingTypeInfo;
 import com.gym.crm.entity.Trainer;
+import com.gym.crm.entity.Training;
+import com.gym.crm.entity.TrainingType;
+import com.gym.crm.mapper.TrainingTypeMapper;
 import com.gym.crm.service.impl.TrainerServiceImpl;
 import com.gym.crm.util.UsernamePasswordGenerator;
 import org.junit.jupiter.api.Test;
@@ -10,10 +18,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -22,10 +32,17 @@ class TrainerServiceTest {
     @Mock
     private TrainerDao trainerDao;
 
+    @Mock
+    private TraineeDao traineeDao;
 
+    @Mock
+    private TrainingDao trainingDao;
 
     @Mock
     private UsernamePasswordGenerator usernamePasswordGenerator;
+
+    @Mock
+    private TrainingTypeMapper trainingTypeMapper;
 
     @InjectMocks
     private TrainerServiceImpl trainerService;
@@ -33,27 +50,48 @@ class TrainerServiceTest {
     @Test
     void createTrainer_Success() {
         Trainer trainer = new Trainer();
-        trainer.setFirstName("Jane");
+        trainer.setFirstName("John");
         trainer.setLastName("Smith");
 
-        when(usernamePasswordGenerator.generateUsername(eq("Jane"), eq("Smith"), any()))
-                .thenReturn("Jane.Smith");
-        when(usernamePasswordGenerator.generatePassword()).thenReturn("xyz9876543");
+        when(usernamePasswordGenerator.generateUsername(eq("John"), eq("Smith"), any()))
+                .thenReturn("John.Smith");
+        when(usernamePasswordGenerator.generatePassword()).thenReturn("aB3dEfGh1K");
 
-        trainerService.createTrainer(trainer);
+        RegisterTrainerResponse result = trainerService.createTrainer(trainer);
 
         verify(trainerDao).save(trainer);
-        assertEquals("Jane.Smith", trainer.getUsername());
-        assertEquals("xyz9876543", trainer.getPassword());
+        assertEquals("John.Smith", trainer.getUsername());
+        assertEquals("aB3dEfGh1K", trainer.getPassword());
         assertTrue(trainer.getIsActive());
+        assertEquals("John.Smith", result.getUsername());
+        assertEquals("aB3dEfGh1K", result.getPassword());
+    }
+
+    @Test
+    void createTrainer_WithDuplicateUsername_GeneratesSerialNumber() {
+        Trainer trainer = new Trainer();
+        trainer.setFirstName("John");
+        trainer.setLastName("Smith");
+
+        when(usernamePasswordGenerator.generateUsername(eq("John"), eq("Smith"), any()))
+                .thenReturn("John.Smith1");
+        when(usernamePasswordGenerator.generatePassword()).thenReturn("pO2iYlC7wN");
+
+        RegisterTrainerResponse result = trainerService.createTrainer(trainer);
+
+        verify(trainerDao).save(trainer);
+        assertEquals("John.Smith1", trainer.getUsername());
+        assertEquals("pO2iYlC7wN", trainer.getPassword());
+        assertTrue(trainer.getIsActive());
+        assertEquals("John.Smith1", result.getUsername());
     }
 
     @Test
     void updateTrainer_Success() {
         Trainer trainer = new Trainer();
         trainer.setId(1L);
-        trainer.setUsername("Jane.Smith");
-        trainer.setFirstName("Jane");
+        trainer.setUsername("John.Smith");
+        trainer.setFirstName("John");
         trainer.setLastName("Smith");
 
         trainerService.updateTrainer(trainer);
@@ -66,7 +104,7 @@ class TrainerServiceTest {
         Long id = 1L;
         Trainer expectedTrainer = new Trainer();
         expectedTrainer.setId(id);
-        when(trainerDao.findById(id)).thenReturn(expectedTrainer);
+        when(trainerDao.findById(id)).thenReturn(Optional.of(expectedTrainer));
 
         Optional<Trainer> result = trainerService.selectTrainerById(id);
 
@@ -76,11 +114,22 @@ class TrainerServiceTest {
     }
 
     @Test
+    void selectTrainerById_NotFound() {
+        Long id = 999L;
+        when(trainerDao.findById(id)).thenReturn(Optional.empty());
+
+        Optional<Trainer> result = trainerService.selectTrainerById(id);
+
+        assertFalse(result.isPresent());
+        verify(trainerDao).findById(id);
+    }
+
+    @Test
     void selectTrainerByUsername_Success() {
-        String username = "Jane.Smith";
+        String username = "John.Smith";
         Trainer expectedTrainer = new Trainer();
         expectedTrainer.setUsername(username);
-        when(trainerDao.findByUsername(username)).thenReturn(expectedTrainer);
+        when(trainerDao.findByUsername(username)).thenReturn(Optional.of(expectedTrainer));
 
         Optional<Trainer> result = trainerService.selectTrainerByUsername(username);
 
@@ -92,7 +141,7 @@ class TrainerServiceTest {
     @Test
     void selectTrainerByUsername_NotFound() {
         String username = "NonExistent.Trainer";
-        when(trainerDao.findByUsername(username)).thenReturn(null);
+        when(trainerDao.findByUsername(username)).thenReturn(Optional.empty());
 
         Optional<Trainer> result = trainerService.selectTrainerByUsername(username);
 
@@ -101,31 +150,137 @@ class TrainerServiceTest {
     }
 
     @Test
-    void selectTrainerById_NotFound() {
-        Long id = 999L;
-        when(trainerDao.findById(id)).thenReturn(null);
+    void changePassword_Success() {
+        Trainer trainer = new Trainer();
+        trainer.setUsername("John.Smith");
+        trainer.setPassword("aB3dEfGh1K");
 
-        Optional<Trainer> result = trainerService.selectTrainerById(id);
+        when(trainerDao.findByUsername("John.Smith")).thenReturn(Optional.of(trainer));
 
-        assertFalse(result.isPresent());
-        verify(trainerDao).findById(id);
+        trainerService.changePassword("John.Smith", "aB3dEfGh1K", "newPass1234");
+
+        assertEquals("newPass1234", trainer.getPassword());
+        verify(trainerDao).update(trainer);
     }
 
     @Test
-    void createTrainer_WithDuplicateUsername_GeneratesSerialNumber() {
+    void changePassword_WrongOldPassword() {
         Trainer trainer = new Trainer();
-        trainer.setFirstName("Jane");
-        trainer.setLastName("Smith");
+        trainer.setUsername("John.Smith");
+        trainer.setPassword("aB3dEfGh1K");
 
-        when(usernamePasswordGenerator.generateUsername(eq("Jane"), eq("Smith"), any()))
-                .thenReturn("Jane.Smith1");
-        when(usernamePasswordGenerator.generatePassword()).thenReturn("xyz9876543");
+        when(trainerDao.findByUsername("John.Smith")).thenReturn(Optional.of(trainer));
 
-        trainerService.createTrainer(trainer);
+        assertThrows(IllegalArgumentException.class,
+                () -> trainerService.changePassword("John.Smith", "wrongPass12", "newPass1234"));
+    }
 
-        verify(trainerDao).save(trainer);
-        assertEquals("Jane.Smith1", trainer.getUsername());
-        assertEquals("xyz9876543", trainer.getPassword());
+    @Test
+    void changePassword_SameAsOldPassword() {
+        Trainer trainer = new Trainer();
+        trainer.setUsername("John.Smith");
+        trainer.setPassword("aB3dEfGh1K");
+
+        when(trainerDao.findByUsername("John.Smith")).thenReturn(Optional.of(trainer));
+
+        assertThrows(IllegalArgumentException.class,
+                () -> trainerService.changePassword("John.Smith", "aB3dEfGh1K", "aB3dEfGh1K"));
+    }
+
+    @Test
+    void changePassword_TrainerNotFound() {
+        when(trainerDao.findByUsername("NonExistent.Trainer")).thenReturn(Optional.empty());
+
+        assertThrows(IllegalArgumentException.class,
+                () -> trainerService.changePassword("NonExistent.Trainer", "oldPass", "newPass"));
+    }
+
+    @Test
+    void activateTrainer_Success() {
+        Trainer trainer = new Trainer();
+        trainer.setUsername("John.Smith");
+        trainer.setIsActive(false);
+
+        when(trainerDao.findByUsername("John.Smith")).thenReturn(Optional.of(trainer));
+
+        trainerService.activateTrainer("John.Smith");
+
         assertTrue(trainer.getIsActive());
+        verify(trainerDao).update(trainer);
+    }
+
+    @Test
+    void activateTrainer_AlreadyActive() {
+        Trainer trainer = new Trainer();
+        trainer.setUsername("John.Smith");
+        trainer.setIsActive(true);
+
+        when(trainerDao.findByUsername("John.Smith")).thenReturn(Optional.of(trainer));
+
+        assertThrows(IllegalStateException.class, () -> trainerService.activateTrainer("John.Smith"));
+    }
+
+    @Test
+    void activateTrainer_NotFound() {
+        when(trainerDao.findByUsername("NonExistent.Trainer")).thenReturn(Optional.empty());
+
+        assertThrows(IllegalArgumentException.class, () -> trainerService.activateTrainer("NonExistent.Trainer"));
+    }
+
+    @Test
+    void deactivateTrainer_Success() {
+        Trainer trainer = new Trainer();
+        trainer.setUsername("John.Smith");
+        trainer.setIsActive(true);
+
+        when(trainerDao.findByUsername("John.Smith")).thenReturn(Optional.of(trainer));
+
+        trainerService.deactivateTrainer("John.Smith");
+
+        assertFalse(trainer.getIsActive());
+        verify(trainerDao).update(trainer);
+    }
+
+    @Test
+    void deactivateTrainer_AlreadyInactive() {
+        Trainer trainer = new Trainer();
+        trainer.setUsername("John.Smith");
+        trainer.setIsActive(false);
+
+        when(trainerDao.findByUsername("John.Smith")).thenReturn(Optional.of(trainer));
+
+        assertThrows(IllegalStateException.class, () -> trainerService.deactivateTrainer("John.Smith"));
+    }
+
+    @Test
+    void deactivateTrainer_NotFound() {
+        when(trainerDao.findByUsername("NonExistent.Trainer")).thenReturn(Optional.empty());
+
+        assertThrows(IllegalArgumentException.class, () -> trainerService.deactivateTrainer("NonExistent.Trainer"));
+    }
+
+    @Test
+    void getTrainings_Success() {
+        TrainingType trainingType = new TrainingType();
+        trainingType.setId(1L);
+        trainingType.setName("Fitness");
+
+        Training training = Training.builder()
+                .trainingName("Morning Fitness Bootcamp")
+                .trainingType(trainingType)
+                .build();
+
+        TrainingTypeInfo info = new TrainingTypeInfo(1L, "Fitness");
+
+        when(trainerDao.findByUsername("John.Smith")).thenReturn(Optional.of(new Trainer()));
+        when(trainingDao.findByTrainerUsernameAndCriteria(eq("John.Smith"), any(), any(), any()))
+                .thenReturn(List.of(training));
+        when(trainingTypeMapper.toTrainingTypeInfo(trainingType)).thenReturn(info);
+
+        GetTrainingTypesResponse result = trainerService.getTrainings("John.Smith", null, null, null);
+
+        assertNotNull(result);
+        assertEquals(1, result.getTrainingTypeList().size());
+        assertEquals("Fitness", result.getTrainingTypeList().get(0).getTrainingTypeName());
     }
 }
