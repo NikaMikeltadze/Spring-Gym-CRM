@@ -3,7 +3,6 @@ package com.gym.crm.config;
 import jakarta.persistence.EntityManagerFactory;
 import org.h2.jdbcx.JdbcDataSource;
 import org.h2.tools.Server;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
