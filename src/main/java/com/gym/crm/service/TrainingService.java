@@ -1,20 +1,21 @@
 package com.gym.crm.service;
 
-import com.gym.crm.entity.Training;
+import com.gym.crm.dto.request.training.AddTrainingRequest;
+import com.gym.crm.dto.response.training.GetTrainingTypesResponse;
+import com.gym.crm.dto.response.training.TrainingTypeInfo;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Optional;
 
 
 public interface TrainingService {
-    void createTraining(@Valid @NotNull Training training);
+    TrainingTypeInfo createTraining(@Valid @NotNull AddTrainingRequest training);
 
-    Optional<Training> selectTraining(@NotNull Long id);
+    Optional<TrainingTypeInfo> selectTraining(@NotNull Long id);
 
-    List<Training> getAllTrainings();
+    GetTrainingTypesResponse getAllTrainings();
 
-    List<Training> findTrainingsByDateRange(LocalDate fromDate, LocalDate toDate);
+    GetTrainingTypesResponse findTrainingsByDateRange(LocalDate fromDate, LocalDate toDate);
 }
