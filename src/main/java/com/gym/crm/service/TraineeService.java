@@ -2,10 +2,9 @@ package com.gym.crm.service;
 
 import com.gym.crm.dto.request.ChangeLoginRequest;
 import com.gym.crm.dto.request.trainee.*;
-import com.gym.crm.dto.response.trainee.GetTraineeProfileResponse;
-import com.gym.crm.dto.response.trainee.GetTraineeTrainingsResponse;
-import com.gym.crm.dto.response.trainee.RegisterTraineeResponse;
-import com.gym.crm.dto.response.trainee.UpdateTraineeProfileResponse;
+import com.gym.crm.dto.request.trainer.GetTrainerTrainingsRequest;
+import com.gym.crm.dto.response.trainee.*;
+import com.gym.crm.dto.response.trainer.GetTrainerTrainingsResponse;
 import com.gym.crm.dto.response.trainer.TrainerProfileInfo;
 import com.gym.crm.entity.Trainee;
 import jakarta.validation.Valid;
@@ -18,7 +17,7 @@ import java.util.Optional;
 public interface TraineeService {
     RegisterTraineeResponse createTrainee(@Valid @NotNull Trainee trainee);
 
-    UpdateTraineeProfileResponse updateTrainee(@Valid @NotNull Trainee trainee);
+    UpdateTraineeProfileResponse updateTrainee(UpdateTraineeProfileRequest request);
 
     void deleteTrainee(@NotBlank String username);
 
@@ -36,7 +35,9 @@ public interface TraineeService {
             @Valid @NotBlank GetTraineeTrainingsRequest request
     );
 
-    List<TrainerProfileInfo> updateTrainerList(@Valid @NotBlank UpdateTraineeTrainerListRequest request);
+    UpdateTraineeTrainerListResponse updateTrainerList(@Valid @NotBlank UpdateTraineeTrainerListRequest request);
 
     List<TrainerProfileInfo> getUnassignedActiveTrainers(@Valid @NotBlank TraineeAssignableTrainerRequest request);
+
+    List<GetTrainerTrainingsResponse> getTrainerTrainings(GetTrainerTrainingsRequest request);
 }

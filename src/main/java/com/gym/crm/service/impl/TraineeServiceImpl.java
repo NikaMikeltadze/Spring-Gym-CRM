@@ -5,10 +5,9 @@ import com.gym.crm.dao.TrainerDao;
 import com.gym.crm.dao.TrainingDao;
 import com.gym.crm.dto.request.ChangeLoginRequest;
 import com.gym.crm.dto.request.trainee.*;
-import com.gym.crm.dto.response.trainee.GetTraineeProfileResponse;
-import com.gym.crm.dto.response.trainee.GetTraineeTrainingsResponse;
-import com.gym.crm.dto.response.trainee.RegisterTraineeResponse;
-import com.gym.crm.dto.response.trainee.UpdateTraineeProfileResponse;
+import com.gym.crm.dto.request.trainer.GetTrainerTrainingsRequest;
+import com.gym.crm.dto.response.trainee.*;
+import com.gym.crm.dto.response.trainer.GetTrainerTrainingsResponse;
 import com.gym.crm.dto.response.trainer.TrainerProfileInfo;
 import com.gym.crm.entity.Trainee;
 import com.gym.crm.entity.Trainer;
@@ -50,12 +49,14 @@ public class TraineeServiceImpl implements TraineeService {
     public RegisterTraineeResponse createTrainee(Trainee trainee) {
         log.debug("Creating trainee with firstName={}, lastName={}", trainee.getFirstName(), trainee.getLastName());
 
-        // Generate username and password
         String username = usernamePasswordGenerator.generateUsername(
                 trainee.getFirstName(),
                 trainee.getLastName(),
-                user -> traineeDao.exists(user) || trainerDao.exists(user)
+                traineeDao::exists
         );
+        if (trainerDao.exists(username)) {
+            throw new IllegalStateException("User already registered as trainer: " + username);
+        }
         String password = usernamePasswordGenerator.generatePassword();
 
         trainee.setUsername(username);
@@ -69,24 +70,15 @@ public class TraineeServiceImpl implements TraineeService {
 
     @Override
     @Transactional
-    public UpdateTraineeProfileResponse updateTrainee(Trainee trainee) {
-        log.debug("Updating trainee with id={}", trainee.getId());
-        UpdateTraineeProfileResponse response = UpdateTraineeProfileResponse.builder()
-                .username(trainee.getUsername())
-                .firstName(trainee.getFirstName())
-                .lastName(trainee.getLastName())
-                .dateOfBirth(trainee.getDateOfBirth())
-                .address(trainee.getAddress())
-                .isActive(trainee.getIsActive())
-                .trainers(trainee.getTrainers()
-                        .stream()
-                        .map((trainerMapper::toGetProfileResponse))
-                        .toList()
-                )
-                .build();
-        traineeDao.update(trainee);
+    public UpdateTraineeProfileResponse updateTrainee(UpdateTraineeProfileRequest request) {
+        log.debug("Updating trainee with username={}", request.getUsername());
+        Trainee trainee = traineeDao.findByUsername(request.getUsername())
+                .orElseThrow(() -> new com.gym.crm.exception.NotFoundException("Trainee not found with username: " + request.getUsername()));
+
+        traineeMapper.updateEntityFromRequest(request, trainee);
+        traineeDao.save(trainee);
         log.info("Successfully updated trainee with username={}", trainee.getUsername());
-        return response;
+        return traineeMapper.toUpdateProfileResponse(trainee);
     }
 
     @Override
@@ -100,7 +92,8 @@ public class TraineeServiceImpl implements TraineeService {
     @Override
     public Optional<GetTraineeProfileResponse> selectTraineeByUsername(String username) {
         log.debug("Selecting trainee by username={}", username);
-        Trainee trainee = traineeDao.findByUsername(username).orElseThrow(() -> new IllegalArgumentException("Trainee not found with username: " + username));
+        Trainee trainee = traineeDao.findByUsername(username)
+                .orElseThrow(() -> new com.gym.crm.exception.NotFoundException("Trainee not found with username: " + username));
         log.debug("Found trainee {}", true);
         return Optional.ofNullable(traineeMapper.toGetProfileResponse(trainee));
     }
@@ -108,7 +101,8 @@ public class TraineeServiceImpl implements TraineeService {
     @Override
     public Optional<GetTraineeProfileResponse> selectTraineeById(Long id) {
         log.debug("Selecting trainee by id={}", id);
-        Trainee trainee = traineeDao.findById(id).orElseThrow(() -> new IllegalArgumentException("Trainee not found with id: " + id));
+        Trainee trainee = traineeDao.findById(id)
+                .orElseThrow(() -> new com.gym.crm.exception.NotFoundException("Trainee not found with id: " + id));
         log.debug("Found trainee {}", true);
         return Optional.ofNullable(traineeMapper.toGetProfileResponse(trainee));
     }
@@ -121,7 +115,7 @@ public class TraineeServiceImpl implements TraineeService {
         Trainee trainee = traineeDao.findByUsername(request.getUsername())
                 .orElseThrow(() -> {
                     log.error("Trainee not found with username={}", request.getUsername());
-                    return new IllegalArgumentException("Trainee not found with username: " + request.getUsername());
+                    return new com.gym.crm.exception.NotFoundException("Trainee not found with username: " + request.getUsername());
                 });
 
         if (!trainee.getPassword().equals(request.getPassword())) {
@@ -147,7 +141,7 @@ public class TraineeServiceImpl implements TraineeService {
         Trainee trainee = traineeDao.findByUsername(request.getUsername())
                 .orElseThrow(() -> {
                     log.error("Trainee not found with username={}", request.getUsername());
-                    return new IllegalArgumentException("Trainee not found with username: " + request.getUsername());
+                    return new com.gym.crm.exception.NotFoundException("Trainee not found with username: " + request.getUsername());
                 });
 
         if (trainee.getIsActive()) {
@@ -168,7 +162,7 @@ public class TraineeServiceImpl implements TraineeService {
         Trainee trainee = traineeDao.findByUsername(request.getUsername())
                 .orElseThrow(() -> {
                     log.error("Trainee not found with username={}", request.getUsername());
-                    return new IllegalArgumentException("Trainee not found with username: " + request.getUsername());
+                    return new com.gym.crm.exception.NotFoundException("Trainee not found with username: " + request.getUsername());
                 });
 
         if (!trainee.getIsActive()) {
@@ -189,7 +183,7 @@ public class TraineeServiceImpl implements TraineeService {
         traineeDao.findByUsername(request.getUsername())
                 .orElseThrow(() -> {
                     log.error("Trainee not found with username={}", request.getUsername());
-                    return new IllegalArgumentException("Trainee not found with username: " + request.getUsername());
+                    return new com.gym.crm.exception.NotFoundException("Trainee not found with username: " + request.getUsername());
                 });
 
         List<Training> trainings = trainingDao.findByTraineeUsernameAndCriteria(request.getUsername(), request.getStartDate(),
@@ -204,25 +198,29 @@ public class TraineeServiceImpl implements TraineeService {
     }
 
     @Override
-    public List<TrainerProfileInfo> updateTrainerList(UpdateTraineeTrainerListRequest request) {
+    public UpdateTraineeTrainerListResponse updateTrainerList(UpdateTraineeTrainerListRequest request) {
         Trainee trainee = traineeDao.findByUsername(request.getTraineeUsername()).orElseThrow(() ->
-                new IllegalArgumentException("Trainee not found with username: " + request.getTraineeUsername()));
+                new com.gym.crm.exception.NotFoundException("Trainee not found with username: " + request.getTraineeUsername()));
         log.debug("Updating trainers for trainee={}", trainee.getUsername());
         List<Trainer> trainers = new ArrayList<>();
 
         for (String trainerUsername : request.getTrainerUsernameList()) {
             Trainer trainer = trainerDao.findByUsername(trainerUsername).orElseThrow(() ->
-                    new IllegalArgumentException("Trainer not found with username: " + trainerUsername));
+                    new com.gym.crm.exception.NotFoundException("Trainer not found with username: " + trainerUsername));
             trainers.add(trainer);
         }
 
         trainee.setTrainers(trainers);
         traineeDao.update(trainee);
         log.info("Successfully updated trainers for trainee={}", trainee.getUsername());
-        return trainers
+        List<TrainerProfileInfo> trainerList = trainers
                 .stream()
                 .map(trainerMapper::toProfileInfo)
                 .toList();
+
+        return UpdateTraineeTrainerListResponse.builder()
+                .trainerList(trainerList)
+                .build();
     }
 
     @Override
@@ -233,5 +231,21 @@ public class TraineeServiceImpl implements TraineeService {
                 .map(trainerMapper::toProfileInfo)
                 .toList();
     }
-}
 
+    @Override
+    public List<GetTrainerTrainingsResponse> getTrainerTrainings(GetTrainerTrainingsRequest request) {
+        trainerDao.findByUsername(request.getUsername())
+                .orElseThrow(() -> new com.gym.crm.exception.NotFoundException("Trainer not found with username: " + request.getUsername()));
+
+        return trainingDao
+                .findByTrainerUsernameAndCriteria(
+                        request.getUsername(),
+                        request.getStartDate(),
+                        request.getEndDate(),
+                        request.getTraineeName()
+                )
+                .stream()
+                .map(trainerMapper::toGetTrainingsResponse)
+                .toList();
+    }
+}

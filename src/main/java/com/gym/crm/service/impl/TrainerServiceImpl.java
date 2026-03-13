@@ -3,11 +3,15 @@ package com.gym.crm.service.impl;
 import com.gym.crm.dao.TraineeDao;
 import com.gym.crm.dao.TrainerDao;
 import com.gym.crm.dao.TrainingDao;
+import com.gym.crm.dto.request.trainer.UpdateTrainerProfileRequest;
 import com.gym.crm.dto.response.trainer.RegisterTrainerResponse;
+import com.gym.crm.dto.response.trainer.UpdateTrainerProfileResponse;
 import com.gym.crm.dto.response.training.GetTrainingTypesResponse;
 import com.gym.crm.dto.response.training.TrainingTypeInfo;
 import com.gym.crm.entity.Trainer;
 import com.gym.crm.entity.Training;
+import com.gym.crm.exception.NotFoundException;
+import com.gym.crm.mapper.TrainerMapper;
 import com.gym.crm.mapper.TrainingTypeMapper;
 import com.gym.crm.service.TrainerService;
 import com.gym.crm.util.UsernamePasswordGenerator;
@@ -33,18 +37,21 @@ public class TrainerServiceImpl implements TrainerService {
     private final TrainingDao trainingDao;
     private final UsernamePasswordGenerator usernamePasswordGenerator;
     private final TrainingTypeMapper trainingTypeMapper;
+    private final TrainerMapper trainerMapper;
 
     @Override
     @Transactional
     public RegisterTrainerResponse createTrainer(Trainer trainer) {
         log.debug("Creating trainer with firstName={}, lastName={}", trainer.getFirstName(), trainer.getLastName());
 
-        // Generate username and password
         String username = usernamePasswordGenerator.generateUsername(
                 trainer.getFirstName(),
                 trainer.getLastName(),
-                user -> traineeDao.exists(user) || trainerDao.exists(user)
+                trainerDao::exists
         );
+        if (traineeDao.exists(username)) {
+            throw new IllegalStateException("User already registered as trainee: " + username);
+        }
         String password = usernamePasswordGenerator.generatePassword();
 
         trainer.setUsername(username);
@@ -58,10 +65,14 @@ public class TrainerServiceImpl implements TrainerService {
 
     @Override
     @Transactional
-    public void updateTrainer(Trainer trainer) {
-        log.debug("Updating trainer with id={}", trainer.getId());
+    public UpdateTrainerProfileResponse updateTrainer(UpdateTrainerProfileRequest request) {
+        log.debug("Updating trainer with username={}", request.getUsername());
+        Trainer trainer = trainerDao.findByUsername(request.getUsername())
+                .orElseThrow(() -> new NotFoundException("Trainer not found with username: " + request.getUsername()));
+        trainerMapper.updateEntityFromRequest(request, trainer);
         trainerDao.update(trainer);
         log.info("Successfully updated trainer with username={}", trainer.getUsername());
+        return trainerMapper.toUpdateProfileResponse(trainer);
     }
 
     public Optional<Trainer> selectTrainerById(Long id) {
@@ -85,7 +96,7 @@ public class TrainerServiceImpl implements TrainerService {
 
         Optional<Trainer> trainer = trainerDao.findByUsername(username);
         if (trainer.isEmpty()) {
-            throw new IllegalArgumentException("Trainer not found with username: " + username);
+            throw new NotFoundException("Trainer not found with username: " + username);
         }
 
         if (!trainer.get().getPassword().equals(oldPassword)) {
@@ -110,7 +121,7 @@ public class TrainerServiceImpl implements TrainerService {
 
         Optional<Trainer> trainer = trainerDao.findByUsername(username);
         if (trainer.isEmpty()) {
-            throw new IllegalArgumentException("Trainer not found with username: " + username);
+            throw new NotFoundException("Trainer not found with username: " + username);
         }
 
         if (trainer.get().getIsActive()) {
@@ -130,7 +141,7 @@ public class TrainerServiceImpl implements TrainerService {
 
         Optional<Trainer> trainer = trainerDao.findByUsername(username);
         if (trainer.isEmpty()) {
-            throw new IllegalArgumentException("Trainer not found with username: " + username);
+            throw new NotFoundException("Trainer not found with username: " + username);
         }
 
         if (!trainer.get().getIsActive()) {
@@ -151,7 +162,7 @@ public class TrainerServiceImpl implements TrainerService {
         Optional.ofNullable(trainerDao.findByUsername(username))
                 .orElseThrow(() -> {
                     log.error("Trainer not found with username={}", username);
-                    return new IllegalArgumentException("Trainer not found with username: " + username);
+                    return new NotFoundException("Trainer not found with username: " + username);
                 });
 
         List<Training> trainings = trainingDao.findByTrainerUsernameAndCriteria(username, fromDate, toDate, traineeName);

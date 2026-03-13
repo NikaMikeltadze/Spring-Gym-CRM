@@ -1,6 +1,8 @@
 package com.gym.crm.service;
 
+import com.gym.crm.dto.request.trainer.UpdateTrainerProfileRequest;
 import com.gym.crm.dto.response.trainer.RegisterTrainerResponse;
+import com.gym.crm.dto.response.trainer.UpdateTrainerProfileResponse;
 import com.gym.crm.dto.response.training.GetTrainingTypesResponse;
 import com.gym.crm.entity.Trainer;
 import jakarta.validation.Valid;
@@ -14,7 +16,7 @@ import java.util.Optional;
 public interface TrainerService {
     RegisterTrainerResponse createTrainer(@Valid @NotNull Trainer trainer);
 
-    void updateTrainer(@Valid @NotNull Trainer trainer);
+    UpdateTrainerProfileResponse updateTrainer(@Valid @NotNull UpdateTrainerProfileRequest request);
 
     Optional<Trainer> selectTrainerById(@NotNull Long id);
 

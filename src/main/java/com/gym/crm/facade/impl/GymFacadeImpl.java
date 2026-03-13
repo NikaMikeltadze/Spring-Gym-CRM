@@ -1,27 +1,23 @@
 package com.gym.crm.facade.impl;
 
 import com.gym.crm.dto.request.ChangeLoginRequest;
-import com.gym.crm.dto.request.trainee.ActivateTraineeRequest;
-import com.gym.crm.dto.request.trainee.DeactivateTraineeRequest;
-import com.gym.crm.dto.request.trainee.GetTraineeTrainingsRequest;
-import com.gym.crm.dto.request.trainee.UpdateTraineeTrainerListRequest;
+import com.gym.crm.dto.request.trainee.*;
+import com.gym.crm.dto.request.trainer.GetTrainerTrainingsRequest;
+import com.gym.crm.dto.request.trainer.RegisterTrainerRequest;
+import com.gym.crm.dto.request.trainer.UpdateTrainerProfileRequest;
 import com.gym.crm.dto.request.training.AddTrainingRequest;
-import com.gym.crm.dto.response.trainee.GetTraineeProfileResponse;
-import com.gym.crm.dto.response.trainee.GetTraineeTrainingsResponse;
-import com.gym.crm.dto.response.trainee.RegisterTraineeResponse;
-import com.gym.crm.dto.response.trainee.UpdateTraineeProfileResponse;
-import com.gym.crm.dto.response.trainer.GetTrainerProfileResponse;
-import com.gym.crm.dto.response.trainer.RegisterTrainerResponse;
-import com.gym.crm.dto.response.trainer.TrainerProfileInfo;
-import com.gym.crm.dto.response.trainer.UpdateTrainerProfileResponse;
+import com.gym.crm.dto.response.trainee.*;
+import com.gym.crm.dto.response.trainer.*;
 import com.gym.crm.dto.response.training.GetTrainingTypesResponse;
 import com.gym.crm.entity.Trainee;
 import com.gym.crm.entity.Trainer;
 import com.gym.crm.facade.GymFacade;
 import com.gym.crm.mapper.TraineeMapper;
+import com.gym.crm.mapper.TrainerMapper;
 import com.gym.crm.service.TraineeService;
 import com.gym.crm.service.TrainerService;
 import com.gym.crm.service.TrainingService;
+import com.gym.crm.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
@@ -37,15 +33,17 @@ public class GymFacadeImpl implements GymFacade {
     private final TrainerService trainerService;
     private final TrainingService trainingService;
     private final TraineeMapper traineeMapper;
+    private final TrainerMapper trainerMapper;
+    private final UserService userService;
 
     @Override
-    public RegisterTraineeResponse createTrainee(Trainee trainee) {
-        return traineeService.createTrainee(trainee);
+    public RegisterTraineeResponse createTrainee(RegisterTraineeRequest trainee) {
+        return traineeService.createTrainee(traineeMapper.toEntity(trainee));
     }
 
     @Override
-    public Optional<GetTraineeProfileResponse> getTraineeByUsername(String username) {
-        return traineeService.selectTraineeByUsername(username);
+    public GetTraineeProfileResponse getTraineeByUsername(String username) {
+        return traineeService.selectTraineeByUsername(username).orElseThrow(() -> new IllegalArgumentException("Trainee not found with username: " + username));
     }
 
     @Override
@@ -54,8 +52,8 @@ public class GymFacadeImpl implements GymFacade {
     }
 
     @Override
-    public UpdateTraineeProfileResponse updateTrainee(Trainee trainee) {
-        return traineeService.updateTrainee(trainee);
+    public UpdateTraineeProfileResponse updateTrainee(UpdateTraineeProfileRequest request) {
+        return traineeService.updateTrainee(request);
     }
 
     @Override
@@ -64,8 +62,8 @@ public class GymFacadeImpl implements GymFacade {
     }
 
     @Override
-    public RegisterTrainerResponse createTrainer(Trainer trainer) {
-        return trainerService.createTrainer(trainer);
+    public RegisterTrainerResponse createTrainer(RegisterTrainerRequest trainerRequest) {
+        return trainerService.createTrainer(trainerMapper.toEntity(trainerRequest));
     }
 
     @Override
@@ -75,11 +73,8 @@ public class GymFacadeImpl implements GymFacade {
     }
 
     @Override
-    public UpdateTrainerProfileResponse updateTrainer(Trainer trainer) {
-        trainerService.updateTrainer(trainer);
-        return trainerService.selectTrainerByUsername(trainer.getUsername())
-                .map(this::mapToUpdateTrainerProfileResponse)
-                .orElse(null);
+    public UpdateTrainerProfileResponse updateTrainer(UpdateTrainerProfileRequest request) {
+        return trainerService.updateTrainer(request);
     }
 
     @Override
@@ -93,14 +88,10 @@ public class GymFacadeImpl implements GymFacade {
     }
 
     @Override
-    public void changeTraineePassword(ChangeLoginRequest request) {
-        traineeService.changePassword(request);
+    public void changeUserPassword(ChangeLoginRequest request) {
+        userService.changePassword(request);
     }
 
-    @Override
-    public void changeTrainerPassword(String username, String oldPassword, String newPassword) {
-        trainerService.changePassword(username, oldPassword, newPassword);
-    }
 
     @Override
     public void activateTrainee(ActivateTraineeRequest request) {
@@ -128,18 +119,22 @@ public class GymFacadeImpl implements GymFacade {
     }
 
     @Override
-    public List<TrainerProfileInfo> updateTrainerList(UpdateTraineeTrainerListRequest request) {
+    public UpdateTraineeTrainerListResponse updateTrainerList(UpdateTraineeTrainerListRequest request) {
         return traineeService.updateTrainerList(request);
     }
 
     @Override
     public List<TrainerProfileInfo> getUnassignedActiveTrainers(String traineeUsername) {
         com.gym.crm.dto.request.trainee.TraineeAssignableTrainerRequest request =
-                new com.gym.crm.dto.request.trainee.TraineeAssignableTrainerRequest();
+                new com.gym.crm.dto.request.trainee.TraineeAssignableTrainerRequest(traineeUsername);
         request.setUsername(traineeUsername);
         return traineeService.getUnassignedActiveTrainers(request);
     }
 
+    @Override
+    public List<GetTrainerTrainingsResponse> getTrainerTrainings(GetTrainerTrainingsRequest request) {
+        return traineeService.getTrainerTrainings(request);
+    }
 
     private GetTrainerProfileResponse mapToGetTrainerProfileResponse(Trainer trainer) {
         return GetTrainerProfileResponse.builder()
