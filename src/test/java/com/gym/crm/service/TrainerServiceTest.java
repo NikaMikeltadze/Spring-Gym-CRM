@@ -3,12 +3,16 @@ package com.gym.crm.service;
 import com.gym.crm.dao.TraineeDao;
 import com.gym.crm.dao.TrainerDao;
 import com.gym.crm.dao.TrainingDao;
+import com.gym.crm.dto.request.trainer.UpdateTrainerProfileRequest;
 import com.gym.crm.dto.response.trainer.RegisterTrainerResponse;
+import com.gym.crm.dto.response.trainer.UpdateTrainerProfileResponse;
 import com.gym.crm.dto.response.training.GetTrainingTypesResponse;
 import com.gym.crm.dto.response.training.TrainingTypeInfo;
 import com.gym.crm.entity.Trainer;
 import com.gym.crm.entity.Training;
 import com.gym.crm.entity.TrainingType;
+import com.gym.crm.exception.NotFoundException;
+import com.gym.crm.mapper.TrainerMapper;
 import com.gym.crm.mapper.TrainingTypeMapper;
 import com.gym.crm.service.impl.TrainerServiceImpl;
 import com.gym.crm.util.UsernamePasswordGenerator;
@@ -43,6 +47,9 @@ class TrainerServiceTest {
 
     @Mock
     private TrainingTypeMapper trainingTypeMapper;
+
+    @Mock
+    private TrainerMapper trainerMapper;
 
     @InjectMocks
     private TrainerServiceImpl trainerService;
@@ -87,15 +94,51 @@ class TrainerServiceTest {
     }
 
     @Test
+    void createTrainer_WhenUsernameExistsAsTrainee_Throws() {
+        Trainer trainer = new Trainer();
+        trainer.setFirstName("Sarah");
+        trainer.setLastName("Williams");
+
+        when(usernamePasswordGenerator.generateUsername(eq("Sarah"), eq("Williams"), any()))
+                .thenReturn("Sarah.Williams");
+        when(traineeDao.exists("Sarah.Williams")).thenReturn(true);
+
+        assertThrows(IllegalStateException.class, () -> trainerService.createTrainer(trainer));
+
+        verify(trainerDao, never()).save(any(Trainer.class));
+    }
+
+    @Test
     void updateTrainer_Success() {
+        UpdateTrainerProfileRequest request = new UpdateTrainerProfileRequest();
+        request.setUsername("John.Smith");
+        request.setFirstName("John");
+        request.setLastName("Smith");
+        request.setIsActive(true);
+
         Trainer trainer = new Trainer();
         trainer.setId(1L);
         trainer.setUsername("John.Smith");
         trainer.setFirstName("John");
         trainer.setLastName("Smith");
+        trainer.setIsActive(true);
 
-        trainerService.updateTrainer(trainer);
+        UpdateTrainerProfileResponse expected = UpdateTrainerProfileResponse.builder()
+                .username("John.Smith")
+                .firstName("John")
+                .lastName("Smith")
+                .trainingTypeId(null)
+                .isActive(true)
+                .traineeList(List.of())
+                .build();
 
+        when(trainerDao.findByUsername("John.Smith")).thenReturn(Optional.of(trainer));
+        when(trainerMapper.toUpdateProfileResponse(trainer)).thenReturn(expected);
+
+        UpdateTrainerProfileResponse result = trainerService.updateTrainer(request);
+
+        assertEquals(expected, result);
+        verify(trainerMapper).updateEntityFromRequest(request, trainer);
         verify(trainerDao).update(trainer);
     }
 
@@ -191,7 +234,7 @@ class TrainerServiceTest {
     void changePassword_TrainerNotFound() {
         when(trainerDao.findByUsername("NonExistent.Trainer")).thenReturn(Optional.empty());
 
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(NotFoundException.class,
                 () -> trainerService.changePassword("NonExistent.Trainer", "oldPass", "newPass"));
     }
 
@@ -224,7 +267,7 @@ class TrainerServiceTest {
     void activateTrainer_NotFound() {
         when(trainerDao.findByUsername("NonExistent.Trainer")).thenReturn(Optional.empty());
 
-        assertThrows(IllegalArgumentException.class, () -> trainerService.activateTrainer("NonExistent.Trainer"));
+        assertThrows(NotFoundException.class, () -> trainerService.activateTrainer("NonExistent.Trainer"));
     }
 
     @Test
@@ -256,7 +299,7 @@ class TrainerServiceTest {
     void deactivateTrainer_NotFound() {
         when(trainerDao.findByUsername("NonExistent.Trainer")).thenReturn(Optional.empty());
 
-        assertThrows(IllegalArgumentException.class, () -> trainerService.deactivateTrainer("NonExistent.Trainer"));
+        assertThrows(NotFoundException.class, () -> trainerService.deactivateTrainer("NonExistent.Trainer"));
     }
 
     @Test

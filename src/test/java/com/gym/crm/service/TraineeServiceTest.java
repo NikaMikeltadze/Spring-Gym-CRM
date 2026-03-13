@@ -9,11 +9,13 @@ import com.gym.crm.dto.response.trainee.GetTraineeProfileResponse;
 import com.gym.crm.dto.response.trainee.GetTraineeTrainingsResponse;
 import com.gym.crm.dto.response.trainee.RegisterTraineeResponse;
 import com.gym.crm.dto.response.trainee.UpdateTraineeProfileResponse;
+import com.gym.crm.dto.response.trainee.UpdateTraineeTrainerListResponse;
 import com.gym.crm.dto.response.trainer.TrainerProfileInfo;
 import com.gym.crm.entity.Trainee;
 import com.gym.crm.entity.Trainer;
 import com.gym.crm.entity.Training;
 import com.gym.crm.entity.TrainingType;
+import com.gym.crm.exception.NotFoundException;
 import com.gym.crm.mapper.TraineeMapper;
 import com.gym.crm.mapper.TrainerMapper;
 import com.gym.crm.mapper.TrainingMapper;
@@ -102,7 +104,30 @@ class TraineeServiceTest {
     }
 
     @Test
+    void createTrainee_WhenUsernameExistsAsTrainer_Throws() {
+        Trainee trainee = new Trainee();
+        trainee.setFirstName("John");
+        trainee.setLastName("Smith");
+
+        when(usernamePasswordGenerator.generateUsername(eq("John"), eq("Smith"), any()))
+                .thenReturn("John.Smith");
+        when(trainerDao.exists("John.Smith")).thenReturn(true);
+
+        assertThrows(IllegalStateException.class, () -> traineeService.createTrainee(trainee));
+
+        verify(traineeDao, never()).save(any(Trainee.class));
+    }
+
+    @Test
     void updateTrainee_Success() {
+        UpdateTraineeProfileRequest request = new UpdateTraineeProfileRequest();
+        request.setUsername("Sarah.Williams");
+        request.setFirstName("Sarah");
+        request.setLastName("Williams");
+        request.setDateOfBirth(LocalDate.of(1995, 6, 15));
+        request.setAddress("123 Main St New York NY");
+        request.setIsActive(true);
+
         Trainee trainee = new Trainee();
         trainee.setId(5L);
         trainee.setUsername("Sarah.Williams");
@@ -113,13 +138,24 @@ class TraineeServiceTest {
         trainee.setIsActive(true);
         trainee.setTrainers(new ArrayList<>());
 
-        UpdateTraineeProfileResponse result = traineeService.updateTrainee(trainee);
+        UpdateTraineeProfileResponse expected = UpdateTraineeProfileResponse.builder()
+                .username("Sarah.Williams")
+                .firstName("Sarah")
+                .lastName("Williams")
+                .dateOfBirth(LocalDate.of(1995, 6, 15))
+                .address("123 Main St New York NY")
+                .isActive(true)
+                .trainers(List.of())
+                .build();
 
-        verify(traineeDao).update(trainee);
-        assertNotNull(result);
-        assertEquals("Sarah.Williams", result.getUsername());
-        assertEquals("Sarah", result.getFirstName());
-        assertEquals("Williams", result.getLastName());
+        when(traineeDao.findByUsername("Sarah.Williams")).thenReturn(Optional.of(trainee));
+        when(traineeMapper.toUpdateProfileResponse(trainee)).thenReturn(expected);
+
+        UpdateTraineeProfileResponse result = traineeService.updateTrainee(request);
+
+        assertEquals(expected, result);
+        verify(traineeMapper).updateEntityFromRequest(request, trainee);
+        verify(traineeDao).save(trainee);
     }
 
     @Test
@@ -158,7 +194,7 @@ class TraineeServiceTest {
         String username = "NonExistent.User";
         when(traineeDao.findByUsername(username)).thenReturn(Optional.empty());
 
-        assertThrows(IllegalArgumentException.class, () -> traineeService.selectTraineeByUsername(username));
+        assertThrows(NotFoundException.class, () -> traineeService.selectTraineeByUsername(username));
         verify(traineeDao).findByUsername(username);
     }
 
@@ -190,7 +226,7 @@ class TraineeServiceTest {
         Long id = 999L;
         when(traineeDao.findById(id)).thenReturn(Optional.empty());
 
-        assertThrows(IllegalArgumentException.class, () -> traineeService.selectTraineeById(id));
+        assertThrows(NotFoundException.class, () -> traineeService.selectTraineeById(id));
         verify(traineeDao).findById(id);
     }
 
@@ -284,9 +320,7 @@ class TraineeServiceTest {
         trainee.setUsername("Sarah.Williams");
         trainee.setIsActive(true);
 
-        DeactivateTraineeRequest request = new DeactivateTraineeRequest();
-        request.setUsername("Sarah.Williams");
-        request.setIsActive(false);
+        DeactivateTraineeRequest request = new DeactivateTraineeRequest("Sarah.Williams", false);
 
         when(traineeDao.findByUsername("Sarah.Williams")).thenReturn(Optional.of(trainee));
 
@@ -302,9 +336,7 @@ class TraineeServiceTest {
         trainee.setUsername("Sarah.Williams");
         trainee.setIsActive(false);
 
-        DeactivateTraineeRequest request = new DeactivateTraineeRequest();
-        request.setUsername("Sarah.Williams");
-        request.setIsActive(false);
+        DeactivateTraineeRequest request = new DeactivateTraineeRequest("Sarah.Williams", false);
 
         when(traineeDao.findByUsername("Sarah.Williams")).thenReturn(Optional.of(trainee));
 
@@ -316,18 +348,26 @@ class TraineeServiceTest {
         Trainee trainee = new Trainee();
         trainee.setUsername("Sarah.Williams");
 
-        GetTraineeTrainingsRequest request = new GetTraineeTrainingsRequest();
-        request.setUsername("Sarah.Williams");
+        GetTraineeTrainingsRequest request = new GetTraineeTrainingsRequest(
+                "Sarah.Williams",
+                null,
+                null,
+                null,
+                null
+        );
 
         Training training = Training.builder()
                 .trainingName("Morning Fitness Bootcamp")
                 .trainingDate(LocalDate.of(2026, 3, 1))
                 .trainingDuration(60.0)
+                .trainingType(new TrainingType(1L, "Fitness"))
+                .trainer(new Trainer())
                 .build();
 
         GetTraineeTrainingsResponse response = GetTraineeTrainingsResponse.builder()
                 .trainingName("Morning Fitness Bootcamp")
                 .trainingDate(LocalDate.of(2026, 3, 1))
+                .trainingTypeName("Fitness")
                 .trainingDuration(60.0)
                 .build();
 
@@ -369,11 +409,11 @@ class TraineeServiceTest {
         when(trainerDao.findByUsername("John.Smith")).thenReturn(Optional.of(trainer));
         when(trainerMapper.toProfileInfo(trainer)).thenReturn(info);
 
-        List<TrainerProfileInfo> result = traineeService.updateTrainerList(request);
+        UpdateTraineeTrainerListResponse result = traineeService.updateTrainerList(request);
 
         assertNotNull(result);
-        assertEquals(1, result.size());
-        assertEquals("John.Smith", result.get(0).getUsername());
+        assertEquals(1, result.getTrainerList().size());
+        assertEquals("John.Smith", result.getTrainerList().get(0).getUsername());
         verify(traineeDao).update(trainee);
     }
 
@@ -389,8 +429,7 @@ class TraineeServiceTest {
         trainer.setLastName("Brown");
         trainer.setTrainingType(trainingType);
 
-        TraineeAssignableTrainerRequest request = new TraineeAssignableTrainerRequest();
-        request.setUsername("Sarah.Williams");
+        TraineeAssignableTrainerRequest request = new TraineeAssignableTrainerRequest("Sarah.Williams");
 
         TrainerProfileInfo info = new TrainerProfileInfo("Robert.Brown", "Robert", "Brown", 5L);
 
