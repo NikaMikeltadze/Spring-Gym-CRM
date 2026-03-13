@@ -9,7 +9,6 @@ import com.gym.crm.dto.request.training.AddTrainingRequest;
 import com.gym.crm.dto.response.trainee.*;
 import com.gym.crm.dto.response.trainer.*;
 import com.gym.crm.dto.response.training.GetTrainingTypesResponse;
-import com.gym.crm.entity.Trainee;
 import com.gym.crm.entity.Trainer;
 import com.gym.crm.facade.GymFacade;
 import com.gym.crm.mapper.TraineeMapper;

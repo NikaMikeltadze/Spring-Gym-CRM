@@ -1,6 +1,5 @@
 package com.gym.crm;
 
-import com.gym.crm.config.WebConfig;
 import org.apache.catalina.Context;
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.Wrapper;
@@ -11,7 +10,7 @@ import org.springframework.web.servlet.DispatcherServlet;
 import java.io.File;
 
 public class Main {
-    public static void main(String[] args) throws InterruptedException, LifecycleException {
+    public static void main(String[] args) throws LifecycleException {
         Tomcat tomcat = new Tomcat();
         tomcat.setPort(8080);
         tomcat.getConnector();

@@ -3,7 +3,6 @@ package com.gym.crm.dao.impl;
 import com.gym.crm.dao.TrainerDao;
 import com.gym.crm.entity.Trainer;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;

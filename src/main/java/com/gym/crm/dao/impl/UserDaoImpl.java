@@ -1,12 +1,9 @@
 package com.gym.crm.dao.impl;
 
 import com.gym.crm.dao.UserDao;
-import com.gym.crm.entity.Trainee;
 import com.gym.crm.entity.User;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
