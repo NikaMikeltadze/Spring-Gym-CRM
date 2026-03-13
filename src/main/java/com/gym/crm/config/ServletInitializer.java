@@ -1,6 +1,8 @@
 package com.gym.crm.config;
 
+import com.gym.crm.config.logging.TransactionIdFilter;
 import io.micrometer.common.lang.NonNull;
+import jakarta.servlet.Filter;
 import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;
 
 public class ServletInitializer extends AbstractAnnotationConfigDispatcherServletInitializer {
@@ -19,5 +21,11 @@ public class ServletInitializer extends AbstractAnnotationConfigDispatcherServle
     @NonNull
     protected String[] getServletMappings() {
         return new String[]{"/"};
+    }
+
+    @Override
+    @NonNull
+    protected Filter[] getServletFilters() {
+        return new Filter[]{new TransactionIdFilter()};
     }
 }
