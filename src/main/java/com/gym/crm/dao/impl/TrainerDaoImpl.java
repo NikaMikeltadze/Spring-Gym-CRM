@@ -76,4 +76,3 @@ public class TrainerDaoImpl implements TrainerDao {
         return trainers;
     }
 }
-

@@ -18,4 +18,3 @@ public interface TrainerDao {
 
     List<Trainer> findActiveTrainersNotAssignedTo(String traineeUsername);
 }
-

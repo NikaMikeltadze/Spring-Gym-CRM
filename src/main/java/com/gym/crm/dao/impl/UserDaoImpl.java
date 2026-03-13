@@ -33,4 +33,9 @@ public class UserDaoImpl implements UserDao {
         return user.stream().findFirst();
 
     }
+    @Override
+    public void save(User user) {
+        entityManager.persist(user);
+        log.info("Saved user with id={}, username={}", user.getId(), user.getUsername());
+    }
 }
