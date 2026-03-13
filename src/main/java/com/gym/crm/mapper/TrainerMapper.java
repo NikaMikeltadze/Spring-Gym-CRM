@@ -2,6 +2,7 @@ package com.gym.crm.mapper;
 
 import com.gym.crm.dto.TrainerDTO;
 import com.gym.crm.dto.request.trainer.RegisterTrainerRequest;
+import com.gym.crm.dto.request.trainer.UpdateTrainerProfileRequest;
 import com.gym.crm.dto.response.trainee.GetTraineeProfileResponse;
 import com.gym.crm.dto.response.trainee.TraineeProfileInfo;
 import com.gym.crm.dto.response.trainer.GetTrainerProfileResponse;
@@ -128,6 +129,12 @@ public class TrainerMapper {
                 training.getTrainingDuration(),
                 training.getTrainee() != null ? training.getTrainee().getUsername() : null
         );
+    }
+
+    public void updateEntityFromRequest(UpdateTrainerProfileRequest request, Trainer trainer) {
+        trainer.setFirstName(request.getFirstName());
+        trainer.setLastName(request.getLastName());
+        trainer.setIsActive(request.getIsActive());
     }
 
     private GetTraineeProfileResponse toNestedTraineeResponse(Trainee trainee) {

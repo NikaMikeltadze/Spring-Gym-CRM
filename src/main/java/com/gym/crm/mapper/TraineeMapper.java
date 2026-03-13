@@ -2,6 +2,7 @@ package com.gym.crm.mapper;
 
 import com.gym.crm.dto.TraineeDTO;
 import com.gym.crm.dto.request.trainee.RegisterTraineeRequest;
+import com.gym.crm.dto.request.trainee.UpdateTraineeProfileRequest;
 import com.gym.crm.dto.response.trainee.GetTraineeProfileResponse;
 import com.gym.crm.dto.response.trainee.GetTraineeTrainingsResponse;
 import com.gym.crm.dto.response.trainee.RegisterTraineeResponse;
@@ -157,6 +158,14 @@ public class TraineeMapper {
         );
     }
 
+    public void updateEntityFromRequest(UpdateTraineeProfileRequest request, Trainee trainee) {
+        trainee.setUsername(request.getUsername());
+        trainee.setFirstName(request.getFirstName());
+        trainee.setLastName(request.getLastName());
+        trainee.setDateOfBirth(request.getDateOfBirth());
+        trainee.setAddress(request.getAddress());
+        trainee.setIsActive(request.getIsActive());
+    }
 
     private GetTrainerProfileResponse toNestedTrainerResponse(Trainer trainer) {
         if (trainer == null) return null;
@@ -169,4 +178,5 @@ public class TraineeMapper {
                 null // for avoidding infinite recursion
         );
     }
+
 }
