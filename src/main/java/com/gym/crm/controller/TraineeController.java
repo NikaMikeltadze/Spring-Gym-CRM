@@ -34,7 +34,6 @@ import java.util.List;
 @SecurityRequirement(name = "passwordHeader")
 public class TraineeController {
     private final GymFacade gymFacade;
-    private final TraineeDao traineeDao;
 
     @PostMapping("/register")
     @SecurityRequirements
