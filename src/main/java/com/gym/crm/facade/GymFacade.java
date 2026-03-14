@@ -1,66 +1,60 @@
 package com.gym.crm.facade;
 
-import com.gym.crm.dto.TraineeDTO;
-import com.gym.crm.dto.TrainerDTO;
-import com.gym.crm.dto.TrainingDTO;
+import com.gym.crm.dto.request.ChangeLoginRequest;
+import com.gym.crm.dto.request.trainee.*;
+import com.gym.crm.dto.request.trainer.GetTrainerTrainingsRequest;
+import com.gym.crm.dto.request.trainer.RegisterTrainerRequest;
+import com.gym.crm.dto.request.trainer.UpdateTrainerProfileRequest;
+import com.gym.crm.dto.request.training.AddTrainingRequest;
+import com.gym.crm.dto.response.trainee.*;
+import com.gym.crm.dto.response.trainer.*;
+import com.gym.crm.dto.response.training.GetTrainingTypesResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import org.springframework.stereotype.Component;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-@Component
 public interface GymFacade {
-    void createTrainee(@Valid @NotNull TraineeDTO trainee);
+    RegisterTraineeResponse createTrainee(@Valid @NotNull RegisterTraineeRequest traineeRequest);
 
-    void createTrainer(@Valid @NotNull TrainerDTO trainer);
+    RegisterTrainerResponse createTrainer(@Valid @NotNull RegisterTrainerRequest trainerRequest);
 
-    void createTraining(@Valid @NotNull TrainingDTO training);
+    void createTraining(@Valid @NotNull AddTrainingRequest training);
 
-    Optional<TraineeDTO> getTraineeByUsername(@NotBlank String username);
+    GetTraineeProfileResponse getTraineeByUsername(@NotBlank String username);
 
-    Optional<TraineeDTO> getTraineeById(@NotNull Long id);
+    Optional<GetTraineeProfileResponse> getTraineeById(@NotNull Long id);
 
-    Optional<TrainerDTO> getTrainerByUsername(@NotBlank String username);
+    Optional<GetTrainerProfileResponse> getTrainerByUsername(@NotBlank String username);
 
-    Optional<TrainingDTO> getTraining(@NotNull Long id);
+    GetTrainingTypesResponse getAllTrainings();
 
-    List<TrainingDTO> getAllTrainings();
+    UpdateTraineeProfileResponse updateTrainee(@Valid @NotNull UpdateTraineeProfileRequest request);
 
-    void updateTrainee(@Valid @NotNull TraineeDTO trainee);
-
-    void updateTrainer(@Valid @NotNull TrainerDTO trainer);
+    UpdateTrainerProfileResponse updateTrainer(@Valid @NotNull UpdateTrainerProfileRequest request);
 
     void deleteTrainee(@NotBlank String username);
 
-    void changeTraineePassword(@NotBlank String username, @NotBlank String oldPassword, @NotBlank String newPassword);
+    void changeUserPassword(@Valid @NotNull ChangeLoginRequest request);
 
-    void changeTrainerPassword(@NotBlank String username, @NotBlank String oldPassword, @NotBlank String newPassword);
+    void activateTrainee(@Valid @NotNull ActivateTraineeRequest request);
 
-    void activateTrainee(@NotBlank String username);
-
-    void deactivateTrainee(@NotBlank String username);
+    void deactivateTrainee(@Valid @NotNull DeactivateTraineeRequest request);
 
     void activateTrainer(@NotBlank String username);
 
     void deactivateTrainer(@NotBlank String username);
 
-    List<TrainingDTO> getTraineeTrainings(
-            @NotBlank String traineeUsername,
-            LocalDate fromDate,
-            LocalDate toDate,
-            String trainerName,
-            String trainingTypeName
+    List<GetTraineeTrainingsResponse> getTraineeTrainings(
+            @Valid @NotNull GetTraineeTrainingsRequest request
     );
 
-    List<TrainingDTO> getTrainerTrainings(
-            @NotBlank String trainerUsername,
-            LocalDate fromDate,
-            LocalDate toDate,
-            String traineeName
-    );
+    UpdateTraineeTrainerListResponse updateTrainerList(@Valid @NotNull UpdateTraineeTrainerListRequest request);
+
+    List<TrainerProfileInfo> getUnassignedActiveTrainers(@NotBlank String traineeUsername);
+
+    List<GetTrainerTrainingsResponse> getTrainerTrainings(@Valid GetTrainerTrainingsRequest request);
 }
 

@@ -29,8 +29,8 @@ class TrainerDaoImplTest {
     void save_Success() {
         Trainer trainer = new Trainer();
         trainer.setId(1L);
-        trainer.setUsername("Jane.Smith");
-        trainer.setFirstName("Jane");
+        trainer.setUsername("John.Smith");
+        trainer.setFirstName("John");
         trainer.setLastName("Smith");
 
         trainerDao.save(trainer);
@@ -38,20 +38,19 @@ class TrainerDaoImplTest {
         verify(entityManager).persist(trainer);
     }
 
-
     @Test
     void findById_Success() {
         Long id = 1L;
         Trainer expectedTrainer = new Trainer();
         expectedTrainer.setId(id);
-        expectedTrainer.setUsername("Jane.Smith");
+        expectedTrainer.setUsername("John.Smith");
 
         when(entityManager.find(Trainer.class, id)).thenReturn(expectedTrainer);
-        Trainer result = trainerDao.findById(id);
+        Trainer result = trainerDao.findById(id).orElse(null);
 
         assertNotNull(result);
         assertEquals(id, result.getId());
-        assertEquals("Jane.Smith", result.getUsername());
+        assertEquals("John.Smith", result.getUsername());
         verify(entityManager).find(Trainer.class, id);
     }
 
@@ -60,7 +59,7 @@ class TrainerDaoImplTest {
         Long id = 999L;
         when(entityManager.find(Trainer.class, id)).thenReturn(null);
 
-        Trainer result = trainerDao.findById(id);
+        Trainer result = trainerDao.findById(id).orElse(null);
 
         assertNull(result);
         verify(entityManager).find(Trainer.class, id);
@@ -70,8 +69,8 @@ class TrainerDaoImplTest {
     void update_Success() {
         Trainer trainer = new Trainer();
         trainer.setId(1L);
-        trainer.setUsername("Jane.Smith");
-        trainer.setFirstName("Jane");
+        trainer.setUsername("John.Smith");
+        trainer.setFirstName("John");
 
         when(entityManager.merge(trainer)).thenReturn(trainer);
 
@@ -79,5 +78,4 @@ class TrainerDaoImplTest {
 
         verify(entityManager).merge(trainer);
     }
-
 }

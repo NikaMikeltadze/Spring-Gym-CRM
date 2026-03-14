@@ -25,10 +25,10 @@ class TraineeDaoImplTest {
     @Test
     void save_Success() {
         Trainee trainee = new Trainee();
-        trainee.setId(1L);
-        trainee.setUsername("John.Doe");
-        trainee.setFirstName("John");
-        trainee.setLastName("Doe");
+        trainee.setId(5L);
+        trainee.setUsername("Sarah.Williams");
+        trainee.setFirstName("Sarah");
+        trainee.setLastName("Williams");
 
         traineeDao.save(trainee);
 
@@ -37,10 +37,10 @@ class TraineeDaoImplTest {
 
     @Test
     void findById_Success() {
-        Long id = 1L;
+        Long id = 5L;
         Trainee expectedTrainee = new Trainee();
         expectedTrainee.setId(id);
-        expectedTrainee.setUsername("John.Doe");
+        expectedTrainee.setUsername("Sarah.Williams");
 
         when(entityManager.find(Trainee.class, id)).thenReturn(expectedTrainee);
 
@@ -48,7 +48,7 @@ class TraineeDaoImplTest {
 
         assertTrue(result.isPresent());
         assertEquals(id, result.get().getId());
-        assertEquals("John.Doe", result.get().getUsername());
+        assertEquals("Sarah.Williams", result.get().getUsername());
         verify(entityManager).find(Trainee.class, id);
     }
 
@@ -66,9 +66,9 @@ class TraineeDaoImplTest {
     @Test
     void update_Success() {
         Trainee trainee = new Trainee();
-        trainee.setId(1L);
-        trainee.setUsername("John.Doe");
-        trainee.setFirstName("John");
+        trainee.setId(5L);
+        trainee.setUsername("Sarah.Williams");
+        trainee.setFirstName("Sarah");
 
         when(entityManager.merge(trainee)).thenReturn(trainee);
 

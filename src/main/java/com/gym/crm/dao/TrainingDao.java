@@ -4,11 +4,12 @@ import com.gym.crm.entity.Training;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 public interface TrainingDao {
     void save(Training training);
 
-    Training findById(Long id);
+    Optional<Training> findById(Long id);
 
     List<Training> findAll();
 

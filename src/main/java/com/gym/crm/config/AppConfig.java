@@ -3,7 +3,6 @@ package com.gym.crm.config;
 import jakarta.persistence.EntityManagerFactory;
 import org.h2.jdbcx.JdbcDataSource;
 import org.h2.tools.Server;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -25,7 +24,15 @@ import java.sql.SQLException;
 import java.util.Properties;
 
 @Configuration
-@ComponentScan("com.gym.crm")
+@ComponentScan(
+        basePackages = {
+                "com.gym.crm.dao",
+                "com.gym.crm.service",
+                "com.gym.crm.facade",
+                "com.gym.crm.mapper",
+                "com.gym.crm.util"
+        }
+)
 @PropertySource("classpath:application.properties")
 @EnableTransactionManagement
 public class AppConfig {
@@ -79,14 +86,9 @@ public class AppConfig {
         return transactionManager;
     }
 
-    @Bean
-    public ModelMapper modelMapper() {
-        return new ModelMapper();
-    }
-
     @Bean(initMethod = "start", destroyMethod = "stop")
     public Server h2WebServer() throws SQLException {
-        return Server.createWebServer("-web", "-webAllowOthers", "-webPort", "8080");
+        return Server.createWebServer("-web", "-webAllowOthers", "-webPort", "8082");
     }
 
     @Bean
