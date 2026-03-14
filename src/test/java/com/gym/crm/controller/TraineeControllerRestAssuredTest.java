@@ -36,7 +36,7 @@ class TraineeControllerRestAssuredTest extends RestAssuredControllerTestSupport 
 
     @BeforeEach
     void setUp() {
-        configureMockMvc(new TraineeController(gymFacade, traineeDao));
+        configureMockMvc(new TraineeController(gymFacade));
     }
 
     @Test
@@ -56,9 +56,9 @@ class TraineeControllerRestAssuredTest extends RestAssuredControllerTestSupport 
                           "address": "Baker Street"
                         }
                         """)
-        .when()
+                .when()
                 .post("/api/trainee/register")
-        .then()
+                .then()
                 .statusCode(201)
                 .body("username", equalTo("jane.doe"));
     }
@@ -72,9 +72,9 @@ class TraineeControllerRestAssuredTest extends RestAssuredControllerTestSupport 
                 .build());
 
         given()
-        .when()
+                .when()
                 .get("/api/trainee/profile/jane.doe")
-        .then()
+                .then()
                 .statusCode(200)
                 .body("firstName", equalTo("Jane"));
     }
@@ -98,9 +98,9 @@ class TraineeControllerRestAssuredTest extends RestAssuredControllerTestSupport 
                           "isActive": true
                         }
                         """)
-        .when()
+                .when()
                 .put("/api/trainee/profile")
-        .then()
+                .then()
                 .statusCode(200)
                 .body("username", equalTo("jane.doe"));
     }
@@ -114,9 +114,9 @@ class TraineeControllerRestAssuredTest extends RestAssuredControllerTestSupport 
                           "username": "jane.doe"
                         }
                         """)
-        .when()
+                .when()
                 .delete("/api/trainee/profile")
-        .then()
+                .then()
                 .statusCode(204);
 
         verify(gymFacade).deleteTrainee("jane.doe");
@@ -132,9 +132,9 @@ class TraineeControllerRestAssuredTest extends RestAssuredControllerTestSupport 
                           "isActive": true
                         }
                         """)
-        .when()
+                .when()
                 .patch("/api/trainee/activate")
-        .then()
+                .then()
                 .statusCode(200);
 
         verify(gymFacade).activateTrainee(any());
@@ -144,9 +144,9 @@ class TraineeControllerRestAssuredTest extends RestAssuredControllerTestSupport 
     void deactivateTrainee_ReturnsOk() {
         given()
                 .queryParam("isActive", false)
-        .when()
+                .when()
                 .patch("/api/trainee/deactivate/jane.doe")
-        .then()
+                .then()
                 .statusCode(200);
 
         verify(gymFacade).deactivateTrainee(argThat(req -> "jane.doe".equals(req.getUsername()) && !req.getIsActive()));
@@ -160,9 +160,9 @@ class TraineeControllerRestAssuredTest extends RestAssuredControllerTestSupport 
 
         given()
                 .queryParam("trainerName", "John")
-        .when()
+                .when()
                 .get("/api/trainee/trainings/jane.doe")
-        .then()
+                .then()
                 .statusCode(200)
                 .body("[0].trainingName", equalTo("Morning Cardio"));
 
@@ -188,9 +188,9 @@ class TraineeControllerRestAssuredTest extends RestAssuredControllerTestSupport 
                           "trainerUsernameList": ["john.smith"]
                         }
                         """)
-        .when()
+                .when()
                 .put("/api/trainee/trainers")
-        .then()
+                .then()
                 .statusCode(200)
                 .body("trainerList", hasSize(1))
                 .body("trainerList[0].username", equalTo("john.smith"));
@@ -206,9 +206,9 @@ class TraineeControllerRestAssuredTest extends RestAssuredControllerTestSupport 
                 .build()));
 
         given()
-        .when()
+                .when()
                 .get("/api/trainee/unassigned-trainers/jane.doe")
-        .then()
+                .then()
                 .statusCode(200)
                 .body("[0].username", equalTo("john.smith"));
     }
@@ -225,9 +225,9 @@ class TraineeControllerRestAssuredTest extends RestAssuredControllerTestSupport 
                           "isActive": null
                         }
                         """)
-        .when()
+                .when()
                 .put("/api/trainee/profile")
-        .then()
+                .then()
                 .statusCode(400)
                 .body("message", equalTo("Validation failed"));
     }

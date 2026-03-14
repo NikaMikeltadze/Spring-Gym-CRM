@@ -1,6 +1,5 @@
 package com.gym.crm.controller;
 
-import com.gym.crm.dao.TraineeDao;
 import com.gym.crm.dto.request.trainee.*;
 import com.gym.crm.dto.response.ApiErrorResponse;
 import com.gym.crm.dto.response.trainee.*;
