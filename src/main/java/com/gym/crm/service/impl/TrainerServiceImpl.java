@@ -3,14 +3,20 @@ package com.gym.crm.service.impl;
 import com.gym.crm.dao.TraineeDao;
 import com.gym.crm.dao.TrainerDao;
 import com.gym.crm.dao.TrainingDao;
-import com.gym.crm.dto.TrainingDTO;
+import com.gym.crm.dto.request.trainer.UpdateTrainerProfileRequest;
+import com.gym.crm.dto.response.trainer.RegisterTrainerResponse;
+import com.gym.crm.dto.response.trainer.UpdateTrainerProfileResponse;
+import com.gym.crm.dto.response.training.GetTrainingTypesResponse;
+import com.gym.crm.dto.response.training.TrainingTypeInfo;
 import com.gym.crm.entity.Trainer;
 import com.gym.crm.entity.Training;
+import com.gym.crm.exception.NotFoundException;
+import com.gym.crm.mapper.TrainerMapper;
+import com.gym.crm.mapper.TrainingTypeMapper;
 import com.gym.crm.service.TrainerService;
 import com.gym.crm.util.UsernamePasswordGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -30,19 +36,22 @@ public class TrainerServiceImpl implements TrainerService {
     private final TraineeDao traineeDao;
     private final TrainingDao trainingDao;
     private final UsernamePasswordGenerator usernamePasswordGenerator;
-    private final ModelMapper modelMapper;
+    private final TrainingTypeMapper trainingTypeMapper;
+    private final TrainerMapper trainerMapper;
 
     @Override
     @Transactional
-    public void createTrainer(Trainer trainer) {
+    public RegisterTrainerResponse createTrainer(Trainer trainer) {
         log.debug("Creating trainer with firstName={}, lastName={}", trainer.getFirstName(), trainer.getLastName());
 
-        // Generate username and password
         String username = usernamePasswordGenerator.generateUsername(
                 trainer.getFirstName(),
                 trainer.getLastName(),
-                user -> traineeDao.exists(user) || trainerDao.exists(user)
+                trainerDao::exists
         );
+        if (traineeDao.exists(username)) {
+            throw new IllegalStateException("User already registered as trainee: " + username);
+        }
         String password = usernamePasswordGenerator.generatePassword();
 
         trainer.setUsername(username);
@@ -51,42 +60,46 @@ public class TrainerServiceImpl implements TrainerService {
 
         trainerDao.save(trainer);
         log.info("Successfully created trainer with username={}", username);
+        return new RegisterTrainerResponse(username, password);
     }
 
     @Override
     @Transactional
-    public void updateTrainer(Trainer trainer) {
-        log.debug("Updating trainer with id={}", trainer.getId());
+    public UpdateTrainerProfileResponse updateTrainer(UpdateTrainerProfileRequest request) {
+        log.debug("Updating trainer with username={}", request.getUsername());
+        Trainer trainer = trainerDao.findByUsername(request.getUsername())
+                .orElseThrow(() -> new NotFoundException("Trainer not found with username: " + request.getUsername()));
+        trainerMapper.updateEntityFromRequest(request, trainer);
         trainerDao.update(trainer);
         log.info("Successfully updated trainer with username={}", trainer.getUsername());
+        return trainerMapper.toUpdateProfileResponse(trainer);
     }
 
     public Optional<Trainer> selectTrainerById(Long id) {
         log.debug("Selecting trainer by id={}", id);
-        Trainer trainer = trainerDao.findById(id);
-        log.debug("Found(by id) trainer: {}", trainer != null);
-        return Optional.ofNullable(trainer);
+        Optional<Trainer> trainer = trainerDao.findById(id);
+        log.debug("Found(by id) trainer: {}", trainer.isPresent());
+        return trainer;
     }
 
     public Optional<Trainer> selectTrainerByUsername(String username) {
         log.debug("Selecting trainer by username={}", username);
-        Trainer trainer = trainerDao.findByUsername(username);
-        log.debug("Found(by username) trainer: {}", trainer != null);
-        return Optional.ofNullable(trainer);
+        Optional<Trainer> trainer = trainerDao.findByUsername(username);
+        log.debug("Found(by username) trainer: {}", trainer.isPresent());
+        return trainer;
     }
 
     @Override
     @Transactional
     public void changePassword(String username, String oldPassword, String newPassword) {
         log.debug("Attempting to change password for trainer username={}", username);
-        
-        Trainer trainer = Optional.ofNullable(trainerDao.findByUsername(username))
-                .orElseThrow(() -> {
-                    log.error("Trainer not found with username={}", username);
-                    return new IllegalArgumentException("Trainer not found with username: " + username);
-                });
 
-        if (!trainer.getPassword().equals(oldPassword)) {
+        Optional<Trainer> trainer = trainerDao.findByUsername(username);
+        if (trainer.isEmpty()) {
+            throw new NotFoundException("Trainer not found with username: " + username);
+        }
+
+        if (!trainer.get().getPassword().equals(oldPassword)) {
             log.warn("Password change failed for trainer={}: old password does not match", username);
             throw new IllegalArgumentException("Old password is incorrect");
         }
@@ -96,8 +109,8 @@ public class TrainerServiceImpl implements TrainerService {
             throw new IllegalArgumentException("New password cannot be the same as old password");
         }
 
-        trainer.setPassword(newPassword);
-        trainerDao.update(trainer);
+        trainer.get().setPassword(newPassword);
+        trainerDao.update(trainer.get());
         log.info("Successfully changed password for trainer username={}", username);
     }
 
@@ -105,20 +118,19 @@ public class TrainerServiceImpl implements TrainerService {
     @Transactional
     public void activateTrainer(String username) {
         log.debug("Attempting to activate trainer username={}", username);
-        
-        Trainer trainer = Optional.ofNullable(trainerDao.findByUsername(username))
-                .orElseThrow(() -> {
-                    log.error("Trainer not found with username={}", username);
-                    return new IllegalArgumentException("Trainer not found with username: " + username);
-                });
 
-        if (trainer.getIsActive()) {
+        Optional<Trainer> trainer = trainerDao.findByUsername(username);
+        if (trainer.isEmpty()) {
+            throw new NotFoundException("Trainer not found with username: " + username);
+        }
+
+        if (trainer.get().getIsActive()) {
             log.warn("Trainer activation failed: trainer={} is already active", username);
             throw new IllegalStateException("Trainer is already active");
         }
 
-        trainer.setIsActive(true);
-        trainerDao.update(trainer);
+        trainer.get().setIsActive(true);
+        trainerDao.update(trainer.get());
         log.info("Successfully activated trainer username={}", username);
     }
 
@@ -126,40 +138,39 @@ public class TrainerServiceImpl implements TrainerService {
     @Transactional
     public void deactivateTrainer(String username) {
         log.debug("Attempting to deactivate trainer username={}", username);
-        
-        Trainer trainer = Optional.ofNullable(trainerDao.findByUsername(username))
-                .orElseThrow(() -> {
-                    log.error("Trainer not found with username={}", username);
-                    return new IllegalArgumentException("Trainer not found with username: " + username);
-                });
 
-        if (!trainer.getIsActive()) {
+        Optional<Trainer> trainer = trainerDao.findByUsername(username);
+        if (trainer.isEmpty()) {
+            throw new NotFoundException("Trainer not found with username: " + username);
+        }
+
+        if (!trainer.get().getIsActive()) {
             log.warn("Trainer deactivation failed: trainer={} is already inactive", username);
             throw new IllegalStateException("Trainer is already inactive");
         }
 
-        trainer.setIsActive(false);
-        trainerDao.update(trainer);
+        trainer.get().setIsActive(false);
+        trainerDao.update(trainer.get());
         log.info("Successfully deactivated trainer username={}", username);
     }
 
     @Override
-    public List<TrainingDTO> getTrainings(String username, LocalDate fromDate, LocalDate toDate, String traineeName) {
+    public GetTrainingTypesResponse getTrainings(String username, LocalDate fromDate, LocalDate toDate, String traineeName) {
         log.debug("Fetching trainings for trainer={} with criteria: from={}, to={}, trainee={}",
                 username, fromDate, toDate, traineeName);
-        
+
         Optional.ofNullable(trainerDao.findByUsername(username))
                 .orElseThrow(() -> {
                     log.error("Trainer not found with username={}", username);
-                    return new IllegalArgumentException("Trainer not found with username: " + username);
+                    return new NotFoundException("Trainer not found with username: " + username);
                 });
 
         List<Training> trainings = trainingDao.findByTrainerUsernameAndCriteria(username, fromDate, toDate, traineeName);
-        List<TrainingDTO> result = trainings.stream()
-                .map(training -> modelMapper.map(training, TrainingDTO.class))
+        List<TrainingTypeInfo> result = trainings.stream()
+                .map(training -> trainingTypeMapper.toTrainingTypeInfo(training.getTrainingType()))
                 .toList();
-        
+
         log.info("Successfully fetched {} trainings for trainer={}", result.size(), username);
-        return result;
+        return new GetTrainingTypesResponse(result);
     }
 }

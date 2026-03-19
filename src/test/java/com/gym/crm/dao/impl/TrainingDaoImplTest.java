@@ -29,7 +29,7 @@ class TrainingDaoImplTest {
     void save_Success() {
         Training training = new Training();
         training.setId(1L);
-        training.setTrainingName("Fitness Training");
+        training.setTrainingName("Morning Fitness Bootcamp");
 
         trainingDao.save(training);
 
@@ -41,15 +41,15 @@ class TrainingDaoImplTest {
         Long id = 1L;
         Training expectedTraining = new Training();
         expectedTraining.setId(id);
-        expectedTraining.setTrainingName("Fitness Training");
+        expectedTraining.setTrainingName("Morning Fitness Bootcamp");
 
         when(entityManager.find(Training.class, id)).thenReturn(expectedTraining);
 
-        Training result = trainingDao.findById(id);
+        Training result = trainingDao.findById(id).orElse(null);
 
         assertNotNull(result);
         assertEquals(id, result.getId());
-        assertEquals("Fitness Training", result.getTrainingName());
+        assertEquals("Morning Fitness Bootcamp", result.getTrainingName());
         verify(entityManager).find(Training.class, id);
     }
 
@@ -58,7 +58,7 @@ class TrainingDaoImplTest {
         Long id = 999L;
         when(entityManager.find(Training.class, id)).thenReturn(null);
 
-        Training result = trainingDao.findById(id);
+        Training result = trainingDao.findById(id).orElse(null);
 
         assertNull(result);
         verify(entityManager).find(Training.class, id);

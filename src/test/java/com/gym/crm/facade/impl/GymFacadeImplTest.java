@@ -1,28 +1,50 @@
 package com.gym.crm.facade.impl;
 
-import com.gym.crm.dto.TraineeDTO;
-import com.gym.crm.dto.TrainerDTO;
-import com.gym.crm.dto.TrainingDTO;
+import com.gym.crm.dto.request.ChangeLoginRequest;
+import com.gym.crm.dto.request.trainee.ActivateTraineeRequest;
+import com.gym.crm.dto.request.trainee.DeactivateTraineeRequest;
+import com.gym.crm.dto.request.trainee.GetTraineeTrainingsRequest;
+import com.gym.crm.dto.request.trainee.UpdateTraineeProfileRequest;
+import com.gym.crm.dto.request.trainee.UpdateTraineeTrainerListRequest;
+import com.gym.crm.dto.request.trainer.GetTrainerTrainingsRequest;
+import com.gym.crm.dto.request.trainer.UpdateTrainerProfileRequest;
+import com.gym.crm.dto.request.training.AddTrainingRequest;
+import com.gym.crm.dto.response.trainee.GetTraineeProfileResponse;
+import com.gym.crm.dto.response.trainee.GetTraineeTrainingsResponse;
+import com.gym.crm.dto.response.trainee.RegisterTraineeResponse;
+import com.gym.crm.dto.response.trainee.UpdateTraineeProfileResponse;
+import com.gym.crm.dto.response.trainee.UpdateTraineeTrainerListResponse;
+import com.gym.crm.dto.response.trainer.GetTrainerProfileResponse;
+import com.gym.crm.dto.response.trainer.GetTrainerTrainingsResponse;
+import com.gym.crm.dto.response.trainer.RegisterTrainerResponse;
+import com.gym.crm.dto.response.trainer.TrainerProfileInfo;
+import com.gym.crm.dto.response.trainer.UpdateTrainerProfileResponse;
+import com.gym.crm.dto.response.training.GetTrainingTypesResponse;
+import com.gym.crm.dto.response.training.TrainingTypeInfo;
 import com.gym.crm.entity.Trainee;
 import com.gym.crm.entity.Trainer;
-import com.gym.crm.entity.Training;
+import com.gym.crm.entity.TrainingType;
+import com.gym.crm.dto.request.trainee.RegisterTraineeRequest;
+import com.gym.crm.dto.request.trainer.RegisterTrainerRequest;
+import com.gym.crm.mapper.TraineeMapper;
+import com.gym.crm.mapper.TrainerMapper;
 import com.gym.crm.service.TraineeService;
 import com.gym.crm.service.TrainerService;
 import com.gym.crm.service.TrainingService;
+import com.gym.crm.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.modelmapper.ModelMapper;
 
-import java.util.Arrays;
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -38,52 +60,55 @@ class GymFacadeImplTest {
     private TrainingService trainingService;
 
     @Mock
-    private ModelMapper modelMapper;
+    private TraineeMapper traineeMapper;
+
+    @Mock
+    private TrainerMapper trainerMapper;
+
+    @Mock
+    private UserService userService;
 
     @InjectMocks
     private GymFacadeImpl gymFacade;
 
     @Test
     void createTrainee_Success() {
-        TraineeDTO traineeDTO = new TraineeDTO();
-        traineeDTO.setId(1L);
-        traineeDTO.setFirstName("John");
-        traineeDTO.setLastName("Doe");
+        RegisterTraineeRequest request = new RegisterTraineeRequest();
+        request.setFirstName("Sarah");
+        request.setLastName("Williams");
 
-        Trainee traineeEntity = new Trainee();
-        traineeEntity.setId(1L);
-        traineeEntity.setFirstName("John");
-        traineeEntity.setLastName("Doe");
+        Trainee trainee = new Trainee();
+        trainee.setFirstName("Sarah");
+        trainee.setLastName("Williams");
 
-        when(modelMapper.map(traineeDTO, Trainee.class)).thenReturn(traineeEntity);
-        gymFacade.createTrainee(traineeDTO);
+        RegisterTraineeResponse expected = new RegisterTraineeResponse("Sarah.Williams", "qF5nBrM3gZ");
+        when(traineeMapper.toEntity(request)).thenReturn(trainee);
+        when(traineeService.createTrainee(trainee)).thenReturn(expected);
 
-        verify(modelMapper).map(traineeDTO, Trainee.class);
-        verify(traineeService).createTrainee(traineeEntity);
+        RegisterTraineeResponse result = gymFacade.createTrainee(request);
+
+        assertEquals(expected, result);
+        verify(traineeMapper).toEntity(request);
+        verify(traineeService).createTrainee(trainee);
     }
 
     @Test
     void getTraineeByUsername_Found() {
-        String username = "John.Doe";
-        Trainee traineeEntity = new Trainee();
-        traineeEntity.setUsername(username);
-        traineeEntity.setFirstName("John");
-        traineeEntity.setLastName("Doe");
+        String username = "Sarah.Williams";
+        GetTraineeProfileResponse response = GetTraineeProfileResponse.builder()
+                .firstName("Sarah")
+                .lastName("Williams")
+                .dateOfBirth(LocalDate.of(1995, 6, 15))
+                .address("123 Main St New York NY")
+                .isActive(true)
+                .build();
 
-        TraineeDTO traineeDTO = new TraineeDTO();
-        traineeDTO.setUsername(username);
-        traineeDTO.setFirstName("John");
-        traineeDTO.setLastName("Doe");
+        when(traineeService.selectTraineeByUsername(username)).thenReturn(Optional.of(response));
 
-        when(traineeService.selectTraineeByUsername(username)).thenReturn(Optional.of(traineeEntity));
-        when(modelMapper.map(traineeEntity, TraineeDTO.class)).thenReturn(traineeDTO);
+        GetTraineeProfileResponse result = gymFacade.getTraineeByUsername(username);
 
-        Optional<TraineeDTO> result = gymFacade.getTraineeByUsername(username);
-
-        assertTrue(result.isPresent());
-        assertEquals(username, result.get().getUsername());
+        assertEquals("Sarah", result.getFirstName());
         verify(traineeService).selectTraineeByUsername(username);
-        verify(modelMapper).map(traineeEntity, TraineeDTO.class);
     }
 
     @Test
@@ -91,33 +116,28 @@ class GymFacadeImplTest {
         String username = "NonExistent.User";
         when(traineeService.selectTraineeByUsername(username)).thenReturn(Optional.empty());
 
-        Optional<TraineeDTO> result = gymFacade.getTraineeByUsername(username);
-
-        assertFalse(result.isPresent());
+        assertThrows(IllegalArgumentException.class, () -> gymFacade.getTraineeByUsername(username));
         verify(traineeService).selectTraineeByUsername(username);
-        verify(modelMapper, never()).map(any(), eq(TraineeDTO.class));
     }
 
     @Test
     void getTraineeById_Found() {
-        Long id = 1L;
-        Trainee traineeEntity = new Trainee();
-        traineeEntity.setId(id);
-        traineeEntity.setFirstName("John");
+        Long id = 5L;
+        GetTraineeProfileResponse response = GetTraineeProfileResponse.builder()
+                .firstName("Sarah")
+                .lastName("Williams")
+                .dateOfBirth(LocalDate.of(1995, 6, 15))
+                .address("123 Main St New York NY")
+                .isActive(true)
+                .build();
 
-        TraineeDTO traineeDTO = new TraineeDTO();
-        traineeDTO.setId(id);
-        traineeDTO.setFirstName("John");
+        when(traineeService.selectTraineeById(id)).thenReturn(Optional.of(response));
 
-        when(traineeService.selectTraineeById(id)).thenReturn(Optional.of(traineeEntity));
-        when(modelMapper.map(traineeEntity, TraineeDTO.class)).thenReturn(traineeDTO);
-
-        Optional<TraineeDTO> result = gymFacade.getTraineeById(id);
+        Optional<GetTraineeProfileResponse> result = gymFacade.getTraineeById(id);
 
         assertTrue(result.isPresent());
-        assertEquals(id, result.get().getId());
+        assertEquals("Sarah", result.get().getFirstName());
         verify(traineeService).selectTraineeById(id);
-        verify(modelMapper).map(traineeEntity, TraineeDTO.class);
     }
 
     @Test
@@ -125,78 +145,91 @@ class GymFacadeImplTest {
         Long id = 999L;
         when(traineeService.selectTraineeById(id)).thenReturn(Optional.empty());
 
-        Optional<TraineeDTO> result = gymFacade.getTraineeById(id);
+        Optional<GetTraineeProfileResponse> result = gymFacade.getTraineeById(id);
 
         assertFalse(result.isPresent());
         verify(traineeService).selectTraineeById(id);
-        verify(modelMapper, never()).map(any(), eq(TraineeDTO.class));
     }
 
     @Test
     void updateTrainee_Success() {
-        TraineeDTO traineeDTO = new TraineeDTO();
-        traineeDTO.setId(1L);
-        traineeDTO.setFirstName("John");
-        traineeDTO.setLastName("Doe");
+        UpdateTraineeProfileRequest request = new UpdateTraineeProfileRequest();
+        request.setUsername("Sarah.Williams");
+        request.setFirstName("Sarah");
+        request.setLastName("Williams");
+        request.setDateOfBirth(LocalDate.of(1995, 6, 15));
+        request.setAddress("123 Main St New York NY");
+        request.setIsActive(true);
 
-        Trainee traineeEntity = new Trainee();
-        traineeEntity.setId(1L);
-        traineeEntity.setFirstName("John");
-        traineeEntity.setLastName("Doe");
+        UpdateTraineeProfileResponse expected = UpdateTraineeProfileResponse.builder()
+                .username("Sarah.Williams")
+                .firstName("Sarah")
+                .lastName("Williams")
+                .dateOfBirth(LocalDate.of(1995, 6, 15))
+                .address("123 Main St New York NY")
+                .isActive(true)
+                .build();
 
-        when(modelMapper.map(traineeDTO, Trainee.class)).thenReturn(traineeEntity);
-        gymFacade.updateTrainee(traineeDTO);
+        when(traineeService.updateTrainee(request)).thenReturn(expected);
 
-        verify(modelMapper).map(traineeDTO, Trainee.class);
-        verify(traineeService).updateTrainee(traineeEntity);
+        UpdateTraineeProfileResponse result = gymFacade.updateTrainee(request);
+
+        assertEquals(expected, result);
+        verify(traineeService).updateTrainee(request);
     }
 
     @Test
     void deleteTrainee_Success() {
-        String username = "John.Doe";
-        gymFacade.deleteTrainee(username);
-        verify(traineeService).deleteTrainee(username);
+        gymFacade.deleteTrainee("Sarah.Williams");
+        verify(traineeService).deleteTrainee("Sarah.Williams");
     }
 
     @Test
     void createTrainer_Success() {
-        TrainerDTO trainerDTO = new TrainerDTO();
-        trainerDTO.setId(1L);
-        trainerDTO.setFirstName("Jane");
-        trainerDTO.setLastName("Smith");
+        RegisterTrainerRequest request = new RegisterTrainerRequest();
+        request.setFirstName("John");
+        request.setLastName("Smith");
+        request.setTrainingTypeId(1L);
 
-        Trainer trainerEntity = new Trainer();
-        trainerEntity.setId(1L);
-        trainerEntity.setFirstName("Jane");
-        trainerEntity.setLastName("Smith");
+        Trainer trainer = new Trainer();
+        trainer.setFirstName("John");
+        trainer.setLastName("Smith");
 
-        when(modelMapper.map(trainerDTO, Trainer.class)).thenReturn(trainerEntity);
-        gymFacade.createTrainer(trainerDTO);
+        RegisterTrainerResponse expected = new RegisterTrainerResponse("John.Smith", "aB3dEfGh1K");
+        when(trainerMapper.toEntity(request)).thenReturn(trainer);
+        when(trainerService.createTrainer(trainer)).thenReturn(expected);
 
-        verify(modelMapper).map(trainerDTO, Trainer.class);
-        verify(trainerService).createTrainer(trainerEntity);
+        RegisterTrainerResponse result = gymFacade.createTrainer(request);
+
+        assertEquals(expected, result);
+        verify(trainerMapper).toEntity(request);
+        verify(trainerService).createTrainer(trainer);
     }
 
     @Test
     void getTrainerByUsername_Found() {
-        String username = "Jane.Smith";
+        String username = "John.Smith";
+
+        TrainingType trainingType = new TrainingType();
+        trainingType.setId(1L);
+        trainingType.setName("Fitness");
+
         Trainer trainerEntity = new Trainer();
         trainerEntity.setUsername(username);
-        trainerEntity.setFirstName("Jane");
-
-        TrainerDTO trainerDTO = new TrainerDTO();
-        trainerDTO.setUsername(username);
-        trainerDTO.setFirstName("Jane");
+        trainerEntity.setFirstName("John");
+        trainerEntity.setLastName("Smith");
+        trainerEntity.setIsActive(true);
+        trainerEntity.setTrainingType(trainingType);
+        trainerEntity.setTrainees(new ArrayList<>());
 
         when(trainerService.selectTrainerByUsername(username)).thenReturn(Optional.of(trainerEntity));
-        when(modelMapper.map(trainerEntity, TrainerDTO.class)).thenReturn(trainerDTO);
 
-        Optional<TrainerDTO> result = gymFacade.getTrainerByUsername(username);
+        Optional<GetTrainerProfileResponse> result = gymFacade.getTrainerByUsername(username);
 
         assertTrue(result.isPresent());
-        assertEquals(username, result.get().getUsername());
+        assertEquals("John", result.get().getFirstName());
+        assertEquals("Smith", result.get().getLastName());
         verify(trainerService).selectTrainerByUsername(username);
-        verify(modelMapper).map(trainerEntity, TrainerDTO.class);
     }
 
     @Test
@@ -204,126 +237,182 @@ class GymFacadeImplTest {
         String username = "NonExistent.Trainer";
         when(trainerService.selectTrainerByUsername(username)).thenReturn(Optional.empty());
 
-        Optional<TrainerDTO> result = gymFacade.getTrainerByUsername(username);
+        Optional<GetTrainerProfileResponse> result = gymFacade.getTrainerByUsername(username);
 
         assertFalse(result.isPresent());
         verify(trainerService).selectTrainerByUsername(username);
-        verify(modelMapper, never()).map(any(), eq(TrainerDTO.class));
     }
 
     @Test
     void updateTrainer_Success() {
-        TrainerDTO trainerDTO = new TrainerDTO();
-        trainerDTO.setId(1L);
-        trainerDTO.setFirstName("Jane");
-        trainerDTO.setLastName("Smith");
+        UpdateTrainerProfileRequest request = new UpdateTrainerProfileRequest();
+        request.setUsername("John.Smith");
+        request.setFirstName("John");
+        request.setLastName("Smith");
+        request.setIsActive(true);
 
-        Trainer trainerEntity = new Trainer();
-        trainerEntity.setId(1L);
-        trainerEntity.setFirstName("Jane");
-        trainerEntity.setLastName("Smith");
+        UpdateTrainerProfileResponse expected = UpdateTrainerProfileResponse.builder()
+                .username("John.Smith")
+                .firstName("John")
+                .lastName("Smith")
+                .trainingTypeId(1L)
+                .isActive(true)
+                .traineeList(List.of())
+                .build();
 
-        when(modelMapper.map(trainerDTO, Trainer.class)).thenReturn(trainerEntity);
-        gymFacade.updateTrainer(trainerDTO);
+        when(trainerService.updateTrainer(request)).thenReturn(expected);
 
-        verify(modelMapper).map(trainerDTO, Trainer.class);
-        verify(trainerService).updateTrainer(trainerEntity);
+        UpdateTrainerProfileResponse result = gymFacade.updateTrainer(request);
+
+        assertEquals(expected, result);
+        verify(trainerService).updateTrainer(request);
     }
 
     @Test
     void createTraining_Success() {
-        TrainingDTO trainingDTO = new TrainingDTO();
-        trainingDTO.setId(1L);
-        trainingDTO.setTrainingName("Fitness Training");
+        AddTrainingRequest request = new AddTrainingRequest();
+        request.setTraineeUsername("Sarah.Williams");
+        request.setTrainerUsername("John.Smith");
+        request.setTrainingName("Morning Fitness Bootcamp");
+        request.setTrainingDate(LocalDate.of(2026, 3, 1));
+        request.setTrainingDuration(60.0);
 
-        Training trainingEntity = new Training();
-        trainingEntity.setId(1L);
-        trainingEntity.setTrainingName("Fitness Training");
+        gymFacade.createTraining(request);
 
-        when(modelMapper.map(trainingDTO, Training.class)).thenReturn(trainingEntity);
-        gymFacade.createTraining(trainingDTO);
-
-        verify(modelMapper).map(trainingDTO, Training.class);
-        verify(trainingService).createTraining(trainingEntity);
-    }
-
-    @Test
-    void getTraining_Found() {
-        Long id = 1L;
-        Training trainingEntity = new Training();
-        trainingEntity.setId(id);
-        trainingEntity.setTrainingName("Fitness Training");
-
-        TrainingDTO trainingDTO = new TrainingDTO();
-        trainingDTO.setId(id);
-        trainingDTO.setTrainingName("Fitness Training");
-
-        when(trainingService.selectTraining(id)).thenReturn(Optional.of(trainingEntity));
-        when(modelMapper.map(trainingEntity, TrainingDTO.class)).thenReturn(trainingDTO);
-
-        Optional<TrainingDTO> result = gymFacade.getTraining(id);
-
-        assertTrue(result.isPresent());
-        assertEquals(id, result.get().getId());
-        verify(trainingService).selectTraining(id);
-        verify(modelMapper).map(trainingEntity, TrainingDTO.class);
-    }
-
-    @Test
-    void getTraining_NotFound() {
-        Long id = 999L;
-        when(trainingService.selectTraining(id)).thenReturn(Optional.empty());
-
-        Optional<TrainingDTO> result = gymFacade.getTraining(id);
-
-        assertFalse(result.isPresent());
-        verify(trainingService).selectTraining(id);
-        verify(modelMapper, never()).map(any(), eq(TrainingDTO.class));
+        verify(trainingService).createTraining(request);
     }
 
     @Test
     void getAllTrainings_Success() {
-        Training training1 = new Training();
-        training1.setId(1L);
-        training1.setTrainingName("Fitness Training");
+        TrainingTypeInfo info1 = new TrainingTypeInfo(1L, "Fitness");
+        TrainingTypeInfo info2 = new TrainingTypeInfo(2L, "Yoga");
+        GetTrainingTypesResponse expected = new GetTrainingTypesResponse(List.of(info1, info2));
 
-        Training training2 = new Training();
-        training2.setId(2L);
-        training2.setTrainingName("Yoga");
+        when(trainingService.getAllTrainings()).thenReturn(expected);
 
-        List<Training> trainingEntities = Arrays.asList(training1, training2);
-
-        TrainingDTO trainingDTO1 = new TrainingDTO();
-        trainingDTO1.setId(1L);
-        trainingDTO1.setTrainingName("Fitness Training");
-
-        TrainingDTO trainingDTO2 = new TrainingDTO();
-        trainingDTO2.setId(2L);
-        trainingDTO2.setTrainingName("Yoga");
-
-        when(trainingService.getAllTrainings()).thenReturn(trainingEntities);
-        when(modelMapper.map(training1, TrainingDTO.class)).thenReturn(trainingDTO1);
-        when(modelMapper.map(training2, TrainingDTO.class)).thenReturn(trainingDTO2);
-
-        List<TrainingDTO> result = gymFacade.getAllTrainings();
+        GetTrainingTypesResponse result = gymFacade.getAllTrainings();
 
         assertNotNull(result);
-        assertEquals(2, result.size());
-        assertEquals("Fitness Training", result.get(0).getTrainingName());
-        assertEquals("Yoga", result.get(1).getTrainingName());
+        assertEquals(2, result.getTrainingTypeList().size());
         verify(trainingService).getAllTrainings();
-        verify(modelMapper, times(2)).map(any(Training.class), eq(TrainingDTO.class));
     }
 
     @Test
-    void getAllTrainings_Empty() {
-        when(trainingService.getAllTrainings()).thenReturn(List.of());
+    void changeUserPassword_Success() {
+        ChangeLoginRequest request = new ChangeLoginRequest();
+        request.setUsername("Sarah.Williams");
+        request.setPassword("qF5nBrM3gZ");
+        request.setNewPassword("newPass1234");
 
-        List<TrainingDTO> result = gymFacade.getAllTrainings();
+        gymFacade.changeUserPassword(request);
+
+        verify(userService).changePassword(request);
+    }
+
+    @Test
+    void activateTrainee_Success() {
+        ActivateTraineeRequest request = new ActivateTraineeRequest();
+        request.setUsername("Sarah.Williams");
+        request.setIsActive(true);
+
+        gymFacade.activateTrainee(request);
+
+        verify(traineeService).activateTrainee(request);
+    }
+
+    @Test
+    void deactivateTrainee_Success() {
+        DeactivateTraineeRequest request = new DeactivateTraineeRequest("Sarah.Williams", false);
+
+        gymFacade.deactivateTrainee(request);
+
+        verify(traineeService).deactivateTrainee(request);
+    }
+
+    @Test
+    void activateTrainer_Success() {
+        gymFacade.activateTrainer("John.Smith");
+        verify(trainerService).activateTrainer("John.Smith");
+    }
+
+    @Test
+    void deactivateTrainer_Success() {
+        gymFacade.deactivateTrainer("John.Smith");
+        verify(trainerService).deactivateTrainer("John.Smith");
+    }
+
+    @Test
+    void getTraineeTrainings_Success() {
+        GetTraineeTrainingsRequest request = new GetTraineeTrainingsRequest();
+        request.setUsername("Sarah.Williams");
+
+        GetTraineeTrainingsResponse response = GetTraineeTrainingsResponse.builder()
+                .trainingName("Morning Fitness Bootcamp")
+                .trainingDate(LocalDate.of(2026, 3, 1))
+                .trainingDuration(60.0)
+                .build();
+
+        when(traineeService.getTrainings(request)).thenReturn(List.of(response));
+
+        List<GetTraineeTrainingsResponse> result = gymFacade.getTraineeTrainings(request);
 
         assertNotNull(result);
-        assertEquals(0, result.size());
-        verify(trainingService).getAllTrainings();
-        verify(modelMapper, never()).map(any(Training.class), eq(TrainingDTO.class));
+        assertEquals(1, result.size());
+        assertEquals("Morning Fitness Bootcamp", result.get(0).getTrainingName());
+        verify(traineeService).getTrainings(request);
+    }
+
+    @Test
+    void updateTrainerList_Success() {
+        UpdateTraineeTrainerListRequest request = new UpdateTraineeTrainerListRequest();
+        request.setTraineeUsername("Sarah.Williams");
+        request.setTrainerUsernameList(List.of("John.Smith"));
+
+        TrainerProfileInfo info = new TrainerProfileInfo("John.Smith", "John", "Smith", 1L);
+        UpdateTraineeTrainerListResponse response = UpdateTraineeTrainerListResponse.builder()
+                .trainerList(List.of(info))
+                .build();
+        when(traineeService.updateTrainerList(request)).thenReturn(response);
+
+        UpdateTraineeTrainerListResponse result = gymFacade.updateTrainerList(request);
+
+        assertNotNull(result);
+        assertEquals(1, result.getTrainerList().size());
+        assertEquals("John.Smith", result.getTrainerList().get(0).getUsername());
+        verify(traineeService).updateTrainerList(request);
+    }
+
+    @Test
+    void getUnassignedActiveTrainers_Success() {
+        TrainerProfileInfo info = new TrainerProfileInfo("Robert.Brown", "Robert", "Brown", 5L);
+        when(traineeService.getUnassignedActiveTrainers(any())).thenReturn(List.of(info));
+
+        List<TrainerProfileInfo> result = gymFacade.getUnassignedActiveTrainers("Sarah.Williams");
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals("Robert.Brown", result.get(0).getUsername());
+        verify(traineeService).getUnassignedActiveTrainers(any());
+    }
+
+    @Test
+    void getTrainerTrainings_Success() {
+        GetTrainerTrainingsRequest request = new GetTrainerTrainingsRequest();
+        request.setUsername("John.Smith");
+
+        GetTrainerTrainingsResponse response = GetTrainerTrainingsResponse.builder()
+                .trainingName("Morning Fitness Bootcamp")
+                .trainingDate(LocalDate.of(2026, 3, 1))
+                .trainingDuration(60.0)
+                .trainingTypeName("Fitness")
+                .traineeName("Sarah.Williams")
+                .build();
+        when(traineeService.getTrainerTrainings(request)).thenReturn(List.of(response));
+
+        List<GetTrainerTrainingsResponse> result = gymFacade.getTrainerTrainings(request);
+
+        assertEquals(1, result.size());
+        assertEquals("Morning Fitness Bootcamp", result.get(0).getTrainingName());
+        verify(traineeService).getTrainerTrainings(request);
     }
 }

@@ -14,6 +14,7 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 @Slf4j
@@ -33,10 +34,10 @@ public class TrainingDaoImpl implements TrainingDao {
     }
 
     @Override
-    public Training findById(Long id) {
+    public Optional<Training> findById(Long id) {
         Training training = entityManager.find(Training.class, id);
         log.debug("Finding training by id={}, found: {}", id, training != null);
-        return training;
+        return Optional.ofNullable(training);
     }
 
     @Override
@@ -50,9 +51,10 @@ public class TrainingDaoImpl implements TrainingDao {
     public List<Training> findByTraineeUsername(String traineeUsername) {
         log.debug("Finding trainings by trainee username={}", traineeUsername);
         List<Training> trainings = entityManager.createQuery(
-                "SELECT t FROM Training t WHERE t.trainee.username = :username",
-                Training.class
-        ).setParameter("username", traineeUsername).getResultList();
+                        "SELECT t FROM Training t WHERE t.trainee.username = :username",
+                        Training.class)
+                .setParameter("username", traineeUsername)
+                .getResultList();
         log.debug("Found {} trainings", trainings.size());
         return trainings;
     }
@@ -112,7 +114,7 @@ public class TrainingDaoImpl implements TrainingDao {
             LocalDate toDate,
             String trainerName,
             String trainingTypeName) {
-        
+
         log.debug("Finding trainings for trainee={} with criteria: from={}, to={}, trainer={}, type={}",
                 traineeUsername, fromDate, toDate, trainerName, trainingTypeName);
 
@@ -157,7 +159,7 @@ public class TrainingDaoImpl implements TrainingDao {
             LocalDate fromDate,
             LocalDate toDate,
             String traineeName) {
-        
+
         log.debug("Finding trainings for trainer={} with criteria: from={}, to={}, trainee={}",
                 trainerUsername, fromDate, toDate, traineeName);
 
