@@ -28,6 +28,15 @@ public class TraineeDaoImpl implements TraineeDao {
     }
 
     @Override
+    public long countAll() {
+        Long count = entityManager.createQuery("SELECT COUNT(t) FROM Trainee t", Long.class)
+                .getSingleResult();
+        long result = count == null ? 0L : count;
+        log.debug("Counted trainees: {}", result);
+        return result;
+    }
+
+    @Override
     public Optional<Trainee> findById(Long id) {
         Trainee trainee = entityManager.find(Trainee.class, id);
         log.info("Finding trainee by id={}, found: {}", id, trainee != null);

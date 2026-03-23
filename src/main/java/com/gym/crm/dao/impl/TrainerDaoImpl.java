@@ -28,6 +28,15 @@ public class TrainerDaoImpl implements TrainerDao {
     }
 
     @Override
+    public long countAll() {
+        Long count = entityManager.createQuery("SELECT COUNT(t) FROM Trainer t", Long.class)
+                .getSingleResult();
+        long result = count == null ? 0L : count;
+        log.debug("Counted trainers: {}", result);
+        return result;
+    }
+
+    @Override
     public Optional<Trainer> findByUsername(String username) {
         List<Trainer> trainers = entityManager.createQuery("SELECT t FROM Trainer t WHERE t.username = :username", Trainer.class)
                 .setParameter("username", username)

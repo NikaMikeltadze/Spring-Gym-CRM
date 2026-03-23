@@ -7,6 +7,8 @@ import java.util.Optional;
 public interface TraineeDao {
     void save(Trainee trainee);
 
+    long countAll();
+
     Optional<Trainee> findById(Long id);
 
     Optional<Trainee> findByUsername(String username);
