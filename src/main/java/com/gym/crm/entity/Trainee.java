@@ -17,15 +17,15 @@ import java.util.List;
 
 @Entity
 public class Trainee extends User {
-    @Column(name = "Date of Birth")
+    @Column(name = "date_of_birth")
     LocalDate dateOfBirth;
 
-    @Column(name = "Address")
+    @Column(name = "address")
     @NotBlank(message = "Address must not be blank")
     String address;
 
     @OneToOne
-    @JoinColumn(name = "UserId", nullable = false, unique = true)
+    @JoinColumn(name = "user_id", nullable = false, unique = true)
     @NotNull(message = "User must not be null")
     User user;
 

@@ -11,12 +11,13 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 
 @Entity
+@Table(name = "trainingtype")
 public class TrainingType {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
 
-    @Column(name = "Training Type Name", nullable = false)
+    @Column(name = "training_type_name", nullable = false)
     @NotBlank(message = "Training Type Name must not be blank")
     String name;
 }

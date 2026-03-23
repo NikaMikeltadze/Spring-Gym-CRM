@@ -18,12 +18,12 @@ import java.util.List;
 @Entity
 public class Trainer extends User {
     @ManyToOne
-    @JoinColumn(name = "Specialization")
+    @JoinColumn(name = "specialization")
     @NotNull
     TrainingType trainingType;
 
     @OneToOne
-    @JoinColumn(name = "User Id", nullable = false, unique = true)
+    @JoinColumn(name = "user_id", nullable = false, unique = true)
     @NotNull(message = "User must not be null")
     User user;
 
