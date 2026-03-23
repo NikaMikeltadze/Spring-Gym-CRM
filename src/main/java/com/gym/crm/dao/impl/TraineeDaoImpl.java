@@ -57,6 +57,10 @@ public class TraineeDaoImpl implements TraineeDao {
     public void delete(String username) {
         Trainee trainee = findByUsername(username).orElse(null);
         if (trainee != null) {
+            entityManager.createQuery("DELETE FROM Training t WHERE t.trainee.id = :traineeId")
+                    .setParameter("traineeId", trainee.getId())
+                    .executeUpdate();
+
             entityManager.remove(trainee);
             log.info("Deleted trainee with username={}", username);
         }
