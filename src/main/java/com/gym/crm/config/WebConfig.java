@@ -3,14 +3,11 @@ package com.gym.crm.config;
 import com.gym.crm.config.auth.HeaderAuthenticationInterceptor;
 import com.gym.crm.config.logging.RequestLoggingInterceptor;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.*;
 import org.springframework.web.util.pattern.PathPatternParser;
 
 @Configuration
-@EnableWebMvc
-@ComponentScan(basePackages = "com.gym.crm")
 @RequiredArgsConstructor
 public class WebConfig implements WebMvcConfigurer {
 

@@ -1,31 +1,13 @@
 package com.gym.crm.config;
 
-import com.gym.crm.config.logging.TransactionIdFilter;
-import io.micrometer.common.lang.NonNull;
-import jakarta.servlet.Filter;
-import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;
+import com.gym.crm.Main;
+import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 
-public class ServletInitializer extends AbstractAnnotationConfigDispatcherServletInitializer {
-
-    @Override
-    protected Class<?>[] getRootConfigClasses() {
-        return new Class[]{AppConfig.class};
-    }
+public class ServletInitializer extends SpringBootServletInitializer {
 
     @Override
-    protected Class<?>[] getServletConfigClasses() {
-        return new Class[]{WebConfig.class};
-    }
-
-    @Override
-    @NonNull
-    protected String[] getServletMappings() {
-        return new String[]{"/"};
-    }
-
-    @Override
-    @NonNull
-    protected Filter[] getServletFilters() {
-        return new Filter[]{new TransactionIdFilter()};
+    protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
+        return application.sources(Main.class);
     }
 }
