@@ -11,6 +11,7 @@ import com.gym.crm.dto.response.training.TrainingTypeInfo;
 import com.gym.crm.entity.Trainer;
 import com.gym.crm.entity.Training;
 import com.gym.crm.entity.TrainingType;
+import com.gym.crm.entity.User;
 import com.gym.crm.exception.NotFoundException;
 import com.gym.crm.mapper.TrainerMapper;
 import com.gym.crm.mapper.TrainingTypeMapper;
@@ -57,8 +58,9 @@ class TrainerServiceTest {
     @Test
     void createTrainer_Success() {
         Trainer trainer = new Trainer();
-        trainer.setFirstName("John");
-        trainer.setLastName("Smith");
+        trainer.setUser(new User());
+        trainer.getUser().setFirstName("John");
+        trainer.getUser().setLastName("Smith");
 
         when(usernamePasswordGenerator.generateUsername(eq("John"), eq("Smith"), any()))
                 .thenReturn("John.Smith");
@@ -67,9 +69,9 @@ class TrainerServiceTest {
         RegisterTrainerResponse result = trainerService.createTrainer(trainer);
 
         verify(trainerDao).save(trainer);
-        assertEquals("John.Smith", trainer.getUsername());
-        assertEquals("aB3dEfGh1K", trainer.getPassword());
-        assertTrue(trainer.getIsActive());
+        assertEquals("John.Smith", trainer.getUser().getUsername());
+        assertEquals("aB3dEfGh1K", trainer.getUser().getPassword());
+        assertTrue(trainer.getUser().getIsActive());
         assertEquals("John.Smith", result.getUsername());
         assertEquals("aB3dEfGh1K", result.getPassword());
     }
@@ -77,8 +79,9 @@ class TrainerServiceTest {
     @Test
     void createTrainer_WithDuplicateUsername_GeneratesSerialNumber() {
         Trainer trainer = new Trainer();
-        trainer.setFirstName("John");
-        trainer.setLastName("Smith");
+        trainer.setUser(new User());
+        trainer.getUser().setFirstName("John");
+        trainer.getUser().setLastName("Smith");
 
         when(usernamePasswordGenerator.generateUsername(eq("John"), eq("Smith"), any()))
                 .thenReturn("John.Smith1");
@@ -87,17 +90,18 @@ class TrainerServiceTest {
         RegisterTrainerResponse result = trainerService.createTrainer(trainer);
 
         verify(trainerDao).save(trainer);
-        assertEquals("John.Smith1", trainer.getUsername());
-        assertEquals("pO2iYlC7wN", trainer.getPassword());
-        assertTrue(trainer.getIsActive());
+        assertEquals("John.Smith1", trainer.getUser().getUsername());
+        assertEquals("pO2iYlC7wN", trainer.getUser().getPassword());
+        assertTrue(trainer.getUser().getIsActive());
         assertEquals("John.Smith1", result.getUsername());
     }
 
     @Test
     void createTrainer_WhenUsernameExistsAsTrainee_Throws() {
         Trainer trainer = new Trainer();
-        trainer.setFirstName("Sarah");
-        trainer.setLastName("Williams");
+        trainer.setUser(new User());
+        trainer.getUser().setFirstName("Sarah");
+        trainer.getUser().setLastName("Williams");
 
         when(usernamePasswordGenerator.generateUsername(eq("Sarah"), eq("Williams"), any()))
                 .thenReturn("Sarah.Williams");
@@ -118,10 +122,11 @@ class TrainerServiceTest {
 
         Trainer trainer = new Trainer();
         trainer.setId(1L);
-        trainer.setUsername("John.Smith");
-        trainer.setFirstName("John");
-        trainer.setLastName("Smith");
-        trainer.setIsActive(true);
+        trainer.setUser(new User());
+        trainer.getUser().setUsername("John.Smith");
+        trainer.getUser().setFirstName("John");
+        trainer.getUser().setLastName("Smith");
+        trainer.getUser().setIsActive(true);
 
         UpdateTrainerProfileResponse expected = UpdateTrainerProfileResponse.builder()
                 .username("John.Smith")
@@ -171,13 +176,14 @@ class TrainerServiceTest {
     void selectTrainerByUsername_Success() {
         String username = "John.Smith";
         Trainer expectedTrainer = new Trainer();
-        expectedTrainer.setUsername(username);
+        expectedTrainer.setUser(new User());
+        expectedTrainer.getUser().setUsername(username);
         when(trainerDao.findByUsername(username)).thenReturn(Optional.of(expectedTrainer));
 
         Optional<Trainer> result = trainerService.selectTrainerByUsername(username);
 
         assertTrue(result.isPresent());
-        assertEquals(username, result.get().getUsername());
+        assertEquals(username, result.get().getUser().getUsername());
         verify(trainerDao).findByUsername(username);
     }
 
@@ -195,22 +201,24 @@ class TrainerServiceTest {
     @Test
     void changePassword_Success() {
         Trainer trainer = new Trainer();
-        trainer.setUsername("John.Smith");
-        trainer.setPassword("aB3dEfGh1K");
+        trainer.setUser(new User());
+        trainer.getUser().setUsername("John.Smith");
+        trainer.getUser().setPassword("aB3dEfGh1K");
 
         when(trainerDao.findByUsername("John.Smith")).thenReturn(Optional.of(trainer));
 
         trainerService.changePassword("John.Smith", "aB3dEfGh1K", "newPass1234");
 
-        assertEquals("newPass1234", trainer.getPassword());
+        assertEquals("newPass1234", trainer.getUser().getPassword());
         verify(trainerDao).update(trainer);
     }
 
     @Test
     void changePassword_WrongOldPassword() {
         Trainer trainer = new Trainer();
-        trainer.setUsername("John.Smith");
-        trainer.setPassword("aB3dEfGh1K");
+        trainer.setUser(new User());
+        trainer.getUser().setUsername("John.Smith");
+        trainer.getUser().setPassword("aB3dEfGh1K");
 
         when(trainerDao.findByUsername("John.Smith")).thenReturn(Optional.of(trainer));
 
@@ -221,8 +229,9 @@ class TrainerServiceTest {
     @Test
     void changePassword_SameAsOldPassword() {
         Trainer trainer = new Trainer();
-        trainer.setUsername("John.Smith");
-        trainer.setPassword("aB3dEfGh1K");
+        trainer.setUser(new User());
+        trainer.getUser().setUsername("John.Smith");
+        trainer.getUser().setPassword("aB3dEfGh1K");
 
         when(trainerDao.findByUsername("John.Smith")).thenReturn(Optional.of(trainer));
 
@@ -241,22 +250,24 @@ class TrainerServiceTest {
     @Test
     void activateTrainer_Success() {
         Trainer trainer = new Trainer();
-        trainer.setUsername("John.Smith");
-        trainer.setIsActive(false);
+        trainer.setUser(new User());
+        trainer.getUser().setUsername("John.Smith");
+        trainer.getUser().setIsActive(false);
 
         when(trainerDao.findByUsername("John.Smith")).thenReturn(Optional.of(trainer));
 
         trainerService.activateTrainer("John.Smith");
 
-        assertTrue(trainer.getIsActive());
+        assertTrue(trainer.getUser().getIsActive());
         verify(trainerDao).update(trainer);
     }
 
     @Test
     void activateTrainer_AlreadyActive() {
         Trainer trainer = new Trainer();
-        trainer.setUsername("John.Smith");
-        trainer.setIsActive(true);
+        trainer.setUser(new User());
+        trainer.getUser().setUsername("John.Smith");
+        trainer.getUser().setIsActive(true);
 
         when(trainerDao.findByUsername("John.Smith")).thenReturn(Optional.of(trainer));
 
@@ -273,22 +284,24 @@ class TrainerServiceTest {
     @Test
     void deactivateTrainer_Success() {
         Trainer trainer = new Trainer();
-        trainer.setUsername("John.Smith");
-        trainer.setIsActive(true);
+        trainer.setUser(new User());
+        trainer.getUser().setUsername("John.Smith");
+        trainer.getUser().setIsActive(true);
 
         when(trainerDao.findByUsername("John.Smith")).thenReturn(Optional.of(trainer));
 
         trainerService.deactivateTrainer("John.Smith");
 
-        assertFalse(trainer.getIsActive());
+        assertFalse(trainer.getUser().getIsActive());
         verify(trainerDao).update(trainer);
     }
 
     @Test
     void deactivateTrainer_AlreadyInactive() {
         Trainer trainer = new Trainer();
-        trainer.setUsername("John.Smith");
-        trainer.setIsActive(false);
+        trainer.setUser(new User());
+        trainer.getUser().setUsername("John.Smith");
+        trainer.getUser().setIsActive(false);
 
         when(trainerDao.findByUsername("John.Smith")).thenReturn(Optional.of(trainer));
 

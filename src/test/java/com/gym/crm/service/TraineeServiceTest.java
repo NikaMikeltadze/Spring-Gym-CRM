@@ -15,6 +15,7 @@ import com.gym.crm.entity.Trainee;
 import com.gym.crm.entity.Trainer;
 import com.gym.crm.entity.Training;
 import com.gym.crm.entity.TrainingType;
+import com.gym.crm.entity.User;
 import com.gym.crm.exception.NotFoundException;
 import com.gym.crm.mapper.TraineeMapper;
 import com.gym.crm.mapper.TrainerMapper;
@@ -67,8 +68,9 @@ class TraineeServiceTest {
     @Test
     void createTrainee_Success() {
         Trainee trainee = new Trainee();
-        trainee.setFirstName("Sarah");
-        trainee.setLastName("Williams");
+        trainee.setUser(new User());
+        trainee.getUser().setFirstName("Sarah");
+        trainee.getUser().setLastName("Williams");
 
         when(usernamePasswordGenerator.generateUsername(eq("Sarah"), eq("Williams"), any()))
                 .thenReturn("Sarah.Williams");
@@ -77,9 +79,9 @@ class TraineeServiceTest {
         RegisterTraineeResponse result = traineeService.createTrainee(trainee);
 
         verify(traineeDao).save(trainee);
-        assertEquals("Sarah.Williams", trainee.getUsername());
-        assertEquals("qF5nBrM3gZ", trainee.getPassword());
-        assertTrue(trainee.getIsActive());
+        assertEquals("Sarah.Williams", trainee.getUser().getUsername());
+        assertEquals("qF5nBrM3gZ", trainee.getUser().getPassword());
+        assertTrue(trainee.getUser().getIsActive());
         assertEquals("Sarah.Williams", result.getUsername());
         assertEquals("qF5nBrM3gZ", result.getPassword());
     }
@@ -87,8 +89,9 @@ class TraineeServiceTest {
     @Test
     void createTrainee_WithDuplicateUsername_GeneratesSerialNumber() {
         Trainee trainee = new Trainee();
-        trainee.setFirstName("John");
-        trainee.setLastName("Smith");
+        trainee.setUser(new User());
+        trainee.getUser().setFirstName("John");
+        trainee.getUser().setLastName("Smith");
 
         when(usernamePasswordGenerator.generateUsername(eq("John"), eq("Smith"), any()))
                 .thenReturn("John.Smith1");
@@ -97,17 +100,18 @@ class TraineeServiceTest {
         RegisterTraineeResponse result = traineeService.createTrainee(trainee);
 
         verify(traineeDao).save(trainee);
-        assertEquals("John.Smith1", trainee.getUsername());
-        assertEquals("pO2iYlC7wN", trainee.getPassword());
-        assertTrue(trainee.getIsActive());
+        assertEquals("John.Smith1", trainee.getUser().getUsername());
+        assertEquals("pO2iYlC7wN", trainee.getUser().getPassword());
+        assertTrue(trainee.getUser().getIsActive());
         assertEquals("John.Smith1", result.getUsername());
     }
 
     @Test
     void createTrainee_WhenUsernameExistsAsTrainer_Throws() {
         Trainee trainee = new Trainee();
-        trainee.setFirstName("John");
-        trainee.setLastName("Smith");
+        trainee.setUser(new User());
+        trainee.getUser().setFirstName("John");
+        trainee.getUser().setLastName("Smith");
 
         when(usernamePasswordGenerator.generateUsername(eq("John"), eq("Smith"), any()))
                 .thenReturn("John.Smith");
@@ -130,12 +134,13 @@ class TraineeServiceTest {
 
         Trainee trainee = new Trainee();
         trainee.setId(5L);
-        trainee.setUsername("Sarah.Williams");
-        trainee.setFirstName("Sarah");
-        trainee.setLastName("Williams");
+        trainee.setUser(new User());
+        trainee.getUser().setUsername("Sarah.Williams");
+        trainee.getUser().setFirstName("Sarah");
+        trainee.getUser().setLastName("Williams");
         trainee.setDateOfBirth(LocalDate.of(1995, 6, 15));
         trainee.setAddress("123 Main St New York NY");
-        trainee.setIsActive(true);
+        trainee.getUser().setIsActive(true);
         trainee.setTrainers(new ArrayList<>());
 
         UpdateTraineeProfileResponse expected = UpdateTraineeProfileResponse.builder()
@@ -168,9 +173,10 @@ class TraineeServiceTest {
     void selectTraineeByUsername_Success() {
         String username = "Sarah.Williams";
         Trainee trainee = new Trainee();
-        trainee.setUsername(username);
-        trainee.setFirstName("Sarah");
-        trainee.setLastName("Williams");
+        trainee.setUser(new User());
+        trainee.getUser().setUsername(username);
+        trainee.getUser().setFirstName("Sarah");
+        trainee.getUser().setLastName("Williams");
         trainee.setTrainers(new ArrayList<>());
 
         GetTraineeProfileResponse profileResponse = GetTraineeProfileResponse.builder()
@@ -203,7 +209,8 @@ class TraineeServiceTest {
         Long id = 5L;
         Trainee trainee = new Trainee();
         trainee.setId(id);
-        trainee.setFirstName("Sarah");
+        trainee.setUser(new User());
+        trainee.getUser().setFirstName("Sarah");
         trainee.setTrainers(new ArrayList<>());
 
         GetTraineeProfileResponse profileResponse = GetTraineeProfileResponse.builder()
@@ -233,8 +240,9 @@ class TraineeServiceTest {
     @Test
     void changePassword_Success() {
         Trainee trainee = new Trainee();
-        trainee.setUsername("Sarah.Williams");
-        trainee.setPassword("qF5nBrM3gZ");
+        trainee.setUser(new User());
+        trainee.getUser().setUsername("Sarah.Williams");
+        trainee.getUser().setPassword("qF5nBrM3gZ");
 
         ChangeLoginRequest request = new ChangeLoginRequest();
         request.setUsername("Sarah.Williams");
@@ -245,15 +253,16 @@ class TraineeServiceTest {
 
         traineeService.changePassword(request);
 
-        assertEquals("newPass1234", trainee.getPassword());
+        assertEquals("newPass1234", trainee.getUser().getPassword());
         verify(traineeDao).update(trainee);
     }
 
     @Test
     void changePassword_WrongOldPassword() {
         Trainee trainee = new Trainee();
-        trainee.setUsername("Sarah.Williams");
-        trainee.setPassword("qF5nBrM3gZ");
+        trainee.setUser(new User());
+        trainee.getUser().setUsername("Sarah.Williams");
+        trainee.getUser().setPassword("qF5nBrM3gZ");
 
         ChangeLoginRequest request = new ChangeLoginRequest();
         request.setUsername("Sarah.Williams");
@@ -268,8 +277,9 @@ class TraineeServiceTest {
     @Test
     void changePassword_SameAsOldPassword() {
         Trainee trainee = new Trainee();
-        trainee.setUsername("Sarah.Williams");
-        trainee.setPassword("qF5nBrM3gZ");
+        trainee.setUser(new User());
+        trainee.getUser().setUsername("Sarah.Williams");
+        trainee.getUser().setPassword("qF5nBrM3gZ");
 
         ChangeLoginRequest request = new ChangeLoginRequest();
         request.setUsername("Sarah.Williams");
@@ -284,8 +294,9 @@ class TraineeServiceTest {
     @Test
     void activateTrainee_Success() {
         Trainee trainee = new Trainee();
-        trainee.setUsername("Sarah.Williams");
-        trainee.setIsActive(false);
+        trainee.setUser(new User());
+        trainee.getUser().setUsername("Sarah.Williams");
+        trainee.getUser().setIsActive(false);
 
         ActivateTraineeRequest request = new ActivateTraineeRequest();
         request.setUsername("Sarah.Williams");
@@ -295,15 +306,16 @@ class TraineeServiceTest {
 
         traineeService.activateTrainee(request);
 
-        assertTrue(trainee.getIsActive());
+        assertTrue(trainee.getUser().getIsActive());
         verify(traineeDao).update(trainee);
     }
 
     @Test
     void activateTrainee_AlreadyActive() {
         Trainee trainee = new Trainee();
-        trainee.setUsername("Sarah.Williams");
-        trainee.setIsActive(true);
+        trainee.setUser(new User());
+        trainee.getUser().setUsername("Sarah.Williams");
+        trainee.getUser().setIsActive(true);
 
         ActivateTraineeRequest request = new ActivateTraineeRequest();
         request.setUsername("Sarah.Williams");
@@ -317,8 +329,9 @@ class TraineeServiceTest {
     @Test
     void deactivateTrainee_Success() {
         Trainee trainee = new Trainee();
-        trainee.setUsername("Sarah.Williams");
-        trainee.setIsActive(true);
+        trainee.setUser(new User());
+        trainee.getUser().setUsername("Sarah.Williams");
+        trainee.getUser().setIsActive(true);
 
         DeactivateTraineeRequest request = new DeactivateTraineeRequest("Sarah.Williams", false);
 
@@ -326,15 +339,16 @@ class TraineeServiceTest {
 
         traineeService.deactivateTrainee(request);
 
-        assertFalse(trainee.getIsActive());
+        assertFalse(trainee.getUser().getIsActive());
         verify(traineeDao).update(trainee);
     }
 
     @Test
     void deactivateTrainee_AlreadyInactive() {
         Trainee trainee = new Trainee();
-        trainee.setUsername("Sarah.Williams");
-        trainee.setIsActive(false);
+        trainee.setUser(new User());
+        trainee.getUser().setUsername("Sarah.Williams");
+        trainee.getUser().setIsActive(false);
 
         DeactivateTraineeRequest request = new DeactivateTraineeRequest("Sarah.Williams", false);
 
@@ -346,7 +360,8 @@ class TraineeServiceTest {
     @Test
     void getTrainings_Success() {
         Trainee trainee = new Trainee();
-        trainee.setUsername("Sarah.Williams");
+        trainee.setUser(new User());
+        trainee.getUser().setUsername("Sarah.Williams");
 
         GetTraineeTrainingsRequest request = new GetTraineeTrainingsRequest(
                 "Sarah.Williams",
@@ -386,7 +401,8 @@ class TraineeServiceTest {
     @Test
     void updateTrainerList_Success() {
         Trainee trainee = new Trainee();
-        trainee.setUsername("Sarah.Williams");
+        trainee.setUser(new User());
+        trainee.getUser().setUsername("Sarah.Williams");
         trainee.setTrainers(new ArrayList<>());
 
         TrainingType trainingType = new TrainingType();
@@ -394,9 +410,10 @@ class TraineeServiceTest {
         trainingType.setName("Fitness");
 
         Trainer trainer = new Trainer();
-        trainer.setUsername("John.Smith");
-        trainer.setFirstName("John");
-        trainer.setLastName("Smith");
+        trainer.setUser(new User());
+        trainer.getUser().setUsername("John.Smith");
+        trainer.getUser().setFirstName("John");
+        trainer.getUser().setLastName("Smith");
         trainer.setTrainingType(trainingType);
 
         UpdateTraineeTrainerListRequest request = new UpdateTraineeTrainerListRequest();
@@ -424,9 +441,10 @@ class TraineeServiceTest {
         trainingType.setName("Resistance");
 
         Trainer trainer = new Trainer();
-        trainer.setUsername("Robert.Brown");
-        trainer.setFirstName("Robert");
-        trainer.setLastName("Brown");
+        trainer.setUser(new User());
+        trainer.getUser().setUsername("Robert.Brown");
+        trainer.getUser().setFirstName("Robert");
+        trainer.getUser().setLastName("Brown");
         trainer.setTrainingType(trainingType);
 
         TraineeAssignableTrainerRequest request = new TraineeAssignableTrainerRequest("Sarah.Williams");

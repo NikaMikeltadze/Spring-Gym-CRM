@@ -26,7 +26,6 @@ class GlobalExceptionHandlerTest {
     @Test
     void handleNotFound_ReturnsNotFoundSilently_ForRootPath() {
         when(request.getRequestURI()).thenReturn("/");
-        when(request.getMethod()).thenReturn("GET");
 
         ResponseEntity<ErrorResponse> response = handler.handleNotFound(
                 new NoResourceFoundException(HttpMethod.GET, ""),

@@ -71,7 +71,7 @@ class AuthControllerRestAssuredTest extends RestAssuredControllerTestSupport {
                         }
                         """)
         .when()
-                .post("/api/auth")
+                .post("/api/auth/change_password")
         .then()
                 .statusCode(200);
 
@@ -90,7 +90,7 @@ class AuthControllerRestAssuredTest extends RestAssuredControllerTestSupport {
                         }
                         """)
         .when()
-                .post("/api/auth")
+                .post("/api/auth/change_password")
         .then()
                 .statusCode(400)
                 .body("fieldErrors.newPassword", org.hamcrest.Matchers.equalTo("New Password must not be blank"));

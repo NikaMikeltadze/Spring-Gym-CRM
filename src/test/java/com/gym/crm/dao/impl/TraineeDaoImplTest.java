@@ -1,6 +1,7 @@
 package com.gym.crm.dao.impl;
 
 import com.gym.crm.entity.Trainee;
+import com.gym.crm.entity.User;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,9 +27,10 @@ class TraineeDaoImplTest {
     void save_Success() {
         Trainee trainee = new Trainee();
         trainee.setId(5L);
-        trainee.setUsername("Sarah.Williams");
-        trainee.setFirstName("Sarah");
-        trainee.setLastName("Williams");
+        trainee.setUser(new User());
+        trainee.getUser().setUsername("Sarah.Williams");
+        trainee.getUser().setFirstName("Sarah");
+        trainee.getUser().setLastName("Williams");
 
         traineeDao.save(trainee);
 
@@ -40,7 +42,8 @@ class TraineeDaoImplTest {
         Long id = 5L;
         Trainee expectedTrainee = new Trainee();
         expectedTrainee.setId(id);
-        expectedTrainee.setUsername("Sarah.Williams");
+        expectedTrainee.setUser(new User());
+        expectedTrainee.getUser().setUsername("Sarah.Williams");
 
         when(entityManager.find(Trainee.class, id)).thenReturn(expectedTrainee);
 
@@ -48,7 +51,7 @@ class TraineeDaoImplTest {
 
         assertTrue(result.isPresent());
         assertEquals(id, result.get().getId());
-        assertEquals("Sarah.Williams", result.get().getUsername());
+        assertEquals("Sarah.Williams", result.get().getUser().getUsername());
         verify(entityManager).find(Trainee.class, id);
     }
 
@@ -67,8 +70,9 @@ class TraineeDaoImplTest {
     void update_Success() {
         Trainee trainee = new Trainee();
         trainee.setId(5L);
-        trainee.setUsername("Sarah.Williams");
-        trainee.setFirstName("Sarah");
+        trainee.setUser(new User());
+        trainee.getUser().setUsername("Sarah.Williams");
+        trainee.getUser().setFirstName("Sarah");
 
         when(entityManager.merge(trainee)).thenReturn(trainee);
 
