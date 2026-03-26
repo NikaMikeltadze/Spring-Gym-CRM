@@ -46,3 +46,7 @@ INSERT INTO training (id, trainee_id, trainer_id, training_name, training_type_i
 INSERT INTO training (id, trainee_id, trainer_id, training_name, training_type_id, training_date, training_duration) VALUES (10, 5, 7, 'Advanced Resistance Training', 5, '2026-03-20', 55);
 INSERT INTO training (id, trainee_id, trainer_id, training_name, training_type_id, training_date, training_duration) VALUES (11, 6, 1, 'Weight Training Basics', 1, '2026-03-22', 60);
 INSERT INTO training (id, trainee_id, trainer_id, training_name, training_type_id, training_date, training_duration) VALUES (12, 8, 7, 'Resistance Circuit', 5, '2026-03-25', 50);
+
+ALTER TABLE trainee ALTER COLUMN id RESTART WITH 11;
+ALTER TABLE trainer ALTER COLUMN id RESTART WITH 11;
+ALTER TABLE users ALTER COLUMN id RESTART WITH 11;
