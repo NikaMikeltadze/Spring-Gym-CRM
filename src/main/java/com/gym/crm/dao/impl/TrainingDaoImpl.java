@@ -51,7 +51,7 @@ public class TrainingDaoImpl implements TrainingDao {
     public List<Training> findByTraineeUsername(String traineeUsername) {
         log.debug("Finding trainings by trainee username={}", traineeUsername);
         List<Training> trainings = entityManager.createQuery(
-                        "SELECT t FROM Training t WHERE t.trainee.username = :username",
+                        "SELECT t FROM Training t WHERE t.trainee.user.username = :username",
                         Training.class)
                 .setParameter("username", traineeUsername)
                 .getResultList();
@@ -63,7 +63,7 @@ public class TrainingDaoImpl implements TrainingDao {
     public List<Training> findByTrainerUsername(String trainerUsername) {
         log.debug("Finding trainings by trainer username={}", trainerUsername);
         List<Training> trainings = entityManager.createQuery(
-                "SELECT t FROM Training t WHERE t.trainer.username = :username",
+                "SELECT t FROM Training t WHERE t.trainer.user.username = :username",
                 Training.class
         ).setParameter("username", trainerUsername).getResultList();
         log.debug("Found {} trainings for trainer={}", trainings.size(), trainerUsername);

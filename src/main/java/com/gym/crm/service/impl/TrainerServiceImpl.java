@@ -42,11 +42,11 @@ public class TrainerServiceImpl implements TrainerService {
     @Override
     @Transactional
     public RegisterTrainerResponse createTrainer(Trainer trainer) {
-        log.debug("Creating trainer with firstName={}, lastName={}", trainer.getFirstName(), trainer.getLastName());
+        log.debug("Creating trainer with firstName={}, lastName={}", trainer.getUser().getFirstName(), trainer.getUser().getLastName());
 
         String username = usernamePasswordGenerator.generateUsername(
-                trainer.getFirstName(),
-                trainer.getLastName(),
+                trainer.getUser().getFirstName(),
+                trainer.getUser().getLastName(),
                 trainerDao::exists
         );
         if (traineeDao.exists(username)) {
@@ -54,9 +54,9 @@ public class TrainerServiceImpl implements TrainerService {
         }
         String password = usernamePasswordGenerator.generatePassword();
 
-        trainer.setUsername(username);
-        trainer.setPassword(password);
-        trainer.setIsActive(true);
+        trainer.getUser().setUsername(username);
+        trainer.getUser().setPassword(password);
+        trainer.getUser().setIsActive(true);
 
         trainerDao.save(trainer);
         log.info("Successfully created trainer with username={}", username);
@@ -71,7 +71,7 @@ public class TrainerServiceImpl implements TrainerService {
                 .orElseThrow(() -> new NotFoundException("Trainer not found with username: " + request.getUsername()));
         trainerMapper.updateEntityFromRequest(request, trainer);
         trainerDao.update(trainer);
-        log.info("Successfully updated trainer with username={}", trainer.getUsername());
+        log.info("Successfully updated trainer with username={}", trainer.getUser().getUsername());
         return trainerMapper.toUpdateProfileResponse(trainer);
     }
 
@@ -99,7 +99,7 @@ public class TrainerServiceImpl implements TrainerService {
             throw new NotFoundException("Trainer not found with username: " + username);
         }
 
-        if (!trainer.get().getPassword().equals(oldPassword)) {
+        if (!trainer.get().getUser().getPassword().equals(oldPassword)) {
             log.warn("Password change failed for trainer={}: old password does not match", username);
             throw new IllegalArgumentException("Old password is incorrect");
         }
@@ -109,7 +109,7 @@ public class TrainerServiceImpl implements TrainerService {
             throw new IllegalArgumentException("New password cannot be the same as old password");
         }
 
-        trainer.get().setPassword(newPassword);
+        trainer.get().getUser().setPassword(newPassword);
         trainerDao.update(trainer.get());
         log.info("Successfully changed password for trainer username={}", username);
     }
@@ -124,12 +124,12 @@ public class TrainerServiceImpl implements TrainerService {
             throw new NotFoundException("Trainer not found with username: " + username);
         }
 
-        if (trainer.get().getIsActive()) {
+        if (trainer.get().getUser().getIsActive()) {
             log.warn("Trainer activation failed: trainer={} is already active", username);
             throw new IllegalStateException("Trainer is already active");
         }
 
-        trainer.get().setIsActive(true);
+        trainer.get().getUser().setIsActive(true);
         trainerDao.update(trainer.get());
         log.info("Successfully activated trainer username={}", username);
     }
@@ -144,12 +144,12 @@ public class TrainerServiceImpl implements TrainerService {
             throw new NotFoundException("Trainer not found with username: " + username);
         }
 
-        if (!trainer.get().getIsActive()) {
+        if (!trainer.get().getUser().getIsActive()) {
             log.warn("Trainer deactivation failed: trainer={} is already inactive", username);
             throw new IllegalStateException("Trainer is already inactive");
         }
 
-        trainer.get().setIsActive(false);
+        trainer.get().getUser().setIsActive(false);
         trainerDao.update(trainer.get());
         log.info("Successfully deactivated trainer username={}", username);
     }

@@ -3,6 +3,7 @@ package com.gym.crm.service.impl;
 import com.gym.crm.dao.TraineeDao;
 import com.gym.crm.dao.TrainerDao;
 import com.gym.crm.dao.TrainingDao;
+import com.gym.crm.dao.UserDao;
 import com.gym.crm.dto.request.ChangeLoginRequest;
 import com.gym.crm.dto.request.trainee.*;
 import com.gym.crm.dto.request.trainer.GetTrainerTrainingsRequest;
@@ -12,9 +13,11 @@ import com.gym.crm.dto.response.trainer.TrainerProfileInfo;
 import com.gym.crm.entity.Trainee;
 import com.gym.crm.entity.Trainer;
 import com.gym.crm.entity.Training;
+import com.gym.crm.entity.User;
 import com.gym.crm.mapper.TraineeMapper;
 import com.gym.crm.mapper.TrainerMapper;
 import com.gym.crm.mapper.TrainingMapper;
+import com.gym.crm.mapper.UserMapper;
 import com.gym.crm.service.TraineeService;
 import com.gym.crm.util.UsernamePasswordGenerator;
 import jakarta.validation.Valid;
@@ -39,19 +42,22 @@ public class TraineeServiceImpl implements TraineeService {
     private final TraineeDao traineeDao;
     private final TrainerDao trainerDao;
     private final TrainingDao trainingDao;
+    private final UserDao userDao;
     private final UsernamePasswordGenerator usernamePasswordGenerator;
     private final TrainerMapper trainerMapper;
     private final TraineeMapper traineeMapper;
     private final TrainingMapper trainingMapper;
+    private final UserMapper userMapper;
 
     @Override
     @Transactional
     public RegisterTraineeResponse createTrainee(Trainee trainee) {
-        log.debug("Creating trainee with firstName={}, lastName={}", trainee.getFirstName(), trainee.getLastName());
+
+        log.debug("Creating trainee with firstName={}, lastName={}", trainee.getUser().getFirstName(), trainee.getUser().getLastName());
 
         String username = usernamePasswordGenerator.generateUsername(
-                trainee.getFirstName(),
-                trainee.getLastName(),
+                trainee.getUser().getFirstName(),
+                trainee.getUser().getLastName(),
                 traineeDao::exists
         );
         if (trainerDao.exists(username)) {
@@ -59,9 +65,9 @@ public class TraineeServiceImpl implements TraineeService {
         }
         String password = usernamePasswordGenerator.generatePassword();
 
-        trainee.setUsername(username);
-        trainee.setPassword(password);
-        trainee.setIsActive(true);
+        trainee.getUser().setUsername(username);
+        trainee.getUser().setPassword(password);
+        trainee.getUser().setIsActive(true);
 
         traineeDao.save(trainee);
         log.info("Successfully created trainee with username={}", username);
@@ -77,7 +83,7 @@ public class TraineeServiceImpl implements TraineeService {
 
         traineeMapper.updateEntityFromRequest(request, trainee);
         traineeDao.save(trainee);
-        log.info("Successfully updated trainee with username={}", trainee.getUsername());
+        log.info("Successfully updated trainee with username={}", trainee.getUser().getUsername());
         return traineeMapper.toUpdateProfileResponse(trainee);
     }
 
@@ -118,7 +124,7 @@ public class TraineeServiceImpl implements TraineeService {
                     return new com.gym.crm.exception.NotFoundException("Trainee not found with username: " + request.getUsername());
                 });
 
-        if (!trainee.getPassword().equals(request.getPassword())) {
+        if (!trainee.getUser().getPassword().equals(request.getPassword())) {
             log.warn("Password change failed for trainee={}: old password does not match", request.getUsername());
             throw new IllegalArgumentException("Old password is incorrect");
         }
@@ -128,7 +134,7 @@ public class TraineeServiceImpl implements TraineeService {
             throw new IllegalArgumentException("New password cannot be the same as old password");
         }
 
-        trainee.setPassword(request.getNewPassword());
+        trainee.getUser().setPassword(request.getNewPassword());
         traineeDao.update(trainee);
         log.info("Successfully changed password for trainee username={}", request.getUsername());
     }
@@ -144,12 +150,12 @@ public class TraineeServiceImpl implements TraineeService {
                     return new com.gym.crm.exception.NotFoundException("Trainee not found with username: " + request.getUsername());
                 });
 
-        if (trainee.getIsActive()) {
+        if (trainee.getUser().getIsActive()) {
             log.warn("Trainee activation failed: trainee={} is already active", request.getUsername());
             throw new IllegalStateException("Trainee is already active");
         }
 
-        trainee.setIsActive(true);
+        trainee.getUser().setIsActive(true);
         traineeDao.update(trainee);
         log.info("Successfully activated trainee username={}", request.getUsername());
     }
@@ -165,12 +171,12 @@ public class TraineeServiceImpl implements TraineeService {
                     return new com.gym.crm.exception.NotFoundException("Trainee not found with username: " + request.getUsername());
                 });
 
-        if (!trainee.getIsActive()) {
+        if (!trainee.getUser().getIsActive()) {
             log.warn("Trainee deactivation failed: trainee={} is already inactive", request.getUsername());
             throw new IllegalStateException("Trainee is already inactive");
         }
 
-        trainee.setIsActive(false);
+        trainee.getUser().setIsActive(false);
         traineeDao.update(trainee);
         log.info("Successfully deactivated trainee username={}", request.getUsername());
     }
@@ -201,7 +207,7 @@ public class TraineeServiceImpl implements TraineeService {
     public UpdateTraineeTrainerListResponse updateTrainerList(UpdateTraineeTrainerListRequest request) {
         Trainee trainee = traineeDao.findByUsername(request.getTraineeUsername()).orElseThrow(() ->
                 new com.gym.crm.exception.NotFoundException("Trainee not found with username: " + request.getTraineeUsername()));
-        log.debug("Updating trainers for trainee={}", trainee.getUsername());
+        log.debug("Updating trainers for trainee={}", trainee.getUser().getUsername());
         List<Trainer> trainers = new ArrayList<>();
 
         for (String trainerUsername : request.getTrainerUsernameList()) {
@@ -212,7 +218,7 @@ public class TraineeServiceImpl implements TraineeService {
 
         trainee.setTrainers(trainers);
         traineeDao.update(trainee);
-        log.info("Successfully updated trainers for trainee={}", trainee.getUsername());
+        log.info("Successfully updated trainers for trainee={}", trainee.getUser().getUsername());
         List<TrainerProfileInfo> trainerList = trainers
                 .stream()
                 .map(trainerMapper::toProfileInfo)

@@ -137,10 +137,10 @@ public class GymFacadeImpl implements GymFacade {
 
     private GetTrainerProfileResponse mapToGetTrainerProfileResponse(Trainer trainer) {
         return GetTrainerProfileResponse.builder()
-                .firstName(trainer.getFirstName())
-                .lastName(trainer.getLastName())
+                .firstName(trainer.getUser().getFirstName())
+                .lastName(trainer.getUser().getLastName())
                 .TrainingTypeId(trainer.getTrainingType().getId())
-                .isActive(trainer.getIsActive())
+                .isActive(trainer.getUser().getIsActive())
                 .traineeList(trainer.getTrainees()
                         .stream()
                         .map(traineeMapper::toGetProfileResponse)
@@ -151,11 +151,11 @@ public class GymFacadeImpl implements GymFacade {
 
     private UpdateTrainerProfileResponse mapToUpdateTrainerProfileResponse(Trainer trainer) {
         return UpdateTrainerProfileResponse.builder()
-                .username(trainer.getUsername())
-                .firstName(trainer.getFirstName())
-                .lastName(trainer.getLastName())
+                .username(trainer.getUser().getUsername())
+                .firstName(trainer.getUser().getFirstName())
+                .lastName(trainer.getUser().getLastName())
                 .trainingTypeId(trainer.getTrainingType().getId())
-                .isActive(trainer.getIsActive())
+                .isActive(trainer.getUser().getIsActive())
                 .traineeList(trainer.getTrainees()
                         .stream()
                         .map(traineeMapper::toProfileInfo)

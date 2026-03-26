@@ -1,8 +1,14 @@
 package com.gym.crm.mapper;
 
 import com.gym.crm.dto.UserDTO;
+import com.gym.crm.dto.request.trainee.RegisterTraineeRequest;
+import com.gym.crm.entity.Trainee;
 import com.gym.crm.entity.User;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Past;
 import org.springframework.stereotype.Component;
+
+import java.time.LocalDate;
 
 @Component
 public class UserMapper {

@@ -24,7 +24,7 @@ public class TrainerDaoImpl implements TrainerDao {
     @Override
     public void save(Trainer trainer) {
         entityManager.persist(trainer);
-        log.debug("Saved trainer with id={}, username={}", trainer.getId(), trainer.getUsername());
+        log.debug("Saved trainer with id={}, username={}", trainer.getId(), trainer.getUser().getUsername());
     }
 
     @Override
@@ -38,7 +38,7 @@ public class TrainerDaoImpl implements TrainerDao {
 
     @Override
     public Optional<Trainer> findByUsername(String username) {
-        List<Trainer> trainers = entityManager.createQuery("SELECT t FROM Trainer t WHERE t.username = :username", Trainer.class)
+        List<Trainer> trainers = entityManager.createQuery("SELECT t FROM Trainer t WHERE t.user.username = :username", Trainer.class)
                 .setParameter("username", username)
                 .getResultList();
         log.debug("Finding trainer by username={}, found: {}", username, !trainers.isEmpty());
@@ -56,7 +56,7 @@ public class TrainerDaoImpl implements TrainerDao {
     @Override
     public void update(Trainer trainer) {
         entityManager.merge(trainer);
-        log.info("Updated trainer with id={}, username={}", trainer.getId(), trainer.getUsername());
+        log.info("Updated trainer with id={}, username={}", trainer.getId(), trainer.getUser().getUsername());
     }
 
     @Override
@@ -70,10 +70,10 @@ public class TrainerDaoImpl implements TrainerDao {
     public List<Trainer> findActiveTrainersNotAssignedTo(String traineeUsername) {
         List<Trainer> trainers = entityManager.createQuery(
                         "SELECT tr FROM Trainer tr " +
-                                "WHERE tr.isActive = true " +
+                                "WHERE tr.user.isActive = true " +
                                 "AND tr.id NOT IN (" +
                                 "    SELECT assignedTrainees.id FROM Trainee t JOIN t.trainers assignedTrainees " +
-                                "    WHERE t.username = :traineeUsername" +
+                                "    WHERE t.user.username = :traineeUsername" +
                                 ")",
                         Trainer.class
                 )

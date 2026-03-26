@@ -24,7 +24,7 @@ public class TraineeDaoImpl implements TraineeDao {
     @Override
     public void save(Trainee trainee) {
         entityManager.persist(trainee);
-        log.info("Saved trainee with id={}, username={}", trainee.getId(), trainee.getUsername());
+        log.info("Saved trainee with id={}, username={}", trainee.getId(), trainee.getUser().getUsername());
     }
 
     @Override
@@ -45,7 +45,7 @@ public class TraineeDaoImpl implements TraineeDao {
 
     @Override
     public Optional<Trainee> findByUsername(String username) {
-        List<Trainee> trainee = entityManager.createQuery("SELECT t FROM Trainee t WHERE t.username = :username"
+        List<Trainee> trainee = entityManager.createQuery("SELECT t FROM Trainee t WHERE t.user.username = :username"
                         , Trainee.class).setParameter("username", username)
                 .getResultList();
         log.debug("Found trainee by username={}:{}", username, !trainee.isEmpty());
@@ -69,7 +69,7 @@ public class TraineeDaoImpl implements TraineeDao {
     @Override
     public void update(Trainee trainee) {
         entityManager.merge(trainee);
-        log.debug("Updated trainee with id={}, username={}", trainee.getId(), trainee.getUsername());
+        log.debug("Updated trainee with id={}, username={}", trainee.getId(), trainee.getUser().getUsername());
     }
 
     @Override

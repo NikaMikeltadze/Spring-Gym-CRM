@@ -10,9 +10,7 @@ import com.gym.crm.dto.response.trainer.GetTrainerTrainingsResponse;
 import com.gym.crm.dto.response.trainer.RegisterTrainerResponse;
 import com.gym.crm.dto.response.trainer.TrainerProfileInfo;
 import com.gym.crm.dto.response.trainer.UpdateTrainerProfileResponse;
-import com.gym.crm.entity.Trainee;
-import com.gym.crm.entity.Trainer;
-import com.gym.crm.entity.Training;
+import com.gym.crm.entity.*;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -26,10 +24,10 @@ public class TrainerMapper {
 
         TrainerDTO dto = new TrainerDTO();
         dto.setId(trainer.getId());
-        dto.setFirstName(trainer.getFirstName());
-        dto.setLastName(trainer.getLastName());
-        dto.setUsername(trainer.getUsername());
-        dto.setIsActive(trainer.getIsActive());
+        dto.setFirstName(trainer.getUser().getFirstName());
+        dto.setLastName(trainer.getUser().getLastName());
+        dto.setUsername(trainer.getUser().getUsername());
+        dto.setIsActive(trainer.getUser().getIsActive());
         dto.setTrainingTypeId(trainer.getTrainingType() != null ? trainer.getTrainingType().getId() : null);
         dto.setTrainingTypeName(trainer.getTrainingType() != null ? trainer.getTrainingType().getName() : null);
         return dto;
@@ -40,10 +38,10 @@ public class TrainerMapper {
 
         Trainer trainer = new Trainer();
         trainer.setId(dto.getId());
-        trainer.setFirstName(dto.getFirstName());
-        trainer.setLastName(dto.getLastName());
-        trainer.setUsername(dto.getUsername());
-        trainer.setIsActive(dto.getIsActive());
+        trainer.getUser().setFirstName(dto.getFirstName());
+        trainer.getUser().setLastName(dto.getLastName());
+        trainer.getUser().setUsername(dto.getUsername());
+        trainer.getUser().setIsActive(dto.getIsActive());
 //        trainer.setTrainingType();
         return trainer;
     }
@@ -51,10 +49,17 @@ public class TrainerMapper {
     public Trainer toEntity(RegisterTrainerRequest request) {
         if (request == null) return null;
 
+        User user = new User();
+        user.setFirstName(request.getFirstName());
+        user.setLastName(request.getLastName());
+
         Trainer trainer = new Trainer();
-        trainer.setFirstName(request.getFirstName());
-        trainer.setLastName(request.getLastName());
-//        trainer.setTrainingType();
+        trainer.setUser(user);
+        TrainingType trainingType = new TrainingType();
+
+        trainingType.setId(request.getTrainingTypeId());
+        trainer.setTrainingType(trainingType);
+
         return trainer;
     }
 
@@ -62,9 +67,9 @@ public class TrainerMapper {
         if (trainer == null) return null;
 
         return new TrainerProfileInfo(
-                trainer.getUsername(),
-                trainer.getFirstName(),
-                trainer.getLastName(),
+                trainer.getUser().getUsername(),
+                trainer.getUser().getFirstName(),
+                trainer.getUser().getLastName(),
                 trainer.getTrainingType() != null ? trainer.getTrainingType().getId() : null
         );
     }
@@ -73,8 +78,8 @@ public class TrainerMapper {
         if (trainer == null) return null;
 
         return new RegisterTrainerResponse(
-                trainer.getUsername(),
-                trainer.getPassword()
+                trainer.getUser().getUsername(),
+                trainer.getUser().getPassword()
         );
     }
 
@@ -83,15 +88,15 @@ public class TrainerMapper {
 
         List<GetTraineeProfileResponse> traineeResponses = trainer.getTrainees() != null
                 ? trainer.getTrainees().stream()
-                .map(this::toNestedTraineeResponse)
-                .collect(Collectors.toList())
+                  .map(this::toNestedTraineeResponse)
+                  .collect(Collectors.toList())
                 : new ArrayList<>();
 
         return new GetTrainerProfileResponse(
-                trainer.getFirstName(),
-                trainer.getLastName(),
+                trainer.getUser().getFirstName(),
+                trainer.getUser().getLastName(),
                 trainer.getTrainingType() != null ? trainer.getTrainingType().getId() : null,
-                trainer.getIsActive(),
+                trainer.getUser().getIsActive(),
                 traineeResponses
         );
     }
@@ -101,20 +106,20 @@ public class TrainerMapper {
 
         List<TraineeProfileInfo> traineeInfos = trainer.getTrainees() != null
                 ? trainer.getTrainees().stream()
-                .map(trainee -> new TraineeProfileInfo(
-                        trainee.getUsername(),
-                        trainee.getFirstName(),
-                        trainee.getLastName()
-                ))
-                .collect(Collectors.toList())
+                  .map(trainee -> new TraineeProfileInfo(
+                          trainee.getUser().getUsername(),
+                          trainee.getUser().getFirstName(),
+                          trainee.getUser().getLastName()
+                  ))
+                  .collect(Collectors.toList())
                 : new ArrayList<>();
 
         return new UpdateTrainerProfileResponse(
-                trainer.getUsername(),
-                trainer.getFirstName(),
-                trainer.getLastName(),
+                trainer.getUser().getUsername(),
+                trainer.getUser().getFirstName(),
+                trainer.getUser().getLastName(),
                 trainer.getTrainingType() != null ? trainer.getTrainingType().getId() : null,
-                trainer.getIsActive(),
+                trainer.getUser().getIsActive(),
                 traineeInfos
         );
     }
@@ -127,25 +132,25 @@ public class TrainerMapper {
                 training.getTrainingDate(),
                 training.getTrainingType() != null ? training.getTrainingType().getName() : null,
                 training.getTrainingDuration(),
-                training.getTrainee() != null ? training.getTrainee().getUsername() : null
+                training.getTrainee() != null ? training.getTrainee().getUser().getUsername() : null
         );
     }
 
     public void updateEntityFromRequest(UpdateTrainerProfileRequest request, Trainer trainer) {
-        trainer.setFirstName(request.getFirstName());
-        trainer.setLastName(request.getLastName());
-        trainer.setIsActive(request.getIsActive());
+        trainer.getUser().setFirstName(request.getFirstName());
+        trainer.getUser().setLastName(request.getLastName());
+        trainer.getUser().setIsActive(request.getIsActive());
     }
 
     private GetTraineeProfileResponse toNestedTraineeResponse(Trainee trainee) {
         if (trainee == null) return null;
 
         return GetTraineeProfileResponse.builder()
-                .firstName(trainee.getFirstName())
-                .lastName(trainee.getLastName())
+                .firstName(trainee.getUser().getFirstName())
+                .lastName(trainee.getUser().getLastName())
                 .dateOfBirth(trainee.getDateOfBirth())
                 .address(trainee.getAddress())
-                .isActive(trainee.getIsActive())
+                .isActive(trainee.getUser().getIsActive())
                 .trainers(null)
                 .build();
     }
