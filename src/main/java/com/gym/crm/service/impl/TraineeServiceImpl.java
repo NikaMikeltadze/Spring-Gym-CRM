@@ -13,7 +13,6 @@ import com.gym.crm.dto.response.trainer.TrainerProfileInfo;
 import com.gym.crm.entity.Trainee;
 import com.gym.crm.entity.Trainer;
 import com.gym.crm.entity.Training;
-import com.gym.crm.entity.User;
 import com.gym.crm.mapper.TraineeMapper;
 import com.gym.crm.mapper.TrainerMapper;
 import com.gym.crm.mapper.TrainingMapper;
