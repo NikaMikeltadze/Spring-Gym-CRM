@@ -178,7 +178,7 @@ public class TrainingDaoImpl implements TrainingDao {
 
         List<Predicate> predicates = new ArrayList<>();
 
-        predicates.add(cb.equal(root.get("trainer").get("username"), trainerUsername));
+        predicates.add(cb.equal(root.get("trainer").get("user").get("username"), trainerUsername));
 
         if (fromDate != null) {
             predicates.add(cb.greaterThanOrEqualTo(root.get("trainingDate"), fromDate));
@@ -190,8 +190,8 @@ public class TrainingDaoImpl implements TrainingDao {
         if (traineeName != null && !traineeName.isEmpty()) {
             predicates.add(cb.like(
                     cb.concat(
-                            cb.concat(root.get("trainee").get("firstName"), cb.literal(" ")),
-                            root.get("trainee").get("lastName")
+                            cb.concat(root.get("trainee").get("user").get("firstName"), cb.literal(" ")),
+                            root.get("trainee").get("user").get("lastName")
                     ),
                     "%" + traineeName + "%"
             ));
