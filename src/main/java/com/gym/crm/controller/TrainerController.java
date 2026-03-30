@@ -160,7 +160,7 @@ public class TrainerController {
                     content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
     })
     public ResponseEntity<List<GetTrainerTrainingsResponse>> getTrainerTrainings(@PathVariable String username,
-                                                                                  @Valid @ModelAttribute GetTrainerTrainingsRequest request) {
+                                                                                 @Valid @ModelAttribute GetTrainerTrainingsRequest request) {
         request.setUsername(username);
         List<GetTrainerTrainingsResponse> response = gymFacade.getTrainerTrainings(request);
         return ResponseEntity.ok(response);

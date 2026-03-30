@@ -8,6 +8,8 @@ import java.util.Optional;
 public interface TrainerDao {
     void save(Trainer trainer);
 
+    long countAll();
+
     Optional<Trainer> findByUsername(String username);
 
     Optional<Trainer> findById(Long id);

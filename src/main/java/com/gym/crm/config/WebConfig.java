@@ -5,7 +5,6 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.gym.crm.config.auth.HeaderAuthenticationInterceptor;
 import com.gym.crm.config.logging.RequestLoggingInterceptor;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -15,8 +14,6 @@ import org.springframework.web.util.pattern.PathPatternParser;
 import java.util.List;
 
 @Configuration
-@EnableWebMvc
-@ComponentScan(basePackages = "com.gym.crm")
 @RequiredArgsConstructor
 public class WebConfig implements WebMvcConfigurer {
 

@@ -14,9 +14,9 @@ public class TrainingMapper {
         TrainingDTO dto = new TrainingDTO();
         dto.setId(training.getId());
         dto.setTraineeId(training.getTrainee() != null ? training.getTrainee().getId() : null);
-        dto.setTraineeUsername(training.getTrainee() != null ? training.getTrainee().getUsername() : null);
+        dto.setTraineeUsername(training.getTrainee() != null ? training.getTrainee().getUser().getUsername() : null);
         dto.setTrainerId(training.getTrainer() != null ? training.getTrainer().getId() : null);
-        dto.setTrainerUsername(training.getTrainer() != null ? training.getTrainer().getUsername() : null);
+        dto.setTrainerUsername(training.getTrainer() != null ? training.getTrainer().getUser().getUsername() : null);
         dto.setTrainingName(training.getTrainingName());
         dto.setTrainingTypeId(training.getTrainingType() != null ? training.getTrainingType().getId() : null);
         dto.setTrainingTypeName(training.getTrainingType() != null ? training.getTrainingType().getName() : null);
@@ -48,7 +48,7 @@ public class TrainingMapper {
                 .trainingDate(training.getTrainingDate())
                 .trainingTypeName(training.getTrainingType().getName())
                 .trainingDuration(training.getTrainingDuration())
-                .trainerName(training.getTrainer().getFirstName())
+                .trainerName(training.getTrainer().getUser().getFirstName())
                 .build();
     }
 }

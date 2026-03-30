@@ -25,16 +25,18 @@ import java.util.Map;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler({NoHandlerFoundException.class, NoResourceFoundException.class})
-    public ResponseEntity<ErrorResponse> handleNotFound(Exception ex) {
-        String path = ex instanceof NoHandlerFoundException nhe
-                ? nhe.getRequestURL()
-                : ex.getMessage();
+    public ResponseEntity<ErrorResponse> handleNotFound(Exception ex, HttpServletRequest request) {
+        String path = request.getRequestURI();
 
-        if (path.contains("favicon.ico")) {
-            return ResponseEntity.notFound().build(); // silent
+        if (isSilentNotFound(path)) {
+            log.debug("Ignoring expected resource miss for path={}", path);
+            return ResponseEntity.notFound().build();
         }
 
-        log.error("Unhandled error", ex);
+        log.warn("Request target not found: method={}, path={}, errorType={}",
+                request.getMethod(),
+                path,
+                ex.getClass().getSimpleName());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
 
@@ -112,5 +114,12 @@ public class GlobalExceptionHandler {
                 .path(request.getRequestURI())
                 .fieldErrors(fieldErrors == null || fieldErrors.isEmpty() ? null : fieldErrors)
                 .build();
+    }
+
+    private boolean isSilentNotFound(String path) {
+        return path == null
+                || path.isBlank()
+                || "/".equals(path)
+                || "/favicon.ico".equals(path);
     }
 }

@@ -11,21 +11,25 @@ import java.util.List;
 
 @Getter
 @Setter
-@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 @AllArgsConstructor
 @NoArgsConstructor
 
 @Entity
-public class Trainee extends User {
-    @Column(name = "Date of Birth")
+public class Trainee {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    Long id;
+
+    @Column(name = "date_of_birth")
     LocalDate dateOfBirth;
 
-    @Column(name = "Address")
+    @Column(name = "address")
     @NotBlank(message = "Address must not be blank")
     String address;
 
-    @OneToOne
-    @JoinColumn(name = "UserId", nullable = false, unique = true)
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "user_id", nullable = false, unique = true)
     @NotNull(message = "User must not be null")
     User user;
 

@@ -9,6 +9,7 @@ import com.gym.crm.dto.response.training.GetTrainingTypesResponse;
 import com.gym.crm.dto.response.training.TrainingTypeInfo;
 import com.gym.crm.entity.Trainee;
 import com.gym.crm.entity.Trainer;
+import com.gym.crm.entity.User;
 import com.gym.crm.entity.Training;
 import com.gym.crm.entity.TrainingType;
 import com.gym.crm.mapper.TrainingTypeMapper;
@@ -58,10 +59,12 @@ class TrainingServiceTest {
         request.setTrainingDuration(60.0);
 
         Trainee trainee = new Trainee();
-        trainee.setUsername("Sarah.Williams");
+        trainee.setUser(new User());
+        trainee.getUser().setUsername("Sarah.Williams");
 
         Trainer trainer = new Trainer();
-        trainer.setUsername("John.Smith");
+        trainer.setUser(new User());
+        trainer.getUser().setUsername("John.Smith");
 
         TrainingType trainingType = new TrainingType();
         trainingType.setId(1L);
@@ -102,6 +105,7 @@ class TrainingServiceTest {
         request.setTrainingName("Morning Fitness Bootcamp");
 
         Trainee trainee = new Trainee();
+        trainee.setUser(new User());
         when(traineeDao.findByUsername("Sarah.Williams")).thenReturn(Optional.of(trainee));
         when(trainerDao.findByUsername("NonExistent.Trainer")).thenReturn(Optional.empty());
 

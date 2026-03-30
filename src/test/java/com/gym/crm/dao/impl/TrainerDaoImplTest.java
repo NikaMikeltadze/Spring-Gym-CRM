@@ -1,6 +1,7 @@
 package com.gym.crm.dao.impl;
 
 import com.gym.crm.entity.Trainer;
+import com.gym.crm.entity.User;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,9 +30,10 @@ class TrainerDaoImplTest {
     void save_Success() {
         Trainer trainer = new Trainer();
         trainer.setId(1L);
-        trainer.setUsername("John.Smith");
-        trainer.setFirstName("John");
-        trainer.setLastName("Smith");
+        trainer.setUser(new User());
+        trainer.getUser().setUsername("John.Smith");
+        trainer.getUser().setFirstName("John");
+        trainer.getUser().setLastName("Smith");
 
         trainerDao.save(trainer);
 
@@ -43,14 +45,15 @@ class TrainerDaoImplTest {
         Long id = 1L;
         Trainer expectedTrainer = new Trainer();
         expectedTrainer.setId(id);
-        expectedTrainer.setUsername("John.Smith");
+        expectedTrainer.setUser(new User());
+        expectedTrainer.getUser().setUsername("John.Smith");
 
         when(entityManager.find(Trainer.class, id)).thenReturn(expectedTrainer);
         Trainer result = trainerDao.findById(id).orElse(null);
 
         assertNotNull(result);
         assertEquals(id, result.getId());
-        assertEquals("John.Smith", result.getUsername());
+        assertEquals("John.Smith", result.getUser().getUsername());
         verify(entityManager).find(Trainer.class, id);
     }
 
@@ -69,8 +72,9 @@ class TrainerDaoImplTest {
     void update_Success() {
         Trainer trainer = new Trainer();
         trainer.setId(1L);
-        trainer.setUsername("John.Smith");
-        trainer.setFirstName("John");
+        trainer.setUser(new User());
+        trainer.getUser().setUsername("John.Smith");
+        trainer.getUser().setFirstName("John");
 
         when(entityManager.merge(trainer)).thenReturn(trainer);
 

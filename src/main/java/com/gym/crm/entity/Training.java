@@ -22,29 +22,29 @@ public class Training {
     Long id;
 
     @ManyToOne(cascade = CascadeType.REMOVE)
-    @JoinColumn(name = "Trainee Id")
+    @JoinColumn(name = "trainee_id")
     @NotNull(message = "Trainee must not be null")
     Trainee trainee;
 
     @ManyToOne
-    @JoinColumn(name = "Trainer Id")
+    @JoinColumn(name = "trainer_id")
     @NotNull(message = "Trainer must not be null")
     Trainer trainer;
 
-    @Column(name = "Training Name", nullable = false)
+    @Column(name = "training_name", nullable = false)
     @NotBlank(message = "Training Name must not be blank")
     String trainingName;
 
     @ManyToOne
-    @JoinColumn(name = "Training Type Id")
+    @JoinColumn(name = "training_type_id")
     @NotNull(message = "Training Type must not be null")
     TrainingType trainingType;
 
-    @Column(name = "Training Date", nullable = false)
+    @Column(name = "training_date", nullable = false)
     @NotNull(message = "Training Date must not be null")
     LocalDate trainingDate;
 
-    @Column(name = "Training Duration", nullable = false)
+    @Column(name = "training_duration", nullable = false)
     @NotNull(message = "Training Duration must not be null")
     Double trainingDuration;
 

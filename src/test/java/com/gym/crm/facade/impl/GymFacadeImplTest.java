@@ -24,6 +24,7 @@ import com.gym.crm.dto.response.training.TrainingTypeInfo;
 import com.gym.crm.entity.Trainee;
 import com.gym.crm.entity.Trainer;
 import com.gym.crm.entity.TrainingType;
+import com.gym.crm.entity.User;
 import com.gym.crm.dto.request.trainee.RegisterTraineeRequest;
 import com.gym.crm.dto.request.trainer.RegisterTrainerRequest;
 import com.gym.crm.mapper.TraineeMapper;
@@ -78,8 +79,9 @@ class GymFacadeImplTest {
         request.setLastName("Williams");
 
         Trainee trainee = new Trainee();
-        trainee.setFirstName("Sarah");
-        trainee.setLastName("Williams");
+        trainee.setUser(new User());
+        trainee.getUser().setFirstName("Sarah");
+        trainee.getUser().setLastName("Williams");
 
         RegisterTraineeResponse expected = new RegisterTraineeResponse("Sarah.Williams", "qF5nBrM3gZ");
         when(traineeMapper.toEntity(request)).thenReturn(trainee);
@@ -192,8 +194,9 @@ class GymFacadeImplTest {
         request.setTrainingTypeId(1L);
 
         Trainer trainer = new Trainer();
-        trainer.setFirstName("John");
-        trainer.setLastName("Smith");
+        trainer.setUser(new User());
+        trainer.getUser().setFirstName("John");
+        trainer.getUser().setLastName("Smith");
 
         RegisterTrainerResponse expected = new RegisterTrainerResponse("John.Smith", "aB3dEfGh1K");
         when(trainerMapper.toEntity(request)).thenReturn(trainer);
@@ -215,10 +218,11 @@ class GymFacadeImplTest {
         trainingType.setName("Fitness");
 
         Trainer trainerEntity = new Trainer();
-        trainerEntity.setUsername(username);
-        trainerEntity.setFirstName("John");
-        trainerEntity.setLastName("Smith");
-        trainerEntity.setIsActive(true);
+        trainerEntity.setUser(new User());
+        trainerEntity.getUser().setUsername(username);
+        trainerEntity.getUser().setFirstName("John");
+        trainerEntity.getUser().setLastName("Smith");
+        trainerEntity.getUser().setIsActive(true);
         trainerEntity.setTrainingType(trainingType);
         trainerEntity.setTrainees(new ArrayList<>());
 
