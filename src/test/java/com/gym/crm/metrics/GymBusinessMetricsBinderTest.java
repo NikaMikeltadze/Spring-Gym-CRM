@@ -32,7 +32,7 @@ class GymBusinessMetricsBinderTest {
     void bindTo_RegistersBusinessGaugeMetrics() {
         when(traineeDao.countAll()).thenReturn(10L);
         when(trainerDao.countAll()).thenReturn(5L);
-        when(trainingDao.findAll()).thenReturn(List.of(new Training(), new Training(), new Training()));
+        when(trainingDao.countAll()).thenReturn(3L);
 
         GymBusinessMetricsBinder binder = new GymBusinessMetricsBinder(traineeDao, trainerDao, trainingDao);
         SimpleMeterRegistry meterRegistry = new SimpleMeterRegistry();
@@ -48,7 +48,7 @@ class GymBusinessMetricsBinderTest {
     void bindTo_ReturnsNaN_WhenMetricSourceFails() {
         when(traineeDao.countAll()).thenThrow(new RuntimeException("DB unavailable"));
         when(trainerDao.countAll()).thenThrow(new RuntimeException("DB unavailable"));
-        when(trainingDao.findAll()).thenThrow(new RuntimeException("DB unavailable"));
+        when(trainingDao.countAll()).thenThrow(new RuntimeException("DB unavailable"));
 
         GymBusinessMetricsBinder binder = new GymBusinessMetricsBinder(traineeDao, trainerDao, trainingDao);
         SimpleMeterRegistry meterRegistry = new SimpleMeterRegistry();

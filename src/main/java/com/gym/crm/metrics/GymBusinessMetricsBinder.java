@@ -39,8 +39,10 @@ public class GymBusinessMetricsBinder implements MeterBinder {
 
     private double safeTraineesCount() {
         try {
+            log.info("Attempting to count trainees");
             return traineeDao.countAll();
         } catch (Exception ex) {
+            log.warn("Caught exception in safeTraineesCount: {}", ex.getMessage());
             log.warn("Failed to read trainees count for metrics", ex);
             return Double.NaN;
         }
@@ -57,8 +59,7 @@ public class GymBusinessMetricsBinder implements MeterBinder {
 
     private double safeTrainingsCount() {
         try {
-            List<?> trainings = trainingDao.findAll();
-            return trainings.size();
+            return trainingDao.countAll();
         } catch (Exception ex) {
             log.warn("Failed to read trainings count for metrics", ex);
             return Double.NaN;

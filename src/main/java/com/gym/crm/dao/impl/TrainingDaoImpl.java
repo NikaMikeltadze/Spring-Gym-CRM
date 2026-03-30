@@ -48,6 +48,15 @@ public class TrainingDaoImpl implements TrainingDao {
     }
 
     @Override
+    public long countAll() {
+        Long count = entityManager.createQuery("SELECT COUNT(t) FROM Training t", Long.class)
+                .getSingleResult();
+        long result = count == null ? 0L : count;
+        log.debug("Counted trainings: {}", result);
+        return result;
+    }
+
+    @Override
     public List<Training> findByTraineeUsername(String traineeUsername) {
         log.debug("Finding trainings by trainee username={}", traineeUsername);
         List<Training> trainings = entityManager.createQuery(
