@@ -2,7 +2,6 @@ package com.gym.crm.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.gym.crm.config.auth.HeaderAuthenticationInterceptor;
 import com.gym.crm.config.logging.RequestLoggingInterceptor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
@@ -18,7 +17,6 @@ import java.util.List;
 public class WebConfig implements WebMvcConfigurer {
 
     private final RequestLoggingInterceptor requestLoggingInterceptor;
-    private final HeaderAuthenticationInterceptor headerAuthenticationInterceptor;
 
     @Override
     public void configureContentNegotiation(ContentNegotiationConfigurer configurer) {
@@ -31,9 +29,6 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(requestLoggingInterceptor).addPathPatterns("/api/**");
-        registry.addInterceptor(headerAuthenticationInterceptor)
-                .addPathPatterns("/api/**")
-                .excludePathPatterns("/api/trainee/register", "/api/trainer/register", "/api/auth/login");
     }
 
     @Override
