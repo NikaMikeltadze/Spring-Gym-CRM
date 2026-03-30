@@ -83,7 +83,7 @@ class GymFacadeImplTest {
         trainee.getUser().setFirstName("Sarah");
         trainee.getUser().setLastName("Williams");
 
-        RegisterTraineeResponse expected = new RegisterTraineeResponse("Sarah.Williams", "qF5nBrM3gZ");
+        RegisterTraineeResponse expected = new RegisterTraineeResponse("Sarah.Williams", "qF5nBrM3gZ", null);
         when(traineeMapper.toEntity(request)).thenReturn(trainee);
         when(traineeService.createTrainee(trainee)).thenReturn(expected);
 
@@ -198,7 +198,7 @@ class GymFacadeImplTest {
         trainer.getUser().setFirstName("John");
         trainer.getUser().setLastName("Smith");
 
-        RegisterTrainerResponse expected = new RegisterTrainerResponse("John.Smith", "aB3dEfGh1K");
+        RegisterTrainerResponse expected = new RegisterTrainerResponse("John.Smith", "aB3dEfGh1K", null);
         when(trainerMapper.toEntity(request)).thenReturn(trainer);
         when(trainerService.createTrainer(trainer)).thenReturn(expected);
 

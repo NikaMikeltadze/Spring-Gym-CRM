@@ -1,5 +1,6 @@
 package com.gym.crm.controller;
 
+import com.gym.crm.config.auth.JwtTokenService;
 import com.gym.crm.facade.GymFacade;
 import com.gym.crm.exception.AccountLockedException;
 import com.gym.crm.service.AuthenticationService;
@@ -28,9 +29,12 @@ class AuthControllerRestAssuredTest extends RestAssuredControllerTestSupport {
     @Mock
     private GymFacade gymFacade;
 
+    @Mock
+    private JwtTokenService jwtTokenService;
+
     @BeforeEach
     void setUp() {
-        configureMockMvc(new AuthController(authenticationService, gymFacade));
+        configureMockMvc(new AuthController(authenticationService, gymFacade, jwtTokenService));
     }
 
     @Test
@@ -40,9 +44,9 @@ class AuthControllerRestAssuredTest extends RestAssuredControllerTestSupport {
         given()
                 .queryParam("username", "john.doe")
                 .queryParam("password", "securePass1")
-        .when()
+                .when()
                 .get("/api/auth/login")
-        .then()
+                .then()
                 .statusCode(200);
 
         verify(authenticationService).authenticate("john.doe", "securePass1");
@@ -55,9 +59,9 @@ class AuthControllerRestAssuredTest extends RestAssuredControllerTestSupport {
         given()
                 .queryParam("username", "john.doe")
                 .queryParam("password", "bad-pass")
-        .when()
+                .when()
                 .get("/api/auth/login")
-        .then()
+                .then()
                 .statusCode(401)
                 .body("message", equalTo("Invalid username or password"));
 
@@ -72,9 +76,9 @@ class AuthControllerRestAssuredTest extends RestAssuredControllerTestSupport {
         given()
                 .queryParam("username", "john.doe")
                 .queryParam("password", "bad-pass")
-        .when()
+                .when()
                 .get("/api/auth/login")
-        .then()
+                .then()
                 .statusCode(423)
                 .body("message", containsString("Account locked until 2026-03-31T10:05:00Z"));
 
@@ -94,9 +98,9 @@ class AuthControllerRestAssuredTest extends RestAssuredControllerTestSupport {
                           "newPassword": "newPass2"
                         }
                         """)
-        .when()
+                .when()
                 .post("/api/auth/change_password")
-        .then()
+                .then()
                 .statusCode(200);
 
         verify(authenticationService).authenticate("john.doe", "securePass1");
@@ -113,9 +117,9 @@ class AuthControllerRestAssuredTest extends RestAssuredControllerTestSupport {
                           "newPassword": ""
                         }
                         """)
-        .when()
+                .when()
                 .post("/api/auth/change_password")
-        .then()
+                .then()
                 .statusCode(400)
                 .body("fieldErrors.newPassword", org.hamcrest.Matchers.equalTo("New Password must not be blank"));
     }

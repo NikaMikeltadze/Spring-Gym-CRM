@@ -1,6 +1,8 @@
 package com.gym.crm.controller;
 
+import com.gym.crm.config.auth.JwtTokenService;
 import com.gym.crm.dto.request.LoginRequest;
+import com.gym.crm.dto.response.auth.LoginResponse;
 import com.gym.crm.exception.AccountLockedException;
 import com.gym.crm.exception.UnauthorizedException;
 import com.gym.crm.service.AuthenticationService;
@@ -34,6 +36,9 @@ class AuthControllerTest {
     @Mock
     private AuthenticationService authenticationService;
 
+    @Mock
+    private JwtTokenService jwtTokenService;
+
     @InjectMocks
     private AuthController authController;
 
@@ -55,8 +60,9 @@ class AuthControllerTest {
         request.setPassword("securePass1");
 
         when(authenticationService.authenticate("john.doe", "securePass1")).thenReturn(true);
+        when(jwtTokenService.generateToken("john.doe")).thenReturn("tokenMock");
 
-        ResponseEntity<Void> response = authController.login(request);
+        ResponseEntity<LoginResponse> response = authController.login(request);
 
         assertEquals(200, response.getStatusCode().value());
         verify(authenticationService).authenticate("john.doe", "securePass1");
