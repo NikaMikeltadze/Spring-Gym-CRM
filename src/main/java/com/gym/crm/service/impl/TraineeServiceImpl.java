@@ -24,6 +24,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -47,6 +48,7 @@ public class TraineeServiceImpl implements TraineeService {
     private final TraineeMapper traineeMapper;
     private final TrainingMapper trainingMapper;
     private final UserMapper userMapper;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     @Transactional
@@ -65,12 +67,12 @@ public class TraineeServiceImpl implements TraineeService {
         String password = usernamePasswordGenerator.generatePassword();
 
         trainee.getUser().setUsername(username);
-        trainee.getUser().setPassword(password);
+        trainee.getUser().setPassword(passwordEncoder.encode(password));
         trainee.getUser().setIsActive(true);
 
         traineeDao.save(trainee);
         log.info("Successfully created trainee with username={}", username);
-        return new RegisterTraineeResponse(username, password);
+        return new RegisterTraineeResponse(username, password, null);
     }
 
     @Override
@@ -123,7 +125,7 @@ public class TraineeServiceImpl implements TraineeService {
                     return new com.gym.crm.exception.NotFoundException("Trainee not found with username: " + request.getUsername());
                 });
 
-        if (!trainee.getUser().getPassword().equals(request.getPassword())) {
+        if (!passwordEncoder.matches(request.getPassword(), trainee.getUser().getPassword())) {
             log.warn("Password change failed for trainee={}: old password does not match", request.getUsername());
             throw new IllegalArgumentException("Old password is incorrect");
         }
@@ -133,7 +135,7 @@ public class TraineeServiceImpl implements TraineeService {
             throw new IllegalArgumentException("New password cannot be the same as old password");
         }
 
-        trainee.getUser().setPassword(request.getNewPassword());
+        trainee.getUser().setPassword(passwordEncoder.encode(request.getNewPassword()));
         traineeDao.update(trainee);
         log.info("Successfully changed password for trainee username={}", request.getUsername());
     }

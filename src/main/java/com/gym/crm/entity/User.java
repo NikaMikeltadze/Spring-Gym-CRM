@@ -8,6 +8,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.Instant;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -39,6 +41,13 @@ public class User {
     @Column(name = "is_active", nullable = false)
     @NotNull(message = "IsActive must not be null")
     Boolean isActive;
+
+    @Builder.Default
+    @Column(name = "failed_login_attempts", nullable = false)
+    Integer failedLoginAttempts = 0;
+
+    @Column(name = "locked_until")
+    Instant lockedUntil;
 
 }
 

@@ -81,6 +81,12 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
     }
 
+    @ExceptionHandler(AccountLockedException.class)
+    public ResponseEntity<ApiErrorResponse> handleAccountLocked(AccountLockedException ex, HttpServletRequest request) {
+        ApiErrorResponse response = buildErrorResponse(HttpStatus.LOCKED, ex.getMessage(), request, null);
+        return ResponseEntity.status(HttpStatus.LOCKED).body(response);
+    }
+
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ApiErrorResponse> handleIllegalArgument(IllegalArgumentException ex, HttpServletRequest request) {
         ApiErrorResponse response = buildErrorResponse(HttpStatus.BAD_REQUEST, ex.getMessage(), request, null);
