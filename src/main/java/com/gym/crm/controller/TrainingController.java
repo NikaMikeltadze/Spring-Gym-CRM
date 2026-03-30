@@ -27,8 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @RequiredArgsConstructor
 @Tag(name = "Training", description = "Training management endpoints")
-@SecurityRequirement(name = "usernameHeader")
-@SecurityRequirement(name = "passwordHeader")
+@SecurityRequirement(name = "bearerAuth")
 public class TrainingController {
     private final GymFacade gymFacade;
 
@@ -38,7 +37,7 @@ public class TrainingController {
             @ApiResponse(responseCode = "201", description = "Training created"),
             @ApiResponse(responseCode = "400", description = "Invalid training payload",
                     content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))),
-            @ApiResponse(responseCode = "401", description = "Missing or invalid auth headers",
+            @ApiResponse(responseCode = "401", description = "Missing or invalid bearer token",
                     content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))),
             @ApiResponse(responseCode = "404", description = "Trainee or trainer not found",
                     content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
@@ -54,7 +53,7 @@ public class TrainingController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Training types returned",
                     content = @Content(schema = @Schema(implementation = GetTrainingTypesResponse.class))),
-            @ApiResponse(responseCode = "401", description = "Missing or invalid auth headers",
+            @ApiResponse(responseCode = "401", description = "Missing or invalid bearer token",
                     content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
     })
     public ResponseEntity<GetTrainingTypesResponse> getTrainingTypes() {

@@ -1,6 +1,5 @@
 package com.gym.crm.config;
 
-import com.gym.crm.config.auth.HeaderAuthenticationInterceptor;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
@@ -11,18 +10,12 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @SecurityScheme(
-        name = "usernameHeader",
-        type = SecuritySchemeType.APIKEY,
+        name = "bearerAuth",
+        type = SecuritySchemeType.HTTP,
         in = SecuritySchemeIn.HEADER,
-        paramName = HeaderAuthenticationInterceptor.USERNAME_HEADER,
-        description = "Username header for protected endpoints"
-)
-@SecurityScheme(
-        name = "passwordHeader",
-        type = SecuritySchemeType.APIKEY,
-        in = SecuritySchemeIn.HEADER,
-        paramName = HeaderAuthenticationInterceptor.PASSWORD_HEADER,
-        description = "Password header for protected endpoints"
+        scheme = "bearer",
+        bearerFormat = "JWT",
+        description = "JWT bearer token for protected endpoints"
 )
 public class OpenApiConfig {
 

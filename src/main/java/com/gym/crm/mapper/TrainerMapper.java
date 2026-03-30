@@ -79,7 +79,8 @@ public class TrainerMapper {
 
         return new RegisterTrainerResponse(
                 trainer.getUser().getUsername(),
-                trainer.getUser().getPassword()
+                trainer.getUser().getPassword(),
+                null
         );
     }
 

@@ -81,7 +81,8 @@ public class TraineeMapper {
 
         return new RegisterTraineeResponse(
                 trainee.getUser().getUsername(),
-                trainee.getUser().getPassword()
+                trainee.getUser().getPassword(),
+                null
         );
     }
 

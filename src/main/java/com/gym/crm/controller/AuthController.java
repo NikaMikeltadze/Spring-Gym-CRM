@@ -1,8 +1,10 @@
 package com.gym.crm.controller;
 
+import com.gym.crm.config.auth.JwtTokenService;
 import com.gym.crm.dto.request.ChangeLoginRequest;
 import com.gym.crm.dto.request.LoginRequest;
 import com.gym.crm.dto.response.ApiErrorResponse;
+import com.gym.crm.dto.response.auth.LoginResponse;
 import com.gym.crm.exception.UnauthorizedException;
 import com.gym.crm.facade.GymFacade;
 import com.gym.crm.service.AuthenticationService;
@@ -16,7 +18,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -30,35 +31,48 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
     private final AuthenticationService authenticationService;
     private final GymFacade gymFacade;
+    private final JwtTokenService jwtTokenService;
 
-    @GetMapping("/login")
+    @PostMapping("/login")
     @Operation(summary = "Authenticate user credentials")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Credentials are valid"),
+            @ApiResponse(responseCode = "200", description = "Credentials are valid and JWT token is issued"),
             @ApiResponse(responseCode = "400", description = "Invalid request parameters",
                     content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))),
             @ApiResponse(responseCode = "401", description = "Invalid username or password",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))),
+            @ApiResponse(responseCode = "423", description = "Account is temporarily locked",
                     content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
     })
-    public ResponseEntity<Void> login(@Valid @ModelAttribute LoginRequest request) {
+    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
         log.info("Auth login request received for username={}", request.getUsername());
-        try {
-            assertAuthenticated(request.getUsername(), request.getPassword());
-            return ResponseEntity.ok().build();
-        } catch (UnauthorizedException ex) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
+        assertAuthenticated(request.getUsername(), request.getPassword());
+
+        String token = jwtTokenService.generateToken(request.getUsername());
+        LoginResponse response = LoginResponse.builder()
+                .username(request.getUsername())
+                .token(token)
+                .tokenType("Bearer")
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/login")
+    @Operation(summary = "Authenticate user credentials (legacy query-param format)")
+    public ResponseEntity<LoginResponse> loginLegacy(@Valid @ModelAttribute LoginRequest request) {
+        return login(request);
     }
 
     @PostMapping("/change_password")
     @Operation(summary = "Change user password")
-    @SecurityRequirement(name = "usernameHeader")
-    @SecurityRequirement(name = "passwordHeader")
+    @SecurityRequirement(name = "bearerAuth")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Password changed successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid request payload",
                     content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))),
             @ApiResponse(responseCode = "401", description = "Invalid username or password",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))),
+            @ApiResponse(responseCode = "423", description = "Account is temporarily locked",
                     content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))),
             @ApiResponse(responseCode = "404", description = "User not found",
                     content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
