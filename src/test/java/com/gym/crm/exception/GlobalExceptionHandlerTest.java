@@ -2,6 +2,7 @@ package com.gym.crm.exception;
 
 import com.gym.crm.dto.response.ApiErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -61,6 +62,7 @@ class GlobalExceptionHandlerTest {
         );
 
         assertEquals(HttpStatus.LOCKED, response.getStatusCode());
+        Assertions.assertNotNull(response.getBody());
         assertEquals("Account locked until 2026-03-31T10:05:00Z", response.getBody().getMessage());
         assertEquals(423, response.getBody().getStatus());
     }
