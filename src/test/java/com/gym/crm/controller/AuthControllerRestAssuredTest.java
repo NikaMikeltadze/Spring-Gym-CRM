@@ -1,12 +1,18 @@
 package com.gym.crm.controller;
 
 import com.gym.crm.facade.GymFacade;
+import com.gym.crm.exception.AccountLockedException;
 import com.gym.crm.service.AuthenticationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.time.Instant;
+
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
 
 import static io.restassured.http.ContentType.JSON;
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
@@ -52,7 +58,25 @@ class AuthControllerRestAssuredTest extends RestAssuredControllerTestSupport {
         .when()
                 .get("/api/auth/login")
         .then()
-                .statusCode(401);
+                .statusCode(401)
+                .body("message", equalTo("Invalid username or password"));
+
+        verify(authenticationService).authenticate("john.doe", "bad-pass");
+    }
+
+    @Test
+    void login_ReturnsLocked_WithLockTimestamp_WhenAccountIsLocked() {
+        when(authenticationService.authenticate("john.doe", "bad-pass"))
+                .thenThrow(new AccountLockedException(Instant.parse("2026-03-31T10:05:00Z")));
+
+        given()
+                .queryParam("username", "john.doe")
+                .queryParam("password", "bad-pass")
+        .when()
+                .get("/api/auth/login")
+        .then()
+                .statusCode(423)
+                .body("message", containsString("Account locked until 2026-03-31T10:05:00Z"));
 
         verify(authenticationService).authenticate("john.doe", "bad-pass");
     }

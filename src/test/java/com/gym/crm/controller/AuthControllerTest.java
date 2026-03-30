@@ -1,6 +1,8 @@
 package com.gym.crm.controller;
 
 import com.gym.crm.dto.request.LoginRequest;
+import com.gym.crm.exception.AccountLockedException;
+import com.gym.crm.exception.UnauthorizedException;
 import com.gym.crm.service.AuthenticationService;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
@@ -18,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -60,21 +63,21 @@ class AuthControllerTest {
     }
 
     @Test
-    void login_ReturnsUnauthorized_WhenCredentialsAreInvalid() {
+    void login_ThrowsUnauthorized_WhenCredentialsAreInvalid() {
         LoginRequest request = new LoginRequest();
         request.setUsername("john.doe");
         request.setPassword("wrongPass");
 
         when(authenticationService.authenticate("john.doe", "wrongPass")).thenReturn(false);
 
-        ResponseEntity<Void> response = authController.login(request);
+        UnauthorizedException ex = assertThrows(UnauthorizedException.class, () -> authController.login(request));
 
-        assertEquals(401, response.getStatusCode().value());
+        assertEquals("Invalid username or password", ex.getMessage());
         verify(authenticationService).authenticate("john.doe", "wrongPass");
     }
 
     @Test
-    void login_ReturnsUnauthorized_WhenUserDoesNotExist() {
+    void login_ThrowsUnauthorized_WhenUserDoesNotExist() {
         LoginRequest request = new LoginRequest();
         request.setUsername("missing.user");
         request.setPassword("securePass1");
@@ -82,10 +85,25 @@ class AuthControllerTest {
         when(authenticationService.authenticate("missing.user", "securePass1"))
                 .thenThrow(new IllegalArgumentException("User not found with username: missing.user"));
 
-        ResponseEntity<Void> response = authController.login(request);
+        UnauthorizedException ex = assertThrows(UnauthorizedException.class, () -> authController.login(request));
 
-        assertEquals(401, response.getStatusCode().value());
+        assertEquals("Invalid username or password", ex.getMessage());
         verify(authenticationService).authenticate("missing.user", "securePass1");
+    }
+
+    @Test
+    void login_PropagatesAccountLockedException_WhenAccountIsLocked() {
+        LoginRequest request = new LoginRequest();
+        request.setUsername("john.doe");
+        request.setPassword("wrongPass");
+
+        when(authenticationService.authenticate("john.doe", "wrongPass"))
+                .thenThrow(new AccountLockedException(java.time.Instant.parse("2026-03-31T10:05:00Z")));
+
+        AccountLockedException ex = assertThrows(AccountLockedException.class, () -> authController.login(request));
+
+        assertEquals("Account locked until 2026-03-31T10:05:00Z", ex.getMessage());
+        verify(authenticationService).authenticate("john.doe", "wrongPass");
     }
 
     @Test

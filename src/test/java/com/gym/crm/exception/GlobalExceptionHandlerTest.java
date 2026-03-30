@@ -1,5 +1,6 @@
 package com.gym.crm.exception;
 
+import com.gym.crm.dto.response.ApiErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -48,5 +49,19 @@ class GlobalExceptionHandlerTest {
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         assertNull(response.getBody());
+    }
+
+    @Test
+    void handleAccountLocked_ReturnsLocked_WithMessageAndStatus() {
+        when(request.getRequestURI()).thenReturn("/api/auth/login");
+
+        ResponseEntity<ApiErrorResponse> response = handler.handleAccountLocked(
+                new AccountLockedException(java.time.Instant.parse("2026-03-31T10:05:00Z")),
+                request
+        );
+
+        assertEquals(HttpStatus.LOCKED, response.getStatusCode());
+        assertEquals("Account locked until 2026-03-31T10:05:00Z", response.getBody().getMessage());
+        assertEquals(423, response.getBody().getStatus());
     }
 }

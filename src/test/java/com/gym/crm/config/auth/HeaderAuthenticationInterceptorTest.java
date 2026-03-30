@@ -1,5 +1,6 @@
 package com.gym.crm.config.auth;
 
+import com.gym.crm.exception.AccountLockedException;
 import com.gym.crm.exception.UnauthorizedException;
 import com.gym.crm.service.AuthenticationService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -91,6 +92,20 @@ class HeaderAuthenticationInterceptorTest {
                 () -> interceptor.preHandle(request, response, handler));
 
         assertEquals("Invalid username or password", ex.getMessage());
+    }
+
+    @Test
+    void preHandle_PropagatesAccountLockedException_WhenAccountIsLocked() {
+        HeaderAuthenticationInterceptor interceptor = new HeaderAuthenticationInterceptor(authenticationService);
+        when(request.getHeader(HeaderAuthenticationInterceptor.USERNAME_HEADER)).thenReturn("john.doe");
+        when(request.getHeader(HeaderAuthenticationInterceptor.PASSWORD_HEADER)).thenReturn("securePass1");
+        when(authenticationService.authenticate("john.doe", "securePass1"))
+                .thenThrow(new AccountLockedException(java.time.Instant.parse("2026-03-31T10:05:00Z")));
+
+        AccountLockedException ex = assertThrows(AccountLockedException.class,
+                () -> interceptor.preHandle(request, response, handler));
+
+        assertEquals("Account locked until 2026-03-31T10:05:00Z", ex.getMessage());
     }
 
     @Test
