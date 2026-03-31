@@ -8,6 +8,8 @@ import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.time.Clock;
+
 @Configuration
 public class AppConfig {
     @Bean
@@ -29,6 +31,11 @@ public class AppConfig {
     @Bean
     public MeterRegistryCustomizer<MeterRegistry> metricsCommonTags() {
         return registry -> registry.config().commonTags("application", "gym-crm");
+    }
+
+    @Bean
+    public Clock systemClock() {
+        return Clock.systemUTC();
     }
 
 }

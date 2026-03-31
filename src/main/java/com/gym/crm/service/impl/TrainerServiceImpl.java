@@ -17,6 +17,7 @@ import com.gym.crm.service.TrainerService;
 import com.gym.crm.util.UsernamePasswordGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -38,6 +39,7 @@ public class TrainerServiceImpl implements TrainerService {
     private final UsernamePasswordGenerator usernamePasswordGenerator;
     private final TrainingTypeMapper trainingTypeMapper;
     private final TrainerMapper trainerMapper;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     @Transactional
@@ -55,12 +57,12 @@ public class TrainerServiceImpl implements TrainerService {
         String password = usernamePasswordGenerator.generatePassword();
 
         trainer.getUser().setUsername(username);
-        trainer.getUser().setPassword(password);
+        trainer.getUser().setPassword(passwordEncoder.encode(password));
         trainer.getUser().setIsActive(true);
 
         trainerDao.save(trainer);
         log.info("Successfully created trainer with username={}", username);
-        return new RegisterTrainerResponse(username, password);
+        return new RegisterTrainerResponse(username, password, null);
     }
 
     @Override
@@ -99,7 +101,7 @@ public class TrainerServiceImpl implements TrainerService {
             throw new NotFoundException("Trainer not found with username: " + username);
         }
 
-        if (!trainer.get().getUser().getPassword().equals(oldPassword)) {
+        if (!passwordEncoder.matches(oldPassword, trainer.get().getUser().getPassword())) {
             log.warn("Password change failed for trainer={}: old password does not match", username);
             throw new IllegalArgumentException("Old password is incorrect");
         }
@@ -109,7 +111,7 @@ public class TrainerServiceImpl implements TrainerService {
             throw new IllegalArgumentException("New password cannot be the same as old password");
         }
 
-        trainer.get().getUser().setPassword(newPassword);
+        trainer.get().getUser().setPassword(passwordEncoder.encode(newPassword));
         trainerDao.update(trainer.get());
         log.info("Successfully changed password for trainer username={}", username);
     }

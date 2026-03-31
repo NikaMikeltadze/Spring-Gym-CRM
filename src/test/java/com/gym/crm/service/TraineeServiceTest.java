@@ -22,11 +22,13 @@ import com.gym.crm.mapper.TrainerMapper;
 import com.gym.crm.mapper.TrainingMapper;
 import com.gym.crm.service.impl.TraineeServiceImpl;
 import com.gym.crm.util.UsernamePasswordGenerator;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -62,8 +64,17 @@ class TraineeServiceTest {
     @Mock
     private TrainingMapper trainingMapper;
 
+    @Mock
+    private PasswordEncoder passwordEncoder;
+
     @InjectMocks
     private TraineeServiceImpl traineeService;
+
+    @BeforeEach
+    void setUp() {
+        lenient().when(passwordEncoder.encode(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        lenient().when(passwordEncoder.matches(any(), any())).thenAnswer(invocation -> invocation.getArgument(0).equals(invocation.getArgument(1)));
+    }
 
     @Test
     void createTrainee_Success() {

@@ -1,5 +1,6 @@
 package com.gym.crm.controller;
 
+import com.gym.crm.config.auth.JwtTokenService;
 import com.gym.crm.dto.request.trainee.*;
 import com.gym.crm.dto.response.ApiErrorResponse;
 import com.gym.crm.dto.response.trainee.*;
@@ -29,10 +30,10 @@ import java.util.List;
 @RequiredArgsConstructor
 @Validated
 @Tag(name = "Trainee", description = "Trainee profile and assignment endpoints")
-@SecurityRequirement(name = "usernameHeader")
-@SecurityRequirement(name = "passwordHeader")
+@SecurityRequirement(name = "bearerAuth")
 public class TraineeController {
     private final GymFacade gymFacade;
+    private final JwtTokenService jwtTokenService;
 
     @PostMapping("/register")
     @SecurityRequirements
@@ -47,6 +48,7 @@ public class TraineeController {
     })
     public ResponseEntity<RegisterTraineeResponse> registerTrainee(@Valid @RequestBody RegisterTraineeRequest traineeRequest) {
         RegisterTraineeResponse response = gymFacade.createTrainee(traineeRequest);
+        response.setToken(jwtTokenService.generateToken(response.getUsername()));
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(response);
@@ -57,7 +59,7 @@ public class TraineeController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Trainee profile returned",
                     content = @Content(schema = @Schema(implementation = GetTraineeProfileResponse.class))),
-            @ApiResponse(responseCode = "401", description = "Missing or invalid auth headers",
+            @ApiResponse(responseCode = "401", description = "Missing or invalid bearer token",
                     content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))),
             @ApiResponse(responseCode = "404", description = "Trainee not found",
                     content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
@@ -74,7 +76,7 @@ public class TraineeController {
                     content = @Content(schema = @Schema(implementation = UpdateTraineeProfileResponse.class))),
             @ApiResponse(responseCode = "400", description = "Invalid update payload",
                     content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))),
-            @ApiResponse(responseCode = "401", description = "Missing or invalid auth headers",
+            @ApiResponse(responseCode = "401", description = "Missing or invalid bearer token",
                     content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))),
             @ApiResponse(responseCode = "404", description = "Trainee not found",
                     content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
@@ -90,7 +92,7 @@ public class TraineeController {
             @ApiResponse(responseCode = "204", description = "Trainee profile deleted"),
             @ApiResponse(responseCode = "400", description = "Invalid delete payload",
                     content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))),
-            @ApiResponse(responseCode = "401", description = "Missing or invalid auth headers",
+            @ApiResponse(responseCode = "401", description = "Missing or invalid bearer token",
                     content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))),
             @ApiResponse(responseCode = "404", description = "Trainee not found",
                     content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
@@ -106,7 +108,7 @@ public class TraineeController {
             @ApiResponse(responseCode = "200", description = "Trainee activated"),
             @ApiResponse(responseCode = "400", description = "Invalid activation payload",
                     content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))),
-            @ApiResponse(responseCode = "401", description = "Missing or invalid auth headers",
+            @ApiResponse(responseCode = "401", description = "Missing or invalid bearer token",
                     content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))),
             @ApiResponse(responseCode = "404", description = "Trainee not found",
                     content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
@@ -122,7 +124,7 @@ public class TraineeController {
             @ApiResponse(responseCode = "200", description = "Trainee deactivated"),
             @ApiResponse(responseCode = "400", description = "Invalid request parameters",
                     content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))),
-            @ApiResponse(responseCode = "401", description = "Missing or invalid auth headers",
+            @ApiResponse(responseCode = "401", description = "Missing or invalid bearer token",
                     content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))),
             @ApiResponse(responseCode = "404", description = "Trainee not found",
                     content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
@@ -139,7 +141,7 @@ public class TraineeController {
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = GetTraineeTrainingsResponse.class)))),
             @ApiResponse(responseCode = "400", description = "Invalid request parameters",
                     content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))),
-            @ApiResponse(responseCode = "401", description = "Missing or invalid auth headers",
+            @ApiResponse(responseCode = "401", description = "Missing or invalid bearer token",
                     content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))),
             @ApiResponse(responseCode = "404", description = "Trainee not found",
                     content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
@@ -158,7 +160,7 @@ public class TraineeController {
                     content = @Content(schema = @Schema(implementation = UpdateTraineeTrainerListResponse.class))),
             @ApiResponse(responseCode = "400", description = "Invalid request payload",
                     content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))),
-            @ApiResponse(responseCode = "401", description = "Missing or invalid auth headers",
+            @ApiResponse(responseCode = "401", description = "Missing or invalid bearer token",
                     content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))),
             @ApiResponse(responseCode = "404", description = "Trainee or trainer not found",
                     content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))

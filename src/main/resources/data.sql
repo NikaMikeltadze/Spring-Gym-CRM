@@ -6,16 +6,16 @@ INSERT INTO trainingtype (id, training_type_name) VALUES (4, 'Stretching');
 INSERT INTO trainingtype (id, training_type_name) VALUES (5, 'Resistance');
 
 -- ===== USERS =====
-INSERT INTO users (id, first_name, last_name, username, password, is_active) VALUES (1, 'John', 'Smith', 'John.Smith', 'aB3dEfGh1K', true);
-INSERT INTO users (id, first_name, last_name, username, password, is_active) VALUES (2, 'Jane', 'Doe', 'Jane.Doe', 'xR7mNpQ2sW', true);
-INSERT INTO users (id, first_name, last_name, username, password, is_active) VALUES (3, 'Emily', 'Davis', 'Emily.Davis', 'kL9wYzA4cV', true);
-INSERT INTO users (id, first_name, last_name, username, password, is_active) VALUES (4, 'Michael', 'Johnson', 'Michael.Johnson', 'tU6vHjD8eX', true);
-INSERT INTO users (id, first_name, last_name, username, password, is_active) VALUES (5, 'Sarah', 'Williams', 'Sarah.Williams', 'qF5nBrM3gZ', true);
-INSERT INTO users (id, first_name, last_name, username, password, is_active) VALUES (6, 'John', 'Smith', 'John.Smith1', 'pO2iYlC7wN', true);
-INSERT INTO users (id, first_name, last_name, username, password, is_active) VALUES (7, 'Robert', 'Brown', 'Robert.Brown', 'hJ4sXdK9mQ', true);
-INSERT INTO users (id, first_name, last_name, username, password, is_active) VALUES (8, 'Laura', 'Taylor', 'Laura.Taylor', 'bV8fRgE1nA', true);
-INSERT INTO users (id, first_name, last_name, username, password, is_active) VALUES (9, 'David', 'Wilson', 'David.Wilson', 'cW3kPzL6tY', true);
-INSERT INTO users (id, first_name, last_name, username, password, is_active) VALUES (10, 'Anna', 'Martinez', 'Anna.Martinez', 'dX7jQhN0uB', true);
+INSERT INTO users (id, first_name, last_name, username, password, is_active, failed_login_attempts, locked_until) VALUES (1, 'John', 'Smith', 'John.Smith', '$2a$10$MV5y7V/1P4QoBkUfHDWbo.BDg402ZYb01UbJWIPZA7C8B5upV9e76', true, 0, NULL);
+INSERT INTO users (id, first_name, last_name, username, password, is_active, failed_login_attempts, locked_until) VALUES (2, 'Jane', 'Doe', 'Jane.Doe', '$2a$10$q/UgiTlGxMXS6X1.fnjRrejtCff1sPmlNZLtlgE23Iv/GWXIR.uya', true, 0, NULL);
+INSERT INTO users (id, first_name, last_name, username, password, is_active, failed_login_attempts, locked_until) VALUES (3, 'Emily', 'Davis', 'Emily.Davis', '$2a$10$8Wwh0CKxsWOGtq7tBIrau.eqYKljKe/8.18OG3vn9DH67bIFBsKJW', true, 0, NULL);
+INSERT INTO users (id, first_name, last_name, username, password, is_active, failed_login_attempts, locked_until) VALUES (4, 'Michael', 'Johnson', 'Michael.Johnson', '$2a$10$bxh5ztOg0Vc083ai7SFKc.ipL4bxbZxSnaB4ad0SEi5ZhbICq6jNO', true, 0, NULL);
+INSERT INTO users (id, first_name, last_name, username, password, is_active, failed_login_attempts, locked_until) VALUES (5, 'Sarah', 'Williams', 'Sarah.Williams', '$2a$10$P9rDbfm5fwjf4dB4lnxkhurJB.CQCxiCNanAuEbBtMKl7Zf8x5iou', true, 0, NULL);
+INSERT INTO users (id, first_name, last_name, username, password, is_active, failed_login_attempts, locked_until) VALUES (6, 'John', 'Smith', 'John.Smith1', '$2a$10$3vxb/XAGcgW00IcDRQPGU.q3dfcx0h4Omw9TY0P0sn132/E0GMPPu', true, 0, NULL);
+INSERT INTO users (id, first_name, last_name, username, password, is_active, failed_login_attempts, locked_until) VALUES (7, 'Robert', 'Brown', 'Robert.Brown', '$2a$10$ViBaEf08JSWCDwWzY30e1uqtvdB04bTY/6tgtI7XTwK2Eit/pa4SS', true, 0, NULL);
+INSERT INTO users (id, first_name, last_name, username, password, is_active, failed_login_attempts, locked_until) VALUES (8, 'Laura', 'Taylor', 'Laura.Taylor', '$2a$10$66jjepfif0UEVUNgz2Obm.HB2YlCm39j9s3S/FkL9PZzeSumniT/i', true, 0, NULL);
+INSERT INTO users (id, first_name, last_name, username, password, is_active, failed_login_attempts, locked_until) VALUES (9, 'David', 'Wilson', 'David.Wilson', '$2a$10$RBOaA.XCIgyYvqIsB9D/JeXdZWI2XIVf/bzAiFkyuHieH2japQMI2', true, 0, NULL);
+INSERT INTO users (id, first_name, last_name, username, password, is_active, failed_login_attempts, locked_until) VALUES (10, 'Anna', 'Martinez', 'Anna.Martinez', '$2a$10$.tNNSVZQYxG0EzEKw2tC7uk0PbbLscXNWQdbZvE20y67mKzSijunC', true, 0, NULL);
 
 -- ===== TRAINERS =====
 -- Trainers: John.Smith(1-Fitness), Jane.Doe(2-Yoga), Emily.Davis(3-Zumba), Michael.Johnson(4-Stretching), Robert.Brown(7-Resistance)

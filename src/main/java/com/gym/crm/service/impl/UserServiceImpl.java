@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -19,6 +20,7 @@ import org.springframework.validation.annotation.Validated;
 @Transactional(readOnly = true)
 public class UserServiceImpl implements UserService {
     private final UserDao userDao;
+    private final PasswordEncoder passwordEncoder;
 
     @Transactional
     @Override
@@ -31,7 +33,7 @@ public class UserServiceImpl implements UserService {
                     return new IllegalArgumentException("Trainee not found with username: " + request.getUsername());
                 });
 
-        if (!user.getPassword().equals(request.getPassword())) {
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             log.warn("Password change failed for user={}: old password does not match", request.getUsername());
             throw new IllegalArgumentException("Old password is incorrect");
         }
@@ -41,7 +43,7 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException("New password cannot be the same as old password");
         }
 
-        user.setPassword(request.getNewPassword());
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userDao.save(user);
         log.info("Successfully changed password for user username={}", request.getUsername());
     }

@@ -10,6 +10,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @Builder
 public class RegisterTrainerResponse {
-    String username;
-    String password;
+    private String username;
+    private String password;
+    private String token;
 }

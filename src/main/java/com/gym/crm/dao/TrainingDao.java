@@ -12,6 +12,7 @@ public interface TrainingDao {
     Optional<Training> findById(Long id);
 
     List<Training> findAll();
+    long countAll();
 
     List<Training> findByTraineeUsername(String traineeUsername);
 

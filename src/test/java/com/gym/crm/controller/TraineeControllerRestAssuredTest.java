@@ -1,5 +1,6 @@
 package com.gym.crm.controller;
 
+import com.gym.crm.config.auth.JwtTokenService;
 import com.gym.crm.dao.TraineeDao;
 import com.gym.crm.dto.response.trainee.GetTraineeProfileResponse;
 import com.gym.crm.dto.response.trainee.GetTraineeTrainingsResponse;
@@ -34,9 +35,12 @@ class TraineeControllerRestAssuredTest extends RestAssuredControllerTestSupport 
     @Mock
     private TraineeDao traineeDao;
 
+    @Mock
+    private JwtTokenService jwtTokenService;
+
     @BeforeEach
     void setUp() {
-        configureMockMvc(new TraineeController(gymFacade));
+        configureMockMvc(new TraineeController(gymFacade, jwtTokenService));
     }
 
     @Test
