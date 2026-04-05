@@ -15,6 +15,7 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -30,7 +31,7 @@ class GlobalExceptionHandlerTest {
         when(request.getRequestURI()).thenReturn("/");
 
         ResponseEntity<ErrorResponse> response = handler.handleNotFound(
-                new NoResourceFoundException(HttpMethod.GET, ""),
+                mock(NoResourceFoundException.class),
                 request
         );
 
@@ -44,7 +45,7 @@ class GlobalExceptionHandlerTest {
         when(request.getMethod()).thenReturn("GET");
 
         ResponseEntity<ErrorResponse> response = handler.handleNotFound(
-                new NoResourceFoundException(HttpMethod.GET, "actuator/prometheus"),
+                mock(NoResourceFoundException.class),
                 request
         );
 
