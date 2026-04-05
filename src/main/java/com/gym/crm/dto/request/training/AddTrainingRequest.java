@@ -10,19 +10,19 @@ import java.time.LocalDate;
 @Data
 public class AddTrainingRequest {
     @NotBlank(message = "Trainee Username should not be Null")
-    private String TraineeUsername;
+    private String traineeUsername;
 
     @NotBlank(message = "Trainer Username should not be Null")
-    private String TrainerUsername;
+    private String trainerUsername;
 
     @NotBlank(message = "Training Name should not be Null")
-    private String TrainingName;
+    private String trainingName;
 
     @NotNull(message = "Training Date should not be Null")
     @PastOrPresent(message = "Training Date should be in the past or present")
-    private LocalDate TrainingDate;
+    private LocalDate trainingDate;
 
     @NotNull(message = "Training Duration should not be Null")
-    private Double TrainingDuration;
+    private Double trainingDuration;
 
 }
