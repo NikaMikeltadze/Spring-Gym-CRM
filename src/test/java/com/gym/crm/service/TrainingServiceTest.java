@@ -4,7 +4,11 @@ import com.gym.crm.dao.TraineeDao;
 import com.gym.crm.dao.TrainerDao;
 import com.gym.crm.dao.TrainingDao;
 import com.gym.crm.dao.TrainingTypeDao;
+import com.gym.crm.client.TrainerWorkloadClient;
+import com.gym.crm.client.WorkloadRequest;
+import com.gym.crm.client.WorkloadSummaryResponse;
 import com.gym.crm.dto.request.training.AddTrainingRequest;
+import com.gym.crm.dto.response.trainer.GetTrainerMonthlyWorkloadResponse;
 import com.gym.crm.dto.response.training.GetTrainingTypesResponse;
 import com.gym.crm.dto.response.training.TrainingTypeInfo;
 import com.gym.crm.entity.Trainee;
@@ -13,11 +17,13 @@ import com.gym.crm.entity.User;
 import com.gym.crm.entity.Training;
 import com.gym.crm.entity.TrainingType;
 import com.gym.crm.mapper.TrainingTypeMapper;
+import com.gym.crm.exception.NotFoundException;
 import com.gym.crm.service.impl.TrainingServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.ArgumentCaptor;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
@@ -46,6 +52,9 @@ class TrainingServiceTest {
     @Mock
     private TrainingTypeMapper trainingTypeMapper;
 
+    @Mock
+    private TrainerWorkloadClient workloadClient;
+
     @InjectMocks
     private TrainingServiceImpl trainingService;
 
@@ -56,7 +65,7 @@ class TrainingServiceTest {
         request.setTrainerUsername("John.Smith");
         request.setTrainingName("Morning Fitness Bootcamp");
         request.setTrainingDate(LocalDate.of(2026, 3, 1));
-        request.setTrainingDuration(60.0);
+        request.setTrainingDuration(60.5);
 
         Trainee trainee = new Trainee();
         trainee.setUser(new User());
@@ -65,6 +74,9 @@ class TrainingServiceTest {
         Trainer trainer = new Trainer();
         trainer.setUser(new User());
         trainer.getUser().setUsername("John.Smith");
+        trainer.getUser().setFirstName("John");
+        trainer.getUser().setLastName("Smith");
+        trainer.getUser().setIsActive(true);
 
         TrainingType trainingType = new TrainingType();
         trainingType.setId(1L);
@@ -80,6 +92,10 @@ class TrainingServiceTest {
         TrainingTypeInfo result = trainingService.createTraining(request);
 
         verify(trainingDao).save(any(Training.class));
+        ArgumentCaptor<WorkloadRequest> workloadCaptor = ArgumentCaptor.forClass(WorkloadRequest.class);
+        verify(workloadClient).updateWorkload(workloadCaptor.capture());
+        assertEquals(60.5, workloadCaptor.getValue().getTrainingDuration());
+        assertEquals(WorkloadRequest.ActionType.ADD, workloadCaptor.getValue().getActionType());
         assertNotNull(result);
         assertEquals(1L, result.getTrainingTypeId());
         assertEquals("Fitness", result.getTrainingTypeName());
@@ -110,6 +126,77 @@ class TrainingServiceTest {
         when(trainerDao.findByUsername("NonExistent.Trainer")).thenReturn(Optional.empty());
 
         assertThrows(IllegalArgumentException.class, () -> trainingService.createTraining(request));
+    }
+
+    @Test
+    void deleteTraining_Success() {
+        Long trainingId = 7L;
+
+        User trainerUser = new User();
+        trainerUser.setUsername("John.Smith");
+        trainerUser.setFirstName("John");
+        trainerUser.setLastName("Smith");
+        trainerUser.setIsActive(true);
+
+        Trainer trainer = new Trainer();
+        trainer.setUser(trainerUser);
+
+        Training training = new Training();
+        training.setId(trainingId);
+        training.setTrainer(trainer);
+        training.setTrainingDate(LocalDate.of(2026, 3, 1));
+        training.setTrainingDuration(45.0);
+
+        when(trainingDao.findById(trainingId)).thenReturn(Optional.of(training));
+
+        trainingService.deleteTraining(trainingId);
+
+        verify(trainingDao).deleteById(trainingId);
+        ArgumentCaptor<WorkloadRequest> workloadCaptor = ArgumentCaptor.forClass(WorkloadRequest.class);
+        verify(workloadClient).updateWorkload(workloadCaptor.capture());
+        assertEquals(WorkloadRequest.ActionType.DELETE, workloadCaptor.getValue().getActionType());
+        assertEquals(45.0, workloadCaptor.getValue().getTrainingDuration());
+    }
+
+    @Test
+    void deleteTraining_NotFound() {
+        Long trainingId = 404L;
+        when(trainingDao.findById(trainingId)).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class, () -> trainingService.deleteTraining(trainingId));
+
+        verify(trainingDao, never()).deleteById(any());
+        verify(workloadClient, never()).updateWorkload(any());
+    }
+
+    @Test
+    void getTrainerMonthlyWorkload_Success() {
+        String username = "John.Smith";
+        int year = 2026;
+        int month = 4;
+
+        Trainer trainer = new Trainer();
+        trainer.setUser(new User());
+        trainer.getUser().setUsername(username);
+
+        WorkloadSummaryResponse workloadSummary = WorkloadSummaryResponse.builder()
+                .trainerUsername(username)
+                .year(year)
+                .month(month)
+                .trainingSummaryDuration(12.5)
+                .build();
+
+        when(trainerDao.findByUsername(username)).thenReturn(Optional.of(trainer));
+        when(workloadClient.getMonthlyWorkload(username, year, month)).thenReturn(workloadSummary);
+
+        GetTrainerMonthlyWorkloadResponse result = trainingService.getTrainerMonthlyWorkload(username, year, month);
+
+        assertNotNull(result);
+        assertEquals(username, result.getTrainerUsername());
+        assertEquals(year, result.getYear());
+        assertEquals(month, result.getMonth());
+        assertEquals(12.5, result.getTrainingSummaryDuration());
+        verify(workloadClient).getMonthlyWorkload(username, year, month);
     }
 
     @Test

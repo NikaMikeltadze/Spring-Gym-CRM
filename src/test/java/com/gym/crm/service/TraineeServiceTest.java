@@ -3,23 +3,19 @@ package com.gym.crm.service;
 import com.gym.crm.dao.TraineeDao;
 import com.gym.crm.dao.TrainerDao;
 import com.gym.crm.dao.TrainingDao;
-import com.gym.crm.dto.request.ChangeLoginRequest;
-import com.gym.crm.dto.request.trainee.*;
-import com.gym.crm.dto.response.trainee.GetTraineeProfileResponse;
-import com.gym.crm.dto.response.trainee.GetTraineeTrainingsResponse;
-import com.gym.crm.dto.response.trainee.RegisterTraineeResponse;
-import com.gym.crm.dto.response.trainee.UpdateTraineeProfileResponse;
-import com.gym.crm.dto.response.trainee.UpdateTraineeTrainerListResponse;
-import com.gym.crm.dto.response.trainer.TrainerProfileInfo;
-import com.gym.crm.entity.Trainee;
-import com.gym.crm.entity.Trainer;
-import com.gym.crm.entity.Training;
-import com.gym.crm.entity.TrainingType;
-import com.gym.crm.entity.User;
-import com.gym.crm.exception.NotFoundException;
+import com.gym.crm.entity.*;
 import com.gym.crm.mapper.TraineeMapper;
 import com.gym.crm.mapper.TrainerMapper;
 import com.gym.crm.mapper.TrainingMapper;
+import com.gym.crm.client.TrainerWorkloadClient;
+import com.gym.crm.client.WorkloadRequest;
+import com.gym.crm.dto.request.*;
+import com.gym.crm.dto.request.trainee.*;
+import com.gym.crm.dto.request.trainer.*;
+import com.gym.crm.dto.response.*;
+import com.gym.crm.dto.response.trainee.*;
+import com.gym.crm.dto.response.trainer.*;
+import com.gym.crm.exception.NotFoundException;
 import com.gym.crm.service.impl.TraineeServiceImpl;
 import com.gym.crm.util.UsernamePasswordGenerator;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.ArgumentCaptor;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -66,6 +63,9 @@ class TraineeServiceTest {
 
     @Mock
     private PasswordEncoder passwordEncoder;
+
+    @Mock
+    private TrainerWorkloadClient workloadClient;
 
     @InjectMocks
     private TraineeServiceImpl traineeService;
@@ -176,8 +176,41 @@ class TraineeServiceTest {
 
     @Test
     void deleteTrainee_Success() {
-        traineeService.deleteTrainee("Sarah.Williams");
-        verify(traineeDao).delete("Sarah.Williams");
+        // Arrange
+        String username = "Sarah.Williams";
+
+        Trainee trainee = new Trainee();
+        User user = new User();
+        user.setUsername(username);
+        user.setFirstName("Sarah");
+        user.setLastName("Williams");
+        user.setIsActive(true);
+        trainee.setUser(user);
+
+        Trainer trainer = new Trainer();
+        User trainerUser = new User();
+        trainerUser.setUsername("John.Doe");
+        trainerUser.setFirstName("John");
+        trainerUser.setLastName("Doe");
+        trainerUser.setIsActive(true);
+        trainer.setUser(trainerUser);
+
+        Training training = new Training();
+        training.setTrainer(trainer);
+        training.setTrainee(trainee);
+        training.setTrainingDate(java.time.LocalDate.now());
+        training.setTrainingDuration(60.5);
+
+        when(trainingDao.findByTraineeUsernameAndCriteria(username, null, null, null, null)).thenReturn(List.of(training));
+
+        // Act
+        traineeService.deleteTrainee(username);
+
+        // Assert
+        ArgumentCaptor<WorkloadRequest> workloadCaptor = ArgumentCaptor.forClass(WorkloadRequest.class);
+        verify(workloadClient, times(1)).updateWorkload(workloadCaptor.capture());
+        assertEquals(60.5, workloadCaptor.getValue().getTrainingDuration());
+        verify(traineeDao, times(1)).delete(username);
     }
 
     @Test

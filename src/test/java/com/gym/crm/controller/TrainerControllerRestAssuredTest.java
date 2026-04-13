@@ -1,5 +1,6 @@
 package com.gym.crm.controller;
 
+import com.gym.crm.config.auth.JwtTokenService;
 import com.gym.crm.dto.response.trainer.GetTrainerProfileResponse;
 import com.gym.crm.dto.response.trainer.GetTrainerTrainingsResponse;
 import com.gym.crm.dto.response.trainer.RegisterTrainerResponse;
@@ -27,13 +28,17 @@ class TrainerControllerRestAssuredTest extends RestAssuredControllerTestSupport 
     @Mock
     private GymFacade gymFacade;
 
+    @Mock
+    private JwtTokenService jwtTokenService;
+
     @BeforeEach
     void setUp() {
-        configureMockMvc(new TrainerController(gymFacade));
+        configureMockMvc(new TrainerController(gymFacade, jwtTokenService));
     }
 
     @Test
     void registerTrainer_ReturnsCreated() {
+        when(jwtTokenService.generateToken("john.smith")).thenReturn("jwt-token");
         when(gymFacade.createTrainer(any())).thenReturn(RegisterTrainerResponse.builder()
                 .username("john.smith")
                 .password("generatedPass")
@@ -52,7 +57,8 @@ class TrainerControllerRestAssuredTest extends RestAssuredControllerTestSupport 
                 .post("/api/trainer/register")
         .then()
                 .statusCode(201)
-                .body("username", equalTo("john.smith"));
+                .body("username", equalTo("john.smith"))
+                .body("token", equalTo("jwt-token"));
     }
 
     @Test

@@ -15,6 +15,7 @@ import com.gym.crm.dto.response.trainee.RegisterTraineeResponse;
 import com.gym.crm.dto.response.trainee.UpdateTraineeProfileResponse;
 import com.gym.crm.dto.response.trainee.UpdateTraineeTrainerListResponse;
 import com.gym.crm.dto.response.trainer.GetTrainerProfileResponse;
+import com.gym.crm.dto.response.trainer.GetTrainerMonthlyWorkloadResponse;
 import com.gym.crm.dto.response.trainer.GetTrainerTrainingsResponse;
 import com.gym.crm.dto.response.trainer.RegisterTrainerResponse;
 import com.gym.crm.dto.response.trainer.TrainerProfileInfo;
@@ -299,6 +300,23 @@ class GymFacadeImplTest {
         assertNotNull(result);
         assertEquals(2, result.getTrainingTypeList().size());
         verify(trainingService).getAllTrainings();
+    }
+
+    @Test
+    void getTrainerMonthlyWorkload_Success() {
+        GetTrainerMonthlyWorkloadResponse expected = GetTrainerMonthlyWorkloadResponse.builder()
+                .trainerUsername("John.Smith")
+                .year(2026)
+                .month(4)
+                .trainingSummaryDuration(10.0)
+                .build();
+
+        when(trainingService.getTrainerMonthlyWorkload("John.Smith", 2026, 4)).thenReturn(expected);
+
+        GetTrainerMonthlyWorkloadResponse result = gymFacade.getTrainerMonthlyWorkload("John.Smith", 2026, 4);
+
+        assertEquals(expected, result);
+        verify(trainingService).getTrainerMonthlyWorkload("John.Smith", 2026, 4);
     }
 
     @Test
