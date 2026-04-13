@@ -1,5 +1,6 @@
 package com.gym.crm.controller;
 
+import com.gym.crm.config.auth.JwtTokenService;
 import com.gym.crm.dto.request.ChangeLoginRequest;
 import com.gym.crm.dto.request.trainer.ActivateTrainerRequest;
 import com.gym.crm.dto.request.trainer.DeactivateTrainerRequest;
@@ -8,6 +9,7 @@ import com.gym.crm.dto.request.trainer.RegisterTrainerRequest;
 import com.gym.crm.dto.request.trainer.UpdateTrainerProfileRequest;
 import com.gym.crm.dto.response.ApiErrorResponse;
 import com.gym.crm.dto.response.trainer.GetTrainerProfileResponse;
+import com.gym.crm.dto.response.trainer.GetTrainerMonthlyWorkloadResponse;
 import com.gym.crm.dto.response.trainer.GetTrainerTrainingsResponse;
 import com.gym.crm.dto.response.trainer.RegisterTrainerResponse;
 import com.gym.crm.dto.response.trainer.UpdateTrainerProfileResponse;
@@ -23,6 +25,8 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -42,6 +46,7 @@ import java.util.List;
 @SecurityRequirement(name = "bearerAuth")
 public class TrainerController {
     private final GymFacade gymFacade;
+    private final JwtTokenService jwtTokenService;
 
     @PostMapping("/register")
     @SecurityRequirements
@@ -58,6 +63,7 @@ public class TrainerController {
         log.info("Register trainer request received for firstName={} and lastName={}",
                 trainerRequest.getFirstName(), trainerRequest.getLastName());
         RegisterTrainerResponse response = gymFacade.createTrainer(trainerRequest);
+        response.setToken(jwtTokenService.generateToken(response.getUsername()));
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(response);
@@ -162,6 +168,26 @@ public class TrainerController {
                                                                                  @Valid @ModelAttribute GetTrainerTrainingsRequest request) {
         request.setUsername(username);
         List<GetTrainerTrainingsResponse> response = gymFacade.getTrainerTrainings(request);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{username}/workload")
+    @Operation(summary = "Get trainer monthly workload")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Trainer monthly workload returned",
+                    content = @Content(schema = @Schema(implementation = GetTrainerMonthlyWorkloadResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid request parameters",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))),
+            @ApiResponse(responseCode = "401", description = "Missing or invalid bearer token",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "Trainer not found",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
+    })
+    public ResponseEntity<GetTrainerMonthlyWorkloadResponse> getTrainerMonthlyWorkload(
+            @PathVariable String username,
+            @RequestParam @Min(2000) Integer year,
+            @RequestParam @Min(1) @Max(12) Integer month) {
+        GetTrainerMonthlyWorkloadResponse response = gymFacade.getTrainerMonthlyWorkload(username, year, month);
         return ResponseEntity.ok(response);
     }
 }

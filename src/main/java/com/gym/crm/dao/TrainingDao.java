@@ -11,6 +11,8 @@ public interface TrainingDao {
 
     Optional<Training> findById(Long id);
 
+    void deleteById(Long id);
+
     List<Training> findAll();
     long countAll();
 

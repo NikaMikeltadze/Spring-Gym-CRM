@@ -19,6 +19,8 @@ import com.gym.crm.mapper.TrainingMapper;
 import com.gym.crm.mapper.UserMapper;
 import com.gym.crm.service.TraineeService;
 import com.gym.crm.util.UsernamePasswordGenerator;
+import com.gym.crm.client.TrainerWorkloadClient;
+import com.gym.crm.client.WorkloadRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -49,6 +51,7 @@ public class TraineeServiceImpl implements TraineeService {
     private final TrainingMapper trainingMapper;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
+    private final TrainerWorkloadClient workloadClient;
 
     @Override
     @Transactional
@@ -92,6 +95,27 @@ public class TraineeServiceImpl implements TraineeService {
     @Transactional
     public void deleteTrainee(String username) {
         log.debug("Deleting trainee with username={}", username);
+        
+        List<Training> trainings = trainingDao.findByTraineeUsernameAndCriteria(username, null, null, null, null);
+        for (Training training : trainings) {
+            try {
+                Trainer trainer = training.getTrainer();
+                WorkloadRequest request = WorkloadRequest.builder()
+                        .trainerUsername(trainer.getUser().getUsername())
+                        .trainerFirstName(trainer.getUser().getFirstName())
+                        .trainerLastName(trainer.getUser().getLastName())
+                        .isActive(trainer.getUser().getIsActive())
+                        .trainingDate(java.sql.Date.valueOf(training.getTrainingDate()))
+                        .trainingDuration(training.getTrainingDuration())
+                        .actionType(WorkloadRequest.ActionType.DELETE)
+                        .build();
+                log.info("Sending DELETE workload request to trainer-workload service for trainer: {}", request.getTrainerUsername());
+                workloadClient.updateWorkload(request);
+            } catch (Exception e) {
+                log.error("Failed to call trainer-workload service for training: {}", training.getId(), e);
+            }
+        }
+        
         traineeDao.delete(username);
         log.info("Successfully deleted trainee with username={}", username);
     }

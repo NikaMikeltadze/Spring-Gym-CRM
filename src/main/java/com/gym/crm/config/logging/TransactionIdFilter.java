@@ -14,13 +14,18 @@ import java.util.UUID;
 public class TransactionIdFilter extends OncePerRequestFilter {
 
     public static final String TRANSACTION_ID_KEY = "transactionId";
+    public static final String TRANSACTION_ID_HEADER = "x-transaction-id";
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request,
                                     @NonNull HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
-        String transactionId = UUID.randomUUID().toString();
+        String incomingTransactionId = request.getHeader(TRANSACTION_ID_HEADER);
+        String transactionId = (incomingTransactionId == null || incomingTransactionId.isBlank())
+                ? UUID.randomUUID().toString()
+                : incomingTransactionId;
         MDC.put(TRANSACTION_ID_KEY, transactionId);
+        response.setHeader(TRANSACTION_ID_HEADER, transactionId);
 
         try {
             filterChain.doFilter(request, response);

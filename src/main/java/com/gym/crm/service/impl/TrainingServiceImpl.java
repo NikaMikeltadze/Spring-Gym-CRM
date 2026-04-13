@@ -11,8 +11,13 @@ import com.gym.crm.entity.Trainee;
 import com.gym.crm.entity.Trainer;
 import com.gym.crm.entity.Training;
 import com.gym.crm.entity.TrainingType;
+import com.gym.crm.exception.NotFoundException;
 import com.gym.crm.mapper.TrainingTypeMapper;
 import com.gym.crm.service.TrainingService;
+import com.gym.crm.client.TrainerWorkloadClient;
+import com.gym.crm.client.WorkloadRequest;
+import com.gym.crm.client.WorkloadSummaryResponse;
+import com.gym.crm.dto.response.trainer.GetTrainerMonthlyWorkloadResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -34,6 +39,7 @@ public class TrainingServiceImpl implements TrainingService {
     private final TrainerDao trainerDao;
     private final TrainingTypeDao trainingTypeDao;
     private final TrainingTypeMapper trainingTypeMapper;
+    private final TrainerWorkloadClient workloadClient;
 
     @Override
     @Transactional
@@ -59,7 +65,67 @@ public class TrainingServiceImpl implements TrainingService {
         trainingDao.save(training);
         log.info("Successfully created training with name={}", training.getTrainingName());
 
+        try {
+            WorkloadRequest request = WorkloadRequest.builder()
+                    .trainerUsername(trainer.getUser().getUsername())
+                    .trainerFirstName(trainer.getUser().getFirstName())
+                    .trainerLastName(trainer.getUser().getLastName())
+                    .isActive(trainer.getUser().getIsActive())
+                    .trainingDate(java.sql.Date.valueOf(trainingRequest.getTrainingDate()))
+                    .trainingDuration(trainingRequest.getTrainingDuration())
+                    .actionType(WorkloadRequest.ActionType.ADD)
+                    .build();
+            
+            log.info("Sending ADD workload request to trainer-workload service for trainer: {}", request.getTrainerUsername());
+            workloadClient.updateWorkload(request);
+        } catch (Exception e) {
+            log.error("Failed to call trainer-workload service", e);
+        }
+
         return trainingTypeMapper.toTrainingTypeInfo(training.getTrainingType());
+    }
+
+    @Override
+    @Transactional
+    public void deleteTraining(Long id) {
+        log.debug("Deleting training by id={}", id);
+        Training training = trainingDao.findById(id)
+                .orElseThrow(() -> new NotFoundException("Training not found with id: " + id));
+
+        trainingDao.deleteById(id);
+        log.info("Successfully deleted training with id={}", id);
+
+        try {
+            Trainer trainer = training.getTrainer();
+            WorkloadRequest request = WorkloadRequest.builder()
+                    .trainerUsername(trainer.getUser().getUsername())
+                    .trainerFirstName(trainer.getUser().getFirstName())
+                    .trainerLastName(trainer.getUser().getLastName())
+                    .isActive(trainer.getUser().getIsActive())
+                    .trainingDate(java.sql.Date.valueOf(training.getTrainingDate()))
+                    .trainingDuration(training.getTrainingDuration())
+                    .actionType(WorkloadRequest.ActionType.DELETE)
+                    .build();
+
+            log.info("Sending DELETE workload request to trainer-workload service for trainer: {}", request.getTrainerUsername());
+            workloadClient.updateWorkload(request);
+        } catch (Exception e) {
+            log.error("Failed to call trainer-workload service for deleted training id={}", id, e);
+        }
+    }
+
+    @Override
+    public GetTrainerMonthlyWorkloadResponse getTrainerMonthlyWorkload(String trainerUsername, Integer year, Integer month) {
+        trainerDao.findByUsername(trainerUsername)
+                .orElseThrow(() -> new NotFoundException("Trainer not found with username: " + trainerUsername));
+
+        WorkloadSummaryResponse summary = workloadClient.getMonthlyWorkload(trainerUsername, year, month);
+        return GetTrainerMonthlyWorkloadResponse.builder()
+                .trainerUsername(summary.getTrainerUsername())
+                .year(summary.getYear())
+                .month(summary.getMonth())
+                .trainingSummaryDuration(summary.getTrainingSummaryDuration())
+                .build();
     }
 
     public Optional<TrainingTypeInfo> selectTraining(Long id) {

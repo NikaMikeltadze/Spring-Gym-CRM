@@ -41,6 +41,14 @@ public class TrainingDaoImpl implements TrainingDao {
     }
 
     @Override
+    public void deleteById(Long id) {
+        int affectedRows = entityManager.createQuery("DELETE FROM Training t WHERE t.id = :id")
+                .setParameter("id", id)
+                .executeUpdate();
+        log.debug("Deleted training by id={}, affectedRows={}", id, affectedRows);
+    }
+
+    @Override
     public List<Training> findAll() {
         List<Training> trainings = entityManager.createQuery("SELECT t FROM Training t", Training.class).getResultList();
         log.debug("Finding all trainings, count: {}", trainings.size());

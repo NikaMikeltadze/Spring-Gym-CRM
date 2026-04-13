@@ -82,6 +82,11 @@ public class GymFacadeImpl implements GymFacade {
     }
 
     @Override
+    public void deleteTraining(Long id) {
+        trainingService.deleteTraining(id);
+    }
+
+    @Override
     public GetTrainingTypesResponse getAllTrainings() {
         return trainingService.getAllTrainings();
     }
@@ -133,6 +138,11 @@ public class GymFacadeImpl implements GymFacade {
     @Override
     public List<GetTrainerTrainingsResponse> getTrainerTrainings(GetTrainerTrainingsRequest request) {
         return traineeService.getTrainerTrainings(request);
+    }
+
+    @Override
+    public GetTrainerMonthlyWorkloadResponse getTrainerMonthlyWorkload(String trainerUsername, Integer year, Integer month) {
+        return trainingService.getTrainerMonthlyWorkload(trainerUsername, year, month);
     }
 
     private GetTrainerProfileResponse mapToGetTrainerProfileResponse(Trainer trainer) {

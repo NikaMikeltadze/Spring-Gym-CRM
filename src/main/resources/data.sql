@@ -50,3 +50,5 @@ INSERT INTO training (id, trainee_id, trainer_id, training_name, training_type_i
 ALTER TABLE trainee ALTER COLUMN id RESTART WITH 11;
 ALTER TABLE trainer ALTER COLUMN id RESTART WITH 11;
 ALTER TABLE users ALTER COLUMN id RESTART WITH 11;
+ALTER TABLE training ALTER COLUMN id RESTART WITH 13;
+ALTER TABLE trainingtype ALTER COLUMN id RESTART WITH 6;

@@ -23,6 +23,8 @@ public interface GymFacade {
 
     void createTraining(@Valid @NotNull AddTrainingRequest training);
 
+    void deleteTraining(@NotNull Long id);
+
     GetTraineeProfileResponse getTraineeByUsername(@NotBlank String username);
 
     Optional<GetTraineeProfileResponse> getTraineeById(@NotNull Long id);
@@ -56,5 +58,9 @@ public interface GymFacade {
     List<TrainerProfileInfo> getUnassignedActiveTrainers(@NotBlank String traineeUsername);
 
     List<GetTrainerTrainingsResponse> getTrainerTrainings(@Valid GetTrainerTrainingsRequest request);
+
+    GetTrainerMonthlyWorkloadResponse getTrainerMonthlyWorkload(@NotBlank String trainerUsername,
+                                                                @NotNull Integer year,
+                                                                @NotNull Integer month);
 }
 
