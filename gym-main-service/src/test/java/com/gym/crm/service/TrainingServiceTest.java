@@ -5,6 +5,7 @@ import com.gym.crm.dao.TrainerDao;
 import com.gym.crm.dao.TrainingDao;
 import com.gym.crm.dao.TrainingTypeDao;
 import com.gym.crm.client.TrainerWorkloadClient;
+import com.gym.crm.producer.TrainerWorkloadProducer;
 import com.gym.crm.client.WorkloadRequest;
 import com.gym.crm.client.WorkloadSummaryResponse;
 import com.gym.crm.dto.request.training.AddTrainingRequest;
@@ -55,6 +56,9 @@ class TrainingServiceTest {
     @Mock
     private TrainerWorkloadClient workloadClient;
 
+    @Mock
+    private TrainerWorkloadProducer workloadProducer;
+
     @InjectMocks
     private TrainingServiceImpl trainingService;
 
@@ -93,7 +97,7 @@ class TrainingServiceTest {
 
         verify(trainingDao).save(any(Training.class));
         ArgumentCaptor<WorkloadRequest> workloadCaptor = ArgumentCaptor.forClass(WorkloadRequest.class);
-        verify(workloadClient).updateWorkload(workloadCaptor.capture());
+        verify(workloadProducer).sendWorkloadUpdate(workloadCaptor.capture());
         assertEquals(60.5, workloadCaptor.getValue().getTrainingDuration());
         assertEquals(WorkloadRequest.ActionType.ADD, workloadCaptor.getValue().getActionType());
         assertNotNull(result);
@@ -153,7 +157,7 @@ class TrainingServiceTest {
 
         verify(trainingDao).deleteById(trainingId);
         ArgumentCaptor<WorkloadRequest> workloadCaptor = ArgumentCaptor.forClass(WorkloadRequest.class);
-        verify(workloadClient).updateWorkload(workloadCaptor.capture());
+        verify(workloadProducer).sendWorkloadUpdate(workloadCaptor.capture());
         assertEquals(WorkloadRequest.ActionType.DELETE, workloadCaptor.getValue().getActionType());
         assertEquals(45.0, workloadCaptor.getValue().getTrainingDuration());
     }
@@ -166,7 +170,7 @@ class TrainingServiceTest {
         assertThrows(NotFoundException.class, () -> trainingService.deleteTraining(trainingId));
 
         verify(trainingDao, never()).deleteById(any());
-        verify(workloadClient, never()).updateWorkload(any());
+        verify(workloadProducer, never()).sendWorkloadUpdate(any());
     }
 
     @Test

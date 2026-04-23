@@ -27,7 +27,6 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -51,33 +50,6 @@ class TrainerWorkloadControllerTest {
                 .setControllerAdvice(new GlobalExceptionHandler())
                 .setValidator(validator)
                 .build();
-    }
-
-    @Test
-    void processWorkload_returnsOkAndDelegatesToService() throws Exception {
-        TrainerWorkloadRequest request = createRequest();
-        doNothing().when(trainerWorkloadService).processWorkload(any());
-
-        mockMvc.perform(post("/api/workloads")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk());
-
-        ArgumentCaptor<TrainerWorkloadRequest> captor = ArgumentCaptor.forClass(TrainerWorkloadRequest.class);
-        verify(trainerWorkloadService).processWorkload(captor.capture());
-        assertThat(captor.getValue()).usingRecursiveComparison().isEqualTo(request);
-    }
-
-    @Test
-    void processWorkload_returnsBadRequestForInvalidBody() throws Exception {
-        TrainerWorkloadRequest request = createRequest();
-        request.setTrainingDate(null);
-
-        mockMvc.perform(post("/api/workloads")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("trainingDate must not be null"));
     }
 
     @Test

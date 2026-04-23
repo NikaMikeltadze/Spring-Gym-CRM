@@ -17,9 +17,9 @@ import com.gym.crm.mapper.TraineeMapper;
 import com.gym.crm.mapper.TrainerMapper;
 import com.gym.crm.mapper.TrainingMapper;
 import com.gym.crm.mapper.UserMapper;
+import com.gym.crm.producer.TrainerWorkloadProducer;
 import com.gym.crm.service.TraineeService;
 import com.gym.crm.util.UsernamePasswordGenerator;
-import com.gym.crm.client.TrainerWorkloadClient;
 import com.gym.crm.client.WorkloadRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -51,7 +51,7 @@ public class TraineeServiceImpl implements TraineeService {
     private final TrainingMapper trainingMapper;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
-    private final TrainerWorkloadClient workloadClient;
+    private final TrainerWorkloadProducer workloadProducer;
 
     @Override
     @Transactional
@@ -109,10 +109,10 @@ public class TraineeServiceImpl implements TraineeService {
                         .trainingDuration(training.getTrainingDuration())
                         .actionType(WorkloadRequest.ActionType.DELETE)
                         .build();
-                log.info("Sending DELETE workload request to trainer-workload service for trainer: {}", request.getTrainerUsername());
-                workloadClient.updateWorkload(request);
+                log.info("Sending DELETE workload request to trainer-workload queue for trainer: {}", request.getTrainerUsername());
+                workloadProducer.sendWorkloadUpdate(request);
             } catch (Exception e) {
-                log.error("Failed to call trainer-workload service for training: {}", training.getId(), e);
+                log.error("Failed to call trainer-workload producer for training: {}", training.getId(), e);
             }
         }
         

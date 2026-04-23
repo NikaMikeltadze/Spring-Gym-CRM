@@ -3,18 +3,12 @@ package com.gym.crm.service;
 import com.gym.crm.dao.TraineeDao;
 import com.gym.crm.dao.TrainerDao;
 import com.gym.crm.dao.TrainingDao;
-import com.gym.crm.entity.*;
-import com.gym.crm.mapper.TraineeMapper;
-import com.gym.crm.mapper.TrainerMapper;
-import com.gym.crm.mapper.TrainingMapper;
 import com.gym.crm.client.TrainerWorkloadClient;
-import com.gym.crm.client.WorkloadRequest;
-import com.gym.crm.dto.request.*;
+import com.gym.crm.producer.TrainerWorkloadProducer;
+import com.gym.crm.dto.request.ChangeLoginRequest;
 import com.gym.crm.dto.request.trainee.*;
-import com.gym.crm.dto.request.trainer.*;
 import com.gym.crm.dto.response.*;
 import com.gym.crm.dto.response.trainee.*;
-import com.gym.crm.dto.response.trainer.*;
 import com.gym.crm.exception.NotFoundException;
 import com.gym.crm.service.impl.TraineeServiceImpl;
 import com.gym.crm.util.UsernamePasswordGenerator;
@@ -66,6 +60,9 @@ class TraineeServiceTest {
 
     @Mock
     private TrainerWorkloadClient workloadClient;
+
+    @Mock
+    private TrainerWorkloadProducer workloadProducer;
 
     @InjectMocks
     private TraineeServiceImpl traineeService;
