@@ -6,19 +6,24 @@
 
     <groupId>com.gym</groupId>
     <artifactId>Gym-Main-Service</artifactId>
+    <name>Gym-Main-Service</name>
+    <description>Gym-Main-Service</description>
     <version>1.0-SNAPSHOT</version>
 
     <properties>
         <java.version>17</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <spring-framework.version>7.0.6</spring-framework.version>
+        <spring-framework.version>7.0.7</spring-framework.version>
+        <spring-security.version>7.0.5</spring-security.version>
         <rest-assured.version>5.5.7</rest-assured.version>
+        <tomcat.version>11.0.21</tomcat.version>
+        <bouncycastle.version>1.84</bouncycastle.version>
     </properties>
 
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>4.0.4</version>
+        <version>4.0.5</version>
         <relativePath/>
     </parent>
 
@@ -193,6 +198,11 @@
                 <version>2025.1.1</version>
             </dependency>
             <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcprov-jdk18on</artifactId>
+                <version>${bouncycastle.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.apache.tomcat.embed</groupId>
                 <artifactId>tomcat-embed-core</artifactId>
                 <version>11.0.21</version>
@@ -211,6 +221,11 @@
                 <groupId>commons-jxpath</groupId>
                 <artifactId>commons-jxpath</artifactId>
                 <version>1.4.0</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-lang</groupId>
+                <artifactId>commons-lang</artifactId>
+                <version>20030203.000129</version>
             </dependency>
             <dependency>
                 <groupId>com.google.guava</groupId>
