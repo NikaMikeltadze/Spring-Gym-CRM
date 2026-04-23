@@ -9,7 +9,7 @@ This repository is structured as a multi-module Maven project consisting of seve
 
 1. **gym-main-service** (Port `8080`): The core Spring Boot REST API for managing trainees, trainers, and training sessions. It handles authentication, data access (H2/PostgreSQL), and main business logic.
 2. **gym-discovery-service** (Port `8761`): A Spring Cloud Netflix Eureka Server acting as the central service registry. It allows microservices to register and discover each other without hardcoding network addresses.
-3. **trainee-workload-service** (Port `8081`): A separate microservice for processing and aggregating trainer workload. It receives training events from the main service and maintains monthly workload totals in its own database.
+3. **trainee-workload-service** (Port `8081`): A separate microservice for processing and aggregating trainer workload. It receives training events asynchronously via ActiveMQ from the main service and maintains monthly workload totals in its own database.
 
 ## Features
 
@@ -25,8 +25,9 @@ This repository is structured as a multi-module Maven project consisting of seve
 
 - Java 17
 - Spring Boot 3.5.7
-- Spring Web, Validation, Data JPA, Security, Actuator
+- Spring Web, Validation, Data JPA, Security, Actuator, JMS
 - H2 (local/dev) and PostgreSQL (stg/prod)
+- Apache ActiveMQ (Message-Oriented Middleware)
 - Springdoc OpenAPI UI
 - Micrometer + Prometheus registry
 - JUnit + Spring Boot Test + Rest Assured
@@ -48,10 +49,19 @@ This repository is structured as a multi-module Maven project consisting of seve
 
 - JDK 17+
 - Maven 3.9+
+- Docker Desktop (for running the ActiveMQ MOM)
 
 ## Run the Application
 
-Start the **Eureka Discovery Server** (`gym-discovery-service`) first on port `8761`.
+First, start the **ActiveMQ** Message-Oriented Middleware (MOM) broker using Docker:
+
+```bat
+docker run -d --name activemq -p 61616:61616 -p 8161:8161 rmohr/activemq
+```
+
+*(Note: ActiveMQ broker listens on TCP 61616 for messaging. The Web Admin Console runs on port 8161 and can be accessed at [http://localhost:8161/admin/](http://localhost:8161/admin/). The default credentials are `admin` / `admin`.)*
+
+Next, start the **Eureka Discovery Server** (`gym-discovery-service`) on port `8761`.
 Then start the other services.
 
 For `gym-main-service`, the default profile is `local` (in-memory H2).
