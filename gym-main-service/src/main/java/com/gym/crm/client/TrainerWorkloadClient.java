@@ -15,7 +15,7 @@ public interface TrainerWorkloadClient {
                                                @RequestParam(value = "year", required = false) Integer year,
                                                @RequestParam(value = "month", required = false) Integer month);
 
-    default WorkloadSummaryResponse getMonthlyWorkloadFallback(String trainerUsername, Integer year, Integer month, Throwable t) {
+    default WorkloadSummaryResponse getMonthlyWorkloadFallback(String trainerUsername, Integer year, Integer month) {
         System.err.println("Workload service is down! Failed to fetch workload for trainer: " + trainerUsername);
         return WorkloadSummaryResponse.builder()
                 .trainerUsername(trainerUsername)

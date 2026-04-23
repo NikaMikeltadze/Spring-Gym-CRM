@@ -2,7 +2,6 @@ package com.gym.crm.trainerworkload.controller;
 
 import com.gym.crm.trainerworkload.model.TrainerMonthlyWorkloadResponse;
 import com.gym.crm.trainerworkload.service.TrainerWorkloadService;
-import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;

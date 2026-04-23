@@ -20,7 +20,7 @@ public class TrainerWorkloadProducer {
     private String workloadQueue;
 
     public void sendWorkloadUpdate(WorkloadRequest request) {
-        String payload = null;
+        String payload;
         try {
             payload = objectMapper.writeValueAsString(request);
         } catch (JsonProcessingException e) {
