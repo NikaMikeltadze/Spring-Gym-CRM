@@ -1,7 +1,15 @@
 # Spring Gym CRM
 
-Spring Gym CRM is a Spring Boot REST API for managing trainees, trainers, and training sessions.
-It includes authentication, profile management, training scheduling, health checks, and Prometheus-ready metrics.
+Spring Gym CRM is a microservices-based project for managing trainees, trainers, and training sessions.
+It includes authentication, profile management, training scheduling, health checks, Prometheus-ready metrics, and service discovery.
+
+## Architecture & Microservices
+
+This repository is structured as a multi-module Maven project consisting of several independent microservices:
+
+1. **gym-main-service** (Port `8080`): The core Spring Boot REST API for managing trainees, trainers, and training sessions. It handles authentication, data access (H2/PostgreSQL), and main business logic.
+2. **gym-discovery-service** (Port `8761`): A Spring Cloud Netflix Eureka Server acting as the central service registry. It allows microservices to register and discover each other without hardcoding network addresses.
+3. **trainee-workload-service** (Port `8081`): A separate microservice for processing and aggregating trainer workload. It receives training events from the main service and maintains monthly workload totals in its own database.
 
 ## Features
 
@@ -26,12 +34,15 @@ It includes authentication, profile management, training scheduling, health chec
 
 ## Project Structure
 
-- `src/main/java/com/gym/crm/controller` - REST controllers
-- `src/main/java/com/gym/crm/service` - business logic
-- `src/main/java/com/gym/crm/dao` - data access layer
-- `src/main/java/com/gym/crm/entity` - JPA entities
-- `src/main/java/com/gym/crm/config` - security, OpenAPI, web config
-- `src/main/resources` - profile configs and seed data (`data.sql`)
+- `gym-main-service/` - The core CRM REST API
+- `gym-discovery-service/` - Eureka Discovery Server
+- `trainee-workload-service/` - Trainer workload aggregation service
+- `gym-main-service/src/main/java/com/gym/crm/controller` - REST controllers
+- `gym-main-service/src/main/java/com/gym/crm/service` - business logic
+- `gym-main-service/src/main/java/com/gym/crm/dao` - data access layer
+- `gym-main-service/src/main/java/com/gym/crm/entity` - JPA entities
+- `gym-main-service/src/main/java/com/gym/crm/config` - security, OpenAPI, web config
+- `gym-main-service/src/main/resources` - profile configs and seed data (`data.sql`)
 
 ## Prerequisites
 
@@ -40,9 +51,13 @@ It includes authentication, profile management, training scheduling, health chec
 
 ## Run the Application
 
-Default profile is `local` (in-memory H2).
+Start the **Eureka Discovery Server** (`gym-discovery-service`) first on port `8761`.
+Then start the other services.
+
+For `gym-main-service`, the default profile is `local` (in-memory H2).
 
 ```bat
+cd gym-main-service
 mvn clean spring-boot:run
 ```
 
@@ -53,7 +68,7 @@ set SPRING_PROFILES_ACTIVE=dev
 mvn spring-boot:run
 ```
 
-For `stg` and `prod`, set database credentials first:
+For `stg` and `prod` under `gym-main-service`, set database credentials first:
 
 ```bat
 set SPRING_PROFILES_ACTIVE=stg
