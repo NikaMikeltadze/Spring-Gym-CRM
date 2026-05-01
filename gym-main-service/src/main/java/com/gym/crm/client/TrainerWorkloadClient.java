@@ -3,17 +3,11 @@ package com.gym.crm.client;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestBody;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 
 @FeignClient(name = "trainer-workload")
 public interface TrainerWorkloadClient {
-
-    @PostMapping("/api/workloads")
-    @CircuitBreaker(name = "workloadClient", fallbackMethod = "updateWorkloadFallback")
-    void updateWorkload(@RequestBody WorkloadRequest request);
 
     @GetMapping("/api/workloads/{trainerUsername}/workload")
     @CircuitBreaker(name = "workloadClient", fallbackMethod = "getMonthlyWorkloadFallback")
@@ -21,11 +15,7 @@ public interface TrainerWorkloadClient {
                                                @RequestParam(value = "year", required = false) Integer year,
                                                @RequestParam(value = "month", required = false) Integer month);
 
-    default void updateWorkloadFallback(WorkloadRequest request, Throwable t) {
-        System.err.println("Workload service is down! Failed to send workload for trainer: " + request.getTrainerUsername());
-    }
-
-    default WorkloadSummaryResponse getMonthlyWorkloadFallback(String trainerUsername, Integer year, Integer month, Throwable t) {
+    default WorkloadSummaryResponse getMonthlyWorkloadFallback(String trainerUsername, Integer year, Integer month) {
         System.err.println("Workload service is down! Failed to fetch workload for trainer: " + trainerUsername);
         return WorkloadSummaryResponse.builder()
                 .trainerUsername(trainerUsername)

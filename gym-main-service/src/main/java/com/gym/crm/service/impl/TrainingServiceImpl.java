@@ -17,6 +17,7 @@ import com.gym.crm.service.TrainingService;
 import com.gym.crm.client.TrainerWorkloadClient;
 import com.gym.crm.client.WorkloadRequest;
 import com.gym.crm.client.WorkloadSummaryResponse;
+import com.gym.crm.producer.TrainerWorkloadProducer;
 import com.gym.crm.dto.response.trainer.GetTrainerMonthlyWorkloadResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,6 +41,7 @@ public class TrainingServiceImpl implements TrainingService {
     private final TrainingTypeDao trainingTypeDao;
     private final TrainingTypeMapper trainingTypeMapper;
     private final TrainerWorkloadClient workloadClient;
+    private final TrainerWorkloadProducer workloadProducer;
 
     @Override
     @Transactional
@@ -77,9 +79,9 @@ public class TrainingServiceImpl implements TrainingService {
                     .build();
             
             log.info("Sending ADD workload request to trainer-workload service for trainer: {}", request.getTrainerUsername());
-            workloadClient.updateWorkload(request);
+            workloadProducer.sendWorkloadUpdate(request);
         } catch (Exception e) {
-            log.error("Failed to call trainer-workload service", e);
+            log.error("Failed to call trainer-workload producer", e);
         }
 
         return trainingTypeMapper.toTrainingTypeInfo(training.getTrainingType());
@@ -108,9 +110,9 @@ public class TrainingServiceImpl implements TrainingService {
                     .build();
 
             log.info("Sending DELETE workload request to trainer-workload service for trainer: {}", request.getTrainerUsername());
-            workloadClient.updateWorkload(request);
+            workloadProducer.sendWorkloadUpdate(request);
         } catch (Exception e) {
-            log.error("Failed to call trainer-workload service for deleted training id={}", id, e);
+            log.error("Failed to call trainer-workload producer for deleted training id={}", id, e);
         }
     }
 

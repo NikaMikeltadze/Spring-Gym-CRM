@@ -4,10 +4,10 @@ import com.gym.crm.exception.UnauthorizedException;
 import com.gym.crm.service.AuthenticationService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
-import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
@@ -23,9 +23,9 @@ public class HeaderAuthenticationInterceptor implements HandlerInterceptor {
     private final AuthenticationService authenticationService;
 
     @Override
-    public boolean preHandle(@NonNull HttpServletRequest request,
-                             @NonNull HttpServletResponse response,
-                             @NonNull Object handler) {
+    public boolean preHandle(@NotNull HttpServletRequest request,
+                             @NotNull HttpServletResponse response,
+                             @NotNull Object handler) {
         String username = request.getHeader(USERNAME_HEADER);
         String password = request.getHeader(PASSWORD_HEADER);
 
@@ -47,9 +47,9 @@ public class HeaderAuthenticationInterceptor implements HandlerInterceptor {
     }
 
     @Override
-    public void afterCompletion(@NonNull HttpServletRequest request,
-                                @NonNull HttpServletResponse response,
-                                @NonNull Object handler,
+    public void afterCompletion(@NotNull HttpServletRequest request,
+                                @NotNull HttpServletResponse response,
+                                @NotNull Object handler,
                                 Exception ex) {
         MDC.remove(MDC_USERNAME_KEY);
     }
