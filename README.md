@@ -49,17 +49,27 @@ This repository is structured as a multi-module Maven project consisting of seve
 
 - JDK 17+
 - Maven 3.9+
-- Docker Desktop (for running the ActiveMQ MOM)
+- Docker Desktop (for running the ActiveMQ MOM and MongoDB)
 
 ## Run the Application
 
-First, start the **ActiveMQ** Message-Oriented Middleware (MOM) broker using Docker:
+First, start the required infrastructure using Docker.
+
+Start the **ActiveMQ** Message-Oriented Middleware (MOM) broker:
 
 ```bat
 docker run -d --name activemq -p 61616:61616 -p 8161:8161 rmohr/activemq
 ```
 
 *(Note: ActiveMQ broker listens on TCP 61616 for messaging. The Web Admin Console runs on port 8161 and can be accessed at [http://localhost:8161/admin/](http://localhost:8161/admin/). The default credentials are `admin` / `admin`.)*
+
+Start the **MongoDB** database (used by `trainee-workload-service` for NoSQL storage):
+
+```bat
+docker run -d --name mongodb -p 27017:27017 mongo:latest
+```
+
+The NoSQL task aggregates and logs trainer workloads to the `gym` database on the default port `27017`.
 
 Next, start the **Eureka Discovery Server** (`gym-discovery-service`) on port `8761`.
 Then start the other services.
