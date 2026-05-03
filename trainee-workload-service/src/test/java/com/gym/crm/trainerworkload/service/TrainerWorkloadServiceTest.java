@@ -9,6 +9,7 @@ import com.gym.crm.trainerworkload.model.WorkloadMonth;
 import com.gym.crm.trainerworkload.model.WorkloadMonthSummary;
 import com.gym.crm.trainerworkload.repository.TrainerWorkloadRepository;
 import com.gym.crm.trainerworkload.repository.WorkloadMonthRepository;
+import com.gym.crm.trainerworkload.nosql.TrainerTrainingSummaryService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,6 +40,9 @@ class TrainerWorkloadServiceTest {
 
     @Mock
     private WorkloadMonthRepository workloadMonthRepository;
+
+    @Mock
+    private TrainerTrainingSummaryService trainerTrainingSummaryService;
 
     @InjectMocks
     private TrainerWorkloadService trainerWorkloadService;
