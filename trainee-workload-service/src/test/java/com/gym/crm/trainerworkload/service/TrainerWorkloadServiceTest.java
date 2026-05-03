@@ -9,6 +9,7 @@ import com.gym.crm.trainerworkload.model.WorkloadMonth;
 import com.gym.crm.trainerworkload.model.WorkloadMonthSummary;
 import com.gym.crm.trainerworkload.repository.TrainerWorkloadRepository;
 import com.gym.crm.trainerworkload.repository.WorkloadMonthRepository;
+import com.gym.crm.trainerworkload.nosql.TrainerTrainingSummaryService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -40,6 +41,9 @@ class TrainerWorkloadServiceTest {
     @Mock
     private WorkloadMonthRepository workloadMonthRepository;
 
+    @Mock
+    private TrainerTrainingSummaryService trainerTrainingSummaryService;
+
     @InjectMocks
     private TrainerWorkloadService trainerWorkloadService;
 
@@ -58,7 +62,7 @@ class TrainerWorkloadServiceTest {
 
     @Test
     void processWorkload_createsTrainerAndMonthWhenMissing_addsDuration() {
-        TrainerWorkloadRequest request = createRequest(true, ActionType.ADD, 2.5);
+        TrainerWorkloadRequest request = createRequest("jdoe", "John", "Doe", true, ActionType.ADD, "2024-06-15T12:00:00Z", 2.5);
 
         when(trainerWorkloadRepository.findByUsername("jdoe")).thenReturn(Optional.empty());
         when(workloadMonthRepository.findByTrainerUsernameAndYearAndMonth("jdoe", 2024, 6)).thenReturn(Optional.empty());
@@ -82,7 +86,7 @@ class TrainerWorkloadServiceTest {
 
     @Test
     void processWorkload_addsDurationToExistingMonth() {
-        TrainerWorkloadRequest request = createRequest(false, ActionType.ADD, 1.75);
+        TrainerWorkloadRequest request = createRequest("jdoe", "John", "Doe", false, ActionType.ADD, "2024-06-15T12:00:00Z", 1.75);
 
         TrainerWorkload trainer = new TrainerWorkload();
         trainer.setUsername("jdoe");
@@ -112,7 +116,7 @@ class TrainerWorkloadServiceTest {
 
     @Test
     void processWorkload_deleteClampsDurationAtZero() {
-        TrainerWorkloadRequest request = createRequest(true, ActionType.DELETE, 5.0);
+        TrainerWorkloadRequest request = createRequest("jdoe", "John", "Doe", true, ActionType.DELETE, "2024-06-15T12:00:00Z", 5.0);
 
         TrainerWorkload trainer = new TrainerWorkload();
         trainer.setUsername("jdoe");
@@ -138,7 +142,7 @@ class TrainerWorkloadServiceTest {
 
     @Test
     void processWorkload_rejectsNullTrainingDate() {
-        TrainerWorkloadRequest request = createRequest(true, ActionType.ADD, 2.5);
+        TrainerWorkloadRequest request = createRequest("jdoe", "John", "Doe", true, ActionType.ADD, "2024-06-15T12:00:00Z", 2.5);
         request.setTrainingDate(null);
 
         assertThatThrownBy(() -> trainerWorkloadService.processWorkload(request))
@@ -148,7 +152,7 @@ class TrainerWorkloadServiceTest {
 
     @Test
     void processWorkload_rejectsNonPositiveDuration() {
-        TrainerWorkloadRequest request = createRequest(true, ActionType.ADD, 0.0);
+        TrainerWorkloadRequest request = createRequest("jdoe", "John", "Doe", true, ActionType.ADD, "2024-06-15T12:00:00Z", 0.0);
 
         assertThatThrownBy(() -> trainerWorkloadService.processWorkload(request))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -254,17 +258,21 @@ class TrainerWorkloadServiceTest {
     }
 
     private static TrainerWorkloadRequest createRequest(
+            String username,
+            String firstName,
+            String lastName,
             boolean active,
             ActionType actionType,
+            String trainingDate,
             Double duration
     ) {
         TrainerWorkloadRequest request = new TrainerWorkloadRequest();
-        request.setTrainerUsername("jdoe");
-        request.setTrainerFirstName("John");
-        request.setTrainerLastName("Doe");
+        request.setTrainerUsername(username);
+        request.setTrainerFirstName(firstName);
+        request.setTrainerLastName(lastName);
         request.setActive(active);
         request.setActionType(actionType);
-        request.setTrainingDate(Date.from(Instant.parse("2024-06-15T12:00:00Z")));
+        request.setTrainingDate(Date.from(Instant.parse(trainingDate)));
         request.setTrainingDuration(duration);
         return request;
     }
