@@ -1,5 +1,7 @@
 package com.gym.crm.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.gym.crm.config.logging.TransactionIdFilter;
 import io.micrometer.core.instrument.MeterRegistry;
 import jakarta.servlet.DispatcherType;
@@ -9,13 +11,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.time.Clock;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Configuration
 public class AppConfig {
     @Bean
     public ObjectMapper objectMapper() {
-        return new ObjectMapper();
+        return new ObjectMapper().registerModule(new JavaTimeModule());
     }
 
     @Bean

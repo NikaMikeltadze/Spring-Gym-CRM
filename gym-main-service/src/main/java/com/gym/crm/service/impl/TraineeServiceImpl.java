@@ -22,7 +22,6 @@ import com.gym.crm.service.TraineeService;
 import com.gym.crm.util.UsernamePasswordGenerator;
 import com.gym.crm.client.WorkloadRequest;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -95,7 +94,7 @@ public class TraineeServiceImpl implements TraineeService {
     @Transactional
     public void deleteTrainee(String username) {
         log.debug("Deleting trainee with username={}", username);
-        
+
         List<Training> trainings = trainingDao.findByTraineeUsernameAndCriteria(username, null, null, null, null);
         for (Training training : trainings) {
             try {
@@ -115,7 +114,7 @@ public class TraineeServiceImpl implements TraineeService {
                 log.error("Failed to call trainer-workload producer for training: {}", training.getId(), e);
             }
         }
-        
+
         traineeDao.delete(username);
         log.info("Successfully deleted trainee with username={}", username);
     }
@@ -166,7 +165,7 @@ public class TraineeServiceImpl implements TraineeService {
 
     @Transactional
     @Override
-    public void activateTrainee(@Valid @NotBlank ActivateTraineeRequest request) {
+    public void activateTrainee(@Valid @NotNull ActivateTraineeRequest request) {
         log.debug("Attempting to activate trainee username={}", request.getUsername());
 
         Trainee trainee = traineeDao.findByUsername(request.getUsername())
@@ -187,7 +186,7 @@ public class TraineeServiceImpl implements TraineeService {
 
     @Override
     @Transactional
-    public void deactivateTrainee(@Valid @NotBlank DeactivateTraineeRequest request) {
+    public void deactivateTrainee(@Valid @NotNull DeactivateTraineeRequest request) {
         log.debug("Attempting to deactivate trainee username={}", request.getUsername());
 
         Trainee trainee = traineeDao.findByUsername(request.getUsername())

@@ -27,17 +27,17 @@ public interface TraineeService {
 
     void changePassword(@Valid @NotNull ChangeLoginRequest request);
 
-    void activateTrainee(@Valid @NotBlank ActivateTraineeRequest request);
+    void activateTrainee(@Valid @NotNull ActivateTraineeRequest request);
 
-    void deactivateTrainee(@Valid @NotBlank DeactivateTraineeRequest request);
+    void deactivateTrainee(@Valid @NotNull DeactivateTraineeRequest request);
 
     List<GetTraineeTrainingsResponse> getTrainings(
-            @Valid @NotBlank GetTraineeTrainingsRequest request
+            @Valid @NotNull GetTraineeTrainingsRequest request
     );
 
-    UpdateTraineeTrainerListResponse updateTrainerList(@Valid @NotBlank UpdateTraineeTrainerListRequest request);
+    UpdateTraineeTrainerListResponse updateTrainerList(@Valid @NotNull UpdateTraineeTrainerListRequest request);
 
-    List<TrainerProfileInfo> getUnassignedActiveTrainers(@Valid @NotBlank TraineeAssignableTrainerRequest request);
+    List<TrainerProfileInfo> getUnassignedActiveTrainers(@Valid @NotNull TraineeAssignableTrainerRequest request);
 
     List<GetTrainerTrainingsResponse> getTrainerTrainings(GetTrainerTrainingsRequest request);
 }
