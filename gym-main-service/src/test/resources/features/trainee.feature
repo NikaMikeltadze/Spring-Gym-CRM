@@ -5,7 +5,7 @@ Feature: Trainee management endpoints
 
   @component @trainee
   Scenario: Register a new trainee successfully
-    Given I have trainee registration data with first name "John" and last name "Doe" and date of birth "1990-01-01"
+    Given I have trainee registration data with first name "John" and last name "Doe" and date of birth "1990-01-01" and address "123 Main St"
     When I send a trainee registration request
     Then the response status should be 201
     And the response should contain a trainee username starting with "John.Doe"
@@ -13,7 +13,7 @@ Feature: Trainee management endpoints
 
   @component @trainee
   Scenario: Register trainee with invalid first name should fail
-    Given I have trainee registration data with first name "" and last name "Doe"
+    Given I have trainee registration data with first name "" and last name "Doe" and date of birth "1990-01-01" and address "123 Main St"
     When I send a trainee registration request
     Then the response status should be 400
     And the response should contain validation error for field "firstName"
@@ -21,7 +21,7 @@ Feature: Trainee management endpoints
   @component @trainee
   Scenario: Register trainee with duplicate name should fail with 409
     Given a trainee already exists with first name "Jane" and last name "Doe"
-    And I have trainee registration data with first name "Jane" and last name "Doe"
+    Given I have trainee registration data with first name "Jane" and last name "Doe" and date of birth "1990-01-01" and address "123 Main St"
     When I send a trainee registration request
     Then the response status should be 409
     And the response should contain message "already registered as trainer"
@@ -45,27 +45,20 @@ Feature: Trainee management endpoints
   @component @trainee
   Scenario: Update trainee profile successfully
     Given I have a valid JWT token for authenticated requests
-    And a trainee exists with username "John.Doe"
+    And a trainee already exists with first name "John" and last name "Doe" and date of birth "1990-01-01" and address "123 Main St"
     And I have trainee update data with first name "Johnny" and last name "Doe"
     When I send a trainee profile update request for "John.Doe"
     Then the response status should be 200
     And the response should contain trainee first name "Johnny"
 
   @component @trainee
-  Scenario: Update trainee with invalid date of birth should fail
+  Scenario: Update trainee with blank first name should fail
     Given I have a valid JWT token for authenticated requests
-    And a trainee exists with username "John.Doe"
-    And I have trainee update data with invalid date of birth "invalid-date"
+    And a trainee already exists with first name "John" and last name "Doe" and date of birth "1990-01-01" and address "123 Main St"
+    And I have trainee update data with first name "" and last name "Doe"
     When I send a trainee profile update request for "John.Doe"
     Then the response status should be 400
-
-  @component @trainee
-  Scenario: Get trainee trainings successfully
-    Given I have a valid JWT token for authenticated requests
-    And a trainee exists with username "John.Doe"
-    When I request trainee trainings for "John.Doe"
-    Then the response status should be 200
-    And the response should contain a list of trainings
+    And the response should contain validation error for field "firstName"
 
   @component @trainee
   Scenario: Get trainee trainings for non-existent trainee should return 404

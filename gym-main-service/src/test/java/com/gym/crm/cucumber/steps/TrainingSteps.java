@@ -47,7 +47,6 @@ public class TrainingSteps {
         scenarioContext.storeData("trainingTrainee", traineeUsername);
         scenarioContext.storeData("trainingTrainer", trainerUsername);
         scenarioContext.storeData("trainingType", trainingType);
-        // no duration stored — resolves to null in the request body, triggering @NotNull validation
     }
 
     @When("I send an add training request")
