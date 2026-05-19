@@ -10,6 +10,7 @@ import com.gym.crm.trainerworkload.model.WorkloadMonthSummary;
 import com.gym.crm.trainerworkload.model.WorkloadYearSummary;
 import com.gym.crm.trainerworkload.repository.TrainerWorkloadRepository;
 import com.gym.crm.trainerworkload.repository.WorkloadMonthRepository;
+import com.gym.crm.trainerworkload.nosql.TrainerTrainingSummaryService;
 import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -27,10 +28,12 @@ public class TrainerWorkloadService {
 
     private final TrainerWorkloadRepository trainerWorkloadRepository;
     private final WorkloadMonthRepository workloadMonthRepository;
+    private final TrainerTrainingSummaryService trainerTrainingSummaryService;
 
-    public TrainerWorkloadService(TrainerWorkloadRepository trainerWorkloadRepository, WorkloadMonthRepository workloadMonthRepository) {
+    public TrainerWorkloadService(TrainerWorkloadRepository trainerWorkloadRepository, WorkloadMonthRepository workloadMonthRepository, TrainerTrainingSummaryService trainerTrainingSummaryService) {
         this.trainerWorkloadRepository = trainerWorkloadRepository;
         this.workloadMonthRepository = workloadMonthRepository;
+        this.trainerTrainingSummaryService = trainerTrainingSummaryService;
     }
 
     @Transactional
@@ -86,6 +89,7 @@ public class TrainerWorkloadService {
         }
 
         workloadMonthRepository.save(workloadMonth);
+        trainerTrainingSummaryService.processEvent(request);
     }
 
     @Transactional
