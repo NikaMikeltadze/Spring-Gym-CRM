@@ -26,6 +26,11 @@ public class WebConfig implements WebMvcConfigurer {
     }
 
     @Override
+    public void addViewControllers(ViewControllerRegistry registry) {
+        registry.addRedirectViewController("/", "/swagger-ui/index.html");
+    }
+
+    @Override
     public void configurePathMatch(PathMatchConfigurer configurer) {
         configurer.setPatternParser(new PathPatternParser());
     }
