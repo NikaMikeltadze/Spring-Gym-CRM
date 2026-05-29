@@ -1,0 +1,103 @@
+name: gym-crm
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: postgres
+    environment:
+      POSTGRES_DB: gymdb
+      POSTGRES_USER: gym
+      POSTGRES_PASSWORD: gym
+    ports:
+      - "5432:5432"
+    networks:
+      - gym-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gym -d gymdb"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  mongo:
+    image: mongo:latest
+    container_name: mongo
+    ports:
+      - "27017:27017"
+    networks:
+      - gym-net
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  activemq:
+    image: rmohr/activemq
+    container_name: activemq
+    # Broker port 61616 is reached in-network as activemq:61616 (no host publish:
+    # 61616 sits in the Windows WinNAT reserved range 61564-61663 and won't bind).
+    # Only the web admin console is published to the host.
+    ports:
+      - "8161:8161"
+    networks:
+      - gym-net
+
+  discovery:
+    build: ./gym-discovery-service
+    image: gym-discovery:standalone
+    container_name: discovery
+    ports:
+      - "8761:8761"
+    networks:
+      - gym-net
+
+  gym-report:
+    build: ./trainee-workload-service
+    image: gym-report:standalone
+    container_name: gym-report
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_MONGODB_URI: mongodb://mongo:27017/gym
+      SPRING_DATA_MONGODB_URI: mongodb://mongo:27017/gym
+      SPRING_ACTIVEMQ_BROKER_URL: tcp://activemq:61616
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery:8761/eureka/
+    depends_on:
+      mongo:
+        condition: service_healthy
+      activemq:
+        condition: service_started
+      discovery:
+        condition: service_started
+    networks:
+      - gym-net
+
+  gym-main:
+    build: ./gym-main-service
+    image: gym-main:standalone
+    container_name: gym-main
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: local
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/gymdb
+      SPRING_DATASOURCE_USERNAME: gym
+      SPRING_DATASOURCE_PASSWORD: gym
+      SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.PostgreSQLDialect
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_H2_CONSOLE_ENABLED: "false"
+      SPRING_ACTIVEMQ_BROKER_URL: tcp://activemq:61616
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery:8761/eureka/
+    depends_on:
+      postgres:
+        condition: service_healthy
+      activemq:
+        condition: service_started
+      discovery:
+        condition: service_started
+    networks:
+      - gym-net
+
+networks:
+  gym-net:
+    driver: bridge
